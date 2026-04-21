@@ -448,6 +448,7 @@ body {
 .footer-hr { border-color: rgba(255,255,255,.1); margin: 1.5rem 0 1rem; }
 .footer-copy { font-size: .8rem; color: rgba(255,255,255,.4); margin: 0; }
 .footer-copy a { color: rgba(255,255,255,.5); }
+.footer-version { opacity: .35; font-size: .75rem; }
 
 /* ── Calendar toolbar ────────────────────────────────────────────────────── */
 .cal-toolbar {

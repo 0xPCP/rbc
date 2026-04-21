@@ -43,7 +43,7 @@
             <a href="{{ url_for('rides.detail', ride_id=ride.id) }}"
                class="cell-ride pace-cell-{{ ride.pace_category }} {{ 'cell-cancelled' if ride.is_cancelled else '' }} {{ 'cell-weather-warn' if w and w.warning else '' }}"
                title="{{ ride.title }} — {{ ride.time.strftime('%I:%M %p') }}{% if w %} | {{ w.emoji }} {{ w.temp_f }}°F{% if w.warning %} ⚠️ {{ w.warning_reasons | join(', ') }}{% endif %}{% endif %}">
-              <span class="cr-time">{{ ride.time.strftime('%-I%p').lower() }}</span>
+              <span class="cr-time">{{ ride.time.strftime('%I%p').lstrip('0').lower() }}</span>
               <span class="cr-title">{{ ride.title | truncate(22, True, '') }}</span>
               {% if w %}<span class="cr-weather">{{ w.emoji }}{{ w.temp_f }}°</span>{% endif %}
               {% if w and w.warning %}<span class="cr-warn">⚠️</span>{% endif %}

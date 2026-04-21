@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Week of {{ week_start.strftime('%b %-d') }} — Ride Calendar{% endblock %}
+{% block title %}Week of {{ week_start.strftime('%b') }} {{ week_start.day }} — Ride Calendar{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -21,7 +21,7 @@
     <div class="cal-nav">
       <a href="{{ url_for('rides.calendar', view='week', start=prev_start.isoformat()) }}" class="cal-nav-btn">‹ Prev</a>
       <span class="cal-nav-title">
-        {{ week_start.strftime('%b %-d') }}–{{ week_end.strftime('%b %-d, %Y') }}
+        {{ week_start.strftime('%b') }} {{ week_start.day }}–{{ week_end.strftime('%b') }} {{ week_end.day }}, {{ week_end.year }}
       </span>
       <a href="{{ url_for('rides.calendar', view='week', start=next_start.isoformat()) }}" class="cal-nav-btn">Next ›</a>
     </div>

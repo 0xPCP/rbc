@@ -59,7 +59,7 @@
       <tbody>
         {% for ride in upcoming %}
         <tr class="{{ 'table-danger' if ride.is_cancelled else '' }}">
-          <td>{{ ride.date.strftime('%b %-d') }}<br><small class="text-muted">{{ ride.time.strftime('%I:%M %p') }}</small></td>
+          <td>{{ ride.date.strftime('%b') }} {{ ride.date.day }}<br><small class="text-muted">{{ ride.time.strftime('%I:%M %p') }}</small></td>
           <td><a href="{{ url_for('rides.detail', ride_id=ride.id) }}">{{ ride.title }}</a></td>
           <td><span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span></td>
           <td>{{ ride.distance_miles }} mi</td>

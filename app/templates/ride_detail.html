@@ -9,7 +9,7 @@
       {% if ride.is_cancelled %}<span class="badge bg-danger fs-6">Cancelled</span>{% endif %}
     </div>
     <h1>{{ ride.title }}</h1>
-    <p>{{ ride.date.strftime('%A, %B %-d, %Y') }} at {{ ride.time.strftime('%I:%M %p') }}</p>
+    <p>{{ ride.date.strftime('%A, %B') }} {{ ride.date.day }}, {{ ride.date.year }} at {{ ride.time.strftime('%I:%M %p') }}</p>
   </div>
 </div>
 
