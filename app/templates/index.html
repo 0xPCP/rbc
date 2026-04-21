@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Reston Bike Club — Ride Together{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<section class="rbc-hero">
+  <div class="hero-overlay"></div>
+  <div class="container hero-content">
+    <p class="hero-eyebrow">Northern Virginia Road Cycling</p>
+    <h1 class="hero-title">Reston Bike Club</h1>
+    <p class="hero-sub">Group rides for every pace. Great people. Open roads.</p>
+    <div class="hero-actions">
+      <a href="{{ url_for('rides.calendar') }}" class="btn btn-rbc btn-lg">View Rides</a>
+      {% if not current_user.is_authenticated %}
+      <a href="{{ url_for('auth.register') }}" class="btn btn-rbc-outline btn-lg">Join for Free</a>
+      {% endif %}
+    </div>
+  </div>
+</section>
+
+<!-- Next Ride -->
+{% if next_ride %}
+<section class="section-light py-5">
+  <div class="container">
+    <h2 class="section-label">Next Ride</h2>
+    <div class="next-ride-card">
+      <div class="next-ride-date">
+        <div class="nrd-month">{{ next_ride.date.strftime('%b') }}</div>
+        <div class="nrd-day">{{ next_ride.date.strftime('%d') }}</div>
+      </div>
+      <div class="next-ride-info">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="pace-badge pace-{{ next_ride.pace_category }}">{{ next_ride.pace_category }}</span>
+          {% if next_ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>{% endif %}
+        </div>
+        <h3 class="next-ride-title">{{ next_ride.title }}</h3>
+        <p class="next-ride-meta">
+          {{ next_ride.time.strftime('%I:%M %p') }} &bull;
+          {{ next_ride.meeting_location }} &bull;
+          {{ next_ride.distance_miles }} mi
+          {% if next_ride.elevation_feet %}&bull; {{ next_ride.elevation_feet }} ft gain{% endif %}
+        </p>
+        <p class="next-ride-signup">
+          <strong>{{ next_ride.signup_count }}</strong> rider{{ 's' if next_ride.signup_count != 1 else '' }} signed up
+        </p>
+      </div>
+      <div class="next-ride-actions">
+        <a href="{{ url_for('rides.detail', ride_id=next_ride.id) }}" class="btn btn-rbc">Details & Sign Up</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<!-- About -->
+<section class="py-5">
+  <div class="container">
+    <div class="row gy-4 align-items-center">
+      <div class="col-lg-6">
+        <h2 class="section-label">About the Club</h2>
+        <h3 class="section-heading">A community built on two wheels</h3>
+        <p class="section-body">Reston Bike Club is a road cycling community based in Northern Virginia. We host weekly group rides for cyclists of all abilities — from competitive A-pace hammerfests to relaxed D-pace social rides. No experience required, just a helmet and a love of riding.</p>
+        <p class="section-body">We ride year-round out of Reston and the surrounding area, with routes covering the W&OD trail, Loudoun County back roads, and everything in between.</p>
+        <a href="{{ url_for('main.about') }}" class="btn btn-rbc-outline mt-2">Learn More</a>
+      </div>
+      <div class="col-lg-6">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-num">A–D</div>
+            <div class="stat-label">Pace Groups</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">52</div>
+            <div class="stat-label">Weeks a Year</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">NoVA</div>
+            <div class="stat-label">Based in</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-num">Free</div>
+            <div class="stat-label">to Join</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Pace Guide -->
+<section class="section-light py-5">
+  <div class="container">
+    <h2 class="section-label text-center">Pace Groups</h2>
+    <h3 class="section-heading text-center mb-4">Find your pace</h3>
+    <div class="row g-3">
+      {% for pace, label, desc in [
+        ('A', 'Fast', '22+ mph average. Competitive riders, minimal stopping.'),
+        ('B', 'Moderate', '18–22 mph average. Strong recreational cyclists.'),
+        ('C', 'Casual', '14–18 mph average. All fitness levels welcome.'),
+        ('D', 'Beginner', 'Under 14 mph. New to group riding, very welcoming.'),
+      ] %}
+      <div class="col-sm-6 col-lg-3">
+        <div class="pace-card">
+          <div class="pace-badge-lg pace-{{ pace }}">{{ pace }}</div>
+          <h5 class="pace-card-title">{{ label }}</h5>
+          <p class="pace-card-desc">{{ desc }}</p>
+          <a href="{{ url_for('rides.calendar', pace=pace) }}" class="btn btn-rbc-sm">View {{ pace }} Rides</a>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- Strava Club Feed -->
+{% if strava_activities %}
+<section class="py-5">
+  <div class="container">
+    <h2 class="section-label">Recent Activity</h2>
+    <h3 class="section-heading mb-4">Club rides on Strava</h3>
+    <div class="row g-3">
+      {% for a in strava_activities %}
+      <div class="col-md-6 col-lg-4">
+        <div class="activity-card">
+          <div class="activity-athlete">
+            {{ a.athlete.firstname }} {{ a.athlete.lastname }}
+          </div>
+          <div class="activity-name">{{ a.name }}</div>
+          <div class="activity-stats">
+            <span>{{ a.distance_miles }} mi</span>
+            <span>{{ a.moving_time_fmt }}</span>
+            {% if a.elevation_feet %}<span>{{ a.elevation_feet }} ft</span>{% endif %}
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
+{% endblock %}

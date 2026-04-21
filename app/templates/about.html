@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}About — Reston Bike Club{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>About Reston Bike Club</h1>
+    <p>Who we are and how we ride.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row gy-5">
+    <div class="col-lg-8">
+      <h2 class="section-heading">Our Story</h2>
+      <p>Reston Bike Club has been bringing cyclists together in Northern Virginia for over two decades. What started as a small group of neighbors heading out on Sunday mornings has grown into a vibrant community of riders who share a passion for cycling and the outdoors.</p>
+      <p>We believe cycling is better together. Whether you're chasing KOMs or just enjoying the view, RBC has a group for you.</p>
+
+      <h2 class="section-heading mt-5">Weekly Rides</h2>
+      <p>We host regular group rides throughout the week. Rides are organized by pace category — A through D — so everyone can find a comfortable group. Routes typically start in the Reston area and explore the back roads of Loudoun, Fairfax, and Fauquier counties, as well as the W&OD Trail corridor.</p>
+      <p>Check the <a href="{{ url_for('rides.calendar') }}">ride calendar</a> for upcoming departures, locations, and details.</p>
+
+      <h2 class="section-heading mt-5">Membership</h2>
+      <p>Membership is free and open to anyone. Create an account to sign up for rides, see who else is coming, and share your ride media with the club.</p>
+      {% if not current_user.is_authenticated %}
+      <a href="{{ url_for('auth.register') }}" class="btn btn-rbc mt-2">Create a Free Account</a>
+      {% endif %}
+    </div>
+    <div class="col-lg-4">
+      <div class="about-sidebar">
+        <h5>Pace Groups</h5>
+        <ul class="pace-list">
+          <li><span class="pace-badge pace-A">A</span> Fast — 22+ mph</li>
+          <li><span class="pace-badge pace-B">B</span> Moderate — 18–22 mph</li>
+          <li><span class="pace-badge pace-C">C</span> Casual — 14–18 mph</li>
+          <li><span class="pace-badge pace-D">D</span> Beginner — &lt;14 mph</li>
+        </ul>
+        <hr />
+        <h5>Location</h5>
+        <p>Rides depart from various locations around Reston, VA and the surrounding area. Meeting location is listed in each ride's details.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

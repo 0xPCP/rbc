@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>{{ title }}</h1>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row">
+    <div class="col-lg-8">
+      <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="row g-3 mb-3">
+          <div class="col-12">
+            {{ form.title.label(class="form-label") }}
+            {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else ""), placeholder="e.g. Sunday Morning Club Ride") }}
+            {% for e in form.title.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-sm-6">
+            {{ form.date.label(class="form-label") }}
+            {{ form.date(class="form-control" + (" is-invalid" if form.date.errors else "")) }}
+            {% for e in form.date.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-sm-6">
+            {{ form.time.label(class="form-label") }}
+            {{ form.time(class="form-control" + (" is-invalid" if form.time.errors else "")) }}
+            {% for e in form.time.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          {{ form.meeting_location.label(class="form-label") }}
+          {{ form.meeting_location(class="form-control" + (" is-invalid" if form.meeting_location.errors else ""), placeholder="e.g. Lake Fairfax Park parking lot") }}
+          {% for e in form.meeting_location.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-sm-4">
+            {{ form.pace_category.label(class="form-label") }}
+            {{ form.pace_category(class="form-select" + (" is-invalid" if form.pace_category.errors else "")) }}
+            {% for e in form.pace_category.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-sm-4">
+            {{ form.distance_miles.label(class="form-label") }}
+            {{ form.distance_miles(class="form-control" + (" is-invalid" if form.distance_miles.errors else ""), placeholder="45.0") }}
+            {% for e in form.distance_miles.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-sm-4">
+            {{ form.elevation_feet.label(class="form-label") }}
+            {{ form.elevation_feet(class="form-control" + (" is-invalid" if form.elevation_feet.errors else ""), placeholder="2500") }}
+            {% for e in form.elevation_feet.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          {{ form.ride_leader.label(class="form-label") }}
+          {{ form.ride_leader(class="form-control" + (" is-invalid" if form.ride_leader.errors else ""), placeholder="Optional") }}
+          {% for e in form.ride_leader.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.route_url.label(class="form-label") }}
+          {{ form.route_url(class="form-control" + (" is-invalid" if form.route_url.errors else ""), placeholder="https://www.strava.com/routes/...") }}
+          {% for e in form.route_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.video_url.label(class="form-label") }}
+          {{ form.video_url(class="form-control" + (" is-invalid" if form.video_url.errors else ""), placeholder="https://www.youtube.com/watch?v=...") }}
+          <div class="form-text">Paste a YouTube or Vimeo URL — it will be embedded automatically.</div>
+          {% for e in form.video_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.description.label(class="form-label") }}
+          {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=4, placeholder="Route notes, what to bring, etc.") }}
+          {% for e in form.description.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-4 form-check">
+          {{ form.is_cancelled(class="form-check-input") }}
+          {{ form.is_cancelled.label(class="form-check-label text-danger") }}
+        </div>
+
+        <div class="d-flex gap-2">
+          {{ form.submit(class="btn btn-rbc") }}
+          <a href="{{ url_for('admin.rides') }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

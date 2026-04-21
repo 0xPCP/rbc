@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Profile — Reston Bike Club{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>My Profile</h1>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row gy-4">
+    <div class="col-lg-6">
+      <div class="detail-card">
+        <h5 class="detail-card-title">Account</h5>
+        <dl class="detail-dl">
+          <dt>Username</dt>
+          <dd>{{ current_user.username }}</dd>
+          <dt>Email</dt>
+          <dd>{{ current_user.email }}</dd>
+          <dt>Member since</dt>
+          <dd>{{ current_user.created_at.strftime('%B %Y') }}</dd>
+          {% if current_user.is_admin %}
+          <dt>Role</dt>
+          <dd><span class="badge bg-success">Admin</span></dd>
+          {% endif %}
+        </dl>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="detail-card">
+        <h5 class="detail-card-title">Strava</h5>
+        {% if current_user.strava_id %}
+        <p>Your Strava account is linked.</p>
+        <p class="text-muted small">Strava ID: {{ current_user.strava_id }}</p>
+        <form method="post" action="{{ url_for('strava.disconnect') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit" class="btn btn-outline-danger btn-sm">Disconnect Strava</button>
+        </form>
+        {% else %}
+        <p>Link your Strava account to share your rides with the club.</p>
+        <a href="{{ url_for('strava.connect') }}" class="btn btn-strava">
+          Connect with Strava
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

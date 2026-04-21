@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Manage Rides — Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container d-flex justify-content-between align-items-center">
+    <div>
+      <h1>Manage Rides</h1>
+      <p class="mb-0">All rides — past and upcoming.</p>
+    </div>
+    <a href="{{ url_for('admin.ride_new') }}" class="btn btn-rbc">+ New Ride</a>
+  </div>
+</div>
+
+<div class="container py-4">
+  {% if rides %}
+  <div class="table-responsive">
+    <table class="table rbc-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Title</th>
+          <th>Pace</th>
+          <th>Distance</th>
+          <th>Signups</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ride in rides %}
+        <tr class="{{ 'table-danger' if ride.is_cancelled else '' }}">
+          <td>{{ ride.date.strftime('%b %-d, %Y') }}<br><small class="text-muted">{{ ride.time.strftime('%I:%M %p') }}</small></td>
+          <td><a href="{{ url_for('rides.detail', ride_id=ride.id) }}">{{ ride.title }}</a></td>
+          <td><span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span></td>
+          <td>{{ ride.distance_miles }} mi</td>
+          <td>{{ ride.signup_count }}</td>
+          <td>
+            {% if ride.is_cancelled %}
+            <span class="badge bg-danger">Cancelled</span>
+            {% else %}
+            <span class="badge bg-success">Active</span>
+            {% endif %}
+          </td>
+          <td class="d-flex gap-1">
+            <a href="{{ url_for('admin.ride_edit', ride_id=ride.id) }}" class="btn btn-outline-secondary btn-xs">Edit</a>
+            <form method="post" action="{{ url_for('admin.ride_delete', ride_id=ride.id) }}" onsubmit="return confirm('Delete this ride and all signups?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="btn btn-outline-danger btn-xs">Del</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted">No rides yet. <a href="{{ url_for('admin.ride_new') }}">Create the first one.</a></p>
+  {% endif %}
+</div>
+{% endblock %}
