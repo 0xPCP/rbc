@@ -75,6 +75,35 @@
 
     <!-- Signup sidebar -->
     <div class="col-lg-4">
+      {% if ride_weather %}
+      <div class="detail-card mb-3 weather-detail-card sev-bg-{{ ride_weather.severity }}">
+        <h5 class="detail-card-title">Forecast</h5>
+        <div class="weather-detail-main">
+          <span class="wd-emoji">{{ ride_weather.emoji }}</span>
+          <div>
+            <div class="wd-desc">{{ ride_weather.description }}</div>
+            <div class="wd-stats">
+              {{ ride_weather.temp_f }}°F &bull;
+              {{ ride_weather.wind_mph }} mph winds &bull;
+              {{ ride_weather.precip_prob }}% chance of rain
+            </div>
+          </div>
+        </div>
+        {% if ride_weather.warning %}
+        <div class="weather-warning-block mt-2">
+          <strong>⚠️ Weather Warning</strong>
+          <ul class="mb-0 mt-1">
+            {% for reason in ride_weather.warning_reasons %}
+            <li>{{ reason }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% elif ride_weather.severity == 1 %}
+        <div class="weather-caution-block mt-2">⚠️ Conditions may be challenging — check the forecast before you ride.</div>
+        {% endif %}
+      </div>
+      {% endif %}
+
       <div class="signup-card">
         <div class="signup-count-big">{{ ride.signup_count }}</div>
         <div class="signup-count-label">rider{{ 's' if ride.signup_count != 1 else '' }} signed up</div>

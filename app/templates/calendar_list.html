@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}Ride Calendar — Reston Bike Club{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>Ride Calendar</h1>
+    <p>Upcoming group rides. Sign up to let others know you're coming.</p>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  <!-- View switcher + pace filter -->
+  <div class="cal-toolbar mb-4">
+    <div class="view-switcher">
+      <a href="{{ url_for('rides.calendar', view='list') }}" class="view-btn {{ 'active' if view == 'list' else '' }}">List</a>
+      <a href="{{ url_for('rides.calendar', view='week') }}" class="view-btn {{ 'active' if view == 'week' else '' }}">Week</a>
+      <a href="{{ url_for('rides.calendar', view='month') }}" class="view-btn {{ 'active' if view == 'month' else '' }}">Month</a>
+    </div>
+    <div class="pace-filter">
+      <span class="filter-label">Pace:</span>
+      <a href="{{ url_for('rides.calendar') }}" class="pace-filter-btn {{ 'active' if not active_pace else '' }}">All</a>
+      {% for p in ['A', 'B', 'C', 'D'] %}
+      <a href="{{ url_for('rides.calendar', pace=p) }}" class="pace-filter-btn pace-filter-{{ p }} {{ 'active' if active_pace == p else '' }}">{{ p }}</a>
+      {% endfor %}
+    </div>
+  </div>
+
+  {% if rides %}
+  <div class="ride-list">
+    {% set current_month = namespace(val='') %}
+    {% for ride in rides %}
+      {% set month = ride.date.strftime('%B %Y') %}
+      {% if month != current_month.val %}
+        {% set current_month.val = month %}
+        <h3 class="month-heading">{{ month }}</h3>
+      {% endif %}
+      {% set w = weather.get(ride.id) %}
+      <a href="{{ url_for('rides.detail', ride_id=ride.id) }}" class="ride-row {{ 'ride-row-cancelled' if ride.is_cancelled else '' }} {{ 'ride-row-weather-warn' if w and w.warning else '' }}">
+        <div class="ride-row-date">
+          <div class="rrd-dow">{{ ride.date.strftime('%a') }}</div>
+          <div class="rrd-day">{{ ride.date.day }}</div>
+        </div>
+        <div class="ride-row-main">
+          <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+            <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
+            {% if ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>{% endif %}
+            <span class="ride-row-time">{{ ride.time.strftime('%I:%M %p') }}</span>
+            {% if w and w.warning %}<span class="weather-warn-badge">⚠️ Weather Warning</span>{% endif %}
+          </div>
+          <div class="ride-row-title">
+            {{ ride.title }}
+            {% if ride.ridewithgps_route_id %}<span class="rwgps-badge">route</span>{% endif %}
+          </div>
+          <div class="ride-row-meta">
+            {{ ride.meeting_location }}
+            &bull; {{ ride.distance_miles }} mi
+            {% if ride.elevation_feet %}&bull; {{ ride.elevation_feet }} ft{% endif %}
+            {% if ride.ride_leader %}&bull; Leader: {{ ride.ride_leader }}{% endif %}
+          </div>
+        </div>
+        <div class="ride-row-right">
+          {% if w %}
+          <div class="list-weather sev-{{ w.severity }}">
+            <span class="lw-emoji">{{ w.emoji }}</span>
+            <span class="lw-temp">{{ w.temp_f }}°F</span>
+            <span class="lw-wind">{{ w.wind_mph }} mph</span>
+          </div>
+          {% endif %}
+          <div class="ride-row-signups">
+            <div class="signup-count">{{ ride.signup_count }}</div>
+            <div class="signup-label">going</div>
+          </div>
+        </div>
+      </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p>No upcoming rides scheduled{% if active_pace %} for pace {{ active_pace }}{% endif %}.</p>
+    {% if not active_pace %}<p class="text-muted">Check back soon or follow us on Strava for updates.</p>{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

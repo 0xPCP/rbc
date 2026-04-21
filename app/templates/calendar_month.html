@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}{{ month_name }} {{ year }} — Ride Calendar{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>Ride Calendar</h1>
+    <p>Upcoming group rides. Sign up to let others know you're coming.</p>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  <!-- View switcher -->
+  <div class="cal-toolbar mb-4">
+    <div class="view-switcher">
+      <a href="{{ url_for('rides.calendar', view='list') }}" class="view-btn">List</a>
+      <a href="{{ url_for('rides.calendar', view='week') }}" class="view-btn">Week</a>
+      <a href="{{ url_for('rides.calendar', view='month') }}" class="view-btn active">Month</a>
+    </div>
+    <div class="cal-nav">
+      <a href="{{ url_for('rides.calendar', view='month', y=prev.y, m=prev.m) }}" class="cal-nav-btn">‹ Prev</a>
+      <span class="cal-nav-title">{{ month_name }} {{ year }}</span>
+      <a href="{{ url_for('rides.calendar', view='month', y=next.y, m=next.m) }}" class="cal-nav-btn">Next ›</a>
+    </div>
+  </div>
+
+  <!-- Month grid -->
+  <div class="month-grid-wrap">
+    <div class="month-grid">
+      <!-- Day headers -->
+      {% for hdr in ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'] %}
+      <div class="month-hdr">{{ hdr }}</div>
+      {% endfor %}
+
+      <!-- Day cells -->
+      {% for week in weeks %}
+        {% for day in week %}
+        <div class="month-cell {{ 'other-month' if day.other_month else '' }} {{ 'is-today' if day.is_today else '' }}">
+          <div class="cell-date-num">{{ day.date.day }}</div>
+          {% for ride in day.rides %}
+            {% set w = weather.get(ride.id) %}
+            <a href="{{ url_for('rides.detail', ride_id=ride.id) }}"
+               class="cell-ride pace-cell-{{ ride.pace_category }} {{ 'cell-cancelled' if ride.is_cancelled else '' }} {{ 'cell-weather-warn' if w and w.warning else '' }}"
+               title="{{ ride.title }} — {{ ride.time.strftime('%I:%M %p') }}{% if w %} | {{ w.emoji }} {{ w.temp_f }}°F{% if w.warning %} ⚠️ {{ w.warning_reasons | join(', ') }}{% endif %}{% endif %}">
+              <span class="cr-time">{{ ride.time.strftime('%-I%p').lower() }}</span>
+              <span class="cr-title">{{ ride.title | truncate(22, True, '') }}</span>
+              {% if w %}<span class="cr-weather">{{ w.emoji }}{{ w.temp_f }}°</span>{% endif %}
+              {% if w and w.warning %}<span class="cr-warn">⚠️</span>{% endif %}
+            </a>
+          {% endfor %}
+        </div>
+        {% endfor %}
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Weather severity legend -->
+  <div class="weather-legend mt-3">
+    <span class="wl-item"><span class="wl-dot sev-0"></span> Good conditions</span>
+    <span class="wl-item"><span class="wl-dot sev-1"></span> Use caution</span>
+    <span class="wl-item"><span class="wl-dot sev-2"></span> Weather warning</span>
+  </div>
+
+</div>
+{% endblock %}
