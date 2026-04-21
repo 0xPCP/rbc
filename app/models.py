@@ -54,6 +54,30 @@ class Ride(db.Model):
         return len(self.signups)
 
     @property
+    def ridewithgps_route_id(self):
+        """Extract the numeric route ID from a RideWithGPS URL, or None."""
+        if not self.route_url:
+            return None
+        match = re.search(r'ridewithgps\.com/routes/(\d+)', self.route_url)
+        return match.group(1) if match else None
+
+    @property
+    def ridewithgps_embed_url(self):
+        """Return the iframe embed URL for a RideWithGPS route."""
+        rid = self.ridewithgps_route_id
+        if not rid:
+            return None
+        return f'https://ridewithgps.com/embeds?type=route&id={rid}&sampleGraph=true&distanceMarkers=true'
+
+    @property
+    def ridewithgps_map_image_url(self):
+        """Return the static route map preview image URL for a RideWithGPS route."""
+        rid = self.ridewithgps_route_id
+        if not rid:
+            return None
+        return f'https://ridewithgps.com/routes/{rid}/hover_preview.png'
+
+    @property
     def embed_url(self):
         """Convert YouTube/Vimeo watch URL to embed URL."""
         if not self.video_url:

@@ -37,7 +37,9 @@
 
           {% if ride.route_url %}
           <dt>Route</dt>
-          <dd><a href="{{ ride.route_url }}" target="_blank" rel="noopener">View Route ↗</a></dd>
+          <dd><a href="{{ ride.route_url }}" target="_blank" rel="noopener">
+            {% if ride.ridewithgps_route_id %}View on RideWithGPS ↗{% else %}View Route ↗{% endif %}
+          </a></dd>
           {% endif %}
         </dl>
       </div>
@@ -46,6 +48,18 @@
       <div class="detail-card mt-3">
         <h5 class="detail-card-title">Notes</h5>
         <p class="mb-0">{{ ride.description }}</p>
+      </div>
+      {% endif %}
+
+      {% if ride.ridewithgps_embed_url %}
+      <div class="detail-card mt-3">
+        <h5 class="detail-card-title">
+          Route Map
+          <a href="{{ ride.route_url }}" target="_blank" rel="noopener" class="detail-card-link">Open on RideWithGPS ↗</a>
+        </h5>
+        <div class="rwgps-wrapper">
+          <iframe src="{{ ride.ridewithgps_embed_url }}" scrolling="no" allowfullscreen></iframe>
+        </div>
       </div>
       {% endif %}
 

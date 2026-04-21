@@ -39,7 +39,10 @@
             {% if ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>{% endif %}
             <span class="ride-row-time">{{ ride.time.strftime('%I:%M %p') }}</span>
           </div>
-          <div class="ride-row-title">{{ ride.title }}</div>
+          <div class="ride-row-title">
+            {{ ride.title }}
+            {% if ride.ridewithgps_route_id %}<span class="rwgps-badge">route</span>{% endif %}
+          </div>
           <div class="ride-row-meta">
             {{ ride.meeting_location }}
             &bull; {{ ride.distance_miles }} mi

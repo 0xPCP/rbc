@@ -67,7 +67,8 @@
 
         <div class="mb-3">
           {{ form.route_url.label(class="form-label") }}
-          {{ form.route_url(class="form-control" + (" is-invalid" if form.route_url.errors else ""), placeholder="https://www.strava.com/routes/...") }}
+          {{ form.route_url(class="form-control" + (" is-invalid" if form.route_url.errors else ""), placeholder="https://ridewithgps.com/routes/12345678") }}
+          <div class="form-text">RideWithGPS links automatically display an interactive route map on the ride page.</div>
           {% for e in form.route_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
         </div>
 
