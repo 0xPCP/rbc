@@ -1,0 +1,8 @@
+{# Reusable weather chip — pass w=weather_dict, size='sm'|'md' #}
+{% if w %}
+<span class="weather-chip sev-{{ w.severity }} {{ 'weather-chip-sm' if size == 'sm' else '' }}">
+  {{ w.emoji }} {{ w.temp_f }}°F
+  {% if size != 'sm' %}<span class="wc-wind">{{ w.wind_mph }}mph</span>{% endif %}
+  {% if w.warning %}<span class="wc-warn">⚠️</span>{% endif %}
+</span>
+{% endif %}

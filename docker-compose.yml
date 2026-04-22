@@ -1,8 +1,6 @@
 services:
   web:
     build: .
-    ports:
-      - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://rbc:${DB_PASSWORD}@db:5432/rbc
       - SECRET_KEY=${SECRET_KEY}
@@ -14,6 +12,14 @@ services:
       db:
         condition: service_healthy
     restart: unless-stopped
+    networks:
+      - internal
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.rbc.rule=Host(`rbc.pcp.dev`)"
+      - "traefik.http.routers.rbc.entrypoints=websecure"
+      - "traefik.http.services.rbc.loadbalancer.server.port=8000"
+      - "com.centurylinklabs.watchtower.enable=false"
 
   db:
     image: postgres:16-alpine
@@ -29,6 +35,13 @@ services:
       timeout: 5s
       retries: 5
     restart: unless-stopped
+    networks:
+      - internal
+
+networks:
+  internal:
+    external: true
+    name: internal
 
 volumes:
   postgres_data:
