@@ -16,22 +16,138 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False, nullable=False)
+    is_admin = db.Column(db.Boolean, default=False, nullable=False)  # global superadmin
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    # Profile / location
+    address = db.Column(db.String(500), nullable=True)
+    zip_code = db.Column(db.String(10), nullable=True)
+    lat = db.Column(db.Float, nullable=True)
+    lng = db.Column(db.Float, nullable=True)
 
     # Strava linking
     strava_id = db.Column(db.BigInteger, unique=True, nullable=True)
     strava_access_token = db.Column(db.Text, nullable=True)
     strava_refresh_token = db.Column(db.Text, nullable=True)
-    strava_token_expires_at = db.Column(db.Integer, nullable=True)  # Unix timestamp
+    strava_token_expires_at = db.Column(db.Integer, nullable=True)
 
     signups = db.relationship('RideSignup', backref='user', lazy=True, cascade='all, delete-orphan')
+    club_memberships = db.relationship('ClubMembership', backref='user', lazy=True, cascade='all, delete-orphan')
+    club_admin_roles = db.relationship('ClubAdmin', backref='user', lazy=True, cascade='all, delete-orphan')
+    waiver_signatures = db.relationship('WaiverSignature', backref='user', lazy=True, cascade='all, delete-orphan')
+
+    def is_club_admin(self, club):
+        if self.is_admin:
+            return True
+        return ClubAdmin.query.filter_by(user_id=self.id, club_id=club.id).first() is not None
+
+    def is_member_of(self, club):
+        return ClubMembership.query.filter_by(user_id=self.id, club_id=club.id).first() is not None
+
+    def has_signed_waiver(self, club, year=None):
+        if year is None:
+            year = datetime.now(timezone.utc).year
+        return WaiverSignature.query.filter_by(
+            user_id=self.id, club_id=club.id, year=year
+        ).first() is not None
+
+
+class Club(db.Model):
+    __tablename__ = 'clubs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    slug = db.Column(db.String(80), unique=True, nullable=False)  # URL-safe identifier
+    name = db.Column(db.String(200), nullable=False)
+    description = db.Column(db.Text, nullable=True)
+    logo_url = db.Column(db.String(500), nullable=True)
+    website = db.Column(db.String(500), nullable=True)
+    contact_email = db.Column(db.String(255), nullable=True)
+    address = db.Column(db.String(500), nullable=True)
+    city = db.Column(db.String(100), nullable=True)
+    state = db.Column(db.String(50), nullable=True)
+    zip_code = db.Column(db.String(10), nullable=True)
+    lat = db.Column(db.Float, nullable=True)
+    lng = db.Column(db.Float, nullable=True)
+    is_active = db.Column(db.Boolean, default=True, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    rides = db.relationship('Ride', backref='club', lazy=True, cascade='all, delete-orphan')
+    memberships = db.relationship('ClubMembership', backref='club', lazy=True, cascade='all, delete-orphan')
+    admin_roles = db.relationship('ClubAdmin', backref='club', lazy=True, cascade='all, delete-orphan')
+    waivers = db.relationship('ClubWaiver', backref='club', lazy=True, cascade='all, delete-orphan')
+
+    @property
+    def member_count(self):
+        return len(self.memberships)
+
+    @property
+    def current_waiver(self):
+        """Most recently created waiver for this club."""
+        return (ClubWaiver.query
+                .filter_by(club_id=self.id)
+                .order_by(ClubWaiver.created_at.desc())
+                .first())
+
+
+class ClubMembership(db.Model):
+    """User subscribing/favoriting a club."""
+    __tablename__ = 'club_memberships'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=False)
+    joined_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (db.UniqueConstraint('user_id', 'club_id', name='uq_membership'),)
+
+
+class ClubAdmin(db.Model):
+    """Grants a user admin rights over a specific club."""
+    __tablename__ = 'club_admins'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=False)
+    granted_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (db.UniqueConstraint('user_id', 'club_id', name='uq_club_admin'),)
+
+
+class ClubWaiver(db.Model):
+    """Waiver/rules text for a club. A new version can be added each year."""
+    __tablename__ = 'club_waivers'
+
+    id = db.Column(db.Integer, primary_key=True)
+    club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+    title = db.Column(db.String(200), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    signatures = db.relationship('WaiverSignature', backref='waiver', lazy=True)
+
+    __table_args__ = (db.UniqueConstraint('club_id', 'year', name='uq_club_waiver_year'),)
+
+
+class WaiverSignature(db.Model):
+    """Records that a user accepted a club's waiver for a given year."""
+    __tablename__ = 'waiver_signatures'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=False)
+    waiver_id = db.Column(db.Integer, db.ForeignKey('club_waivers.id'), nullable=False)
+    year = db.Column(db.Integer, nullable=False)
+    signed_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    __table_args__ = (db.UniqueConstraint('user_id', 'club_id', 'year', name='uq_signature_year'),)
 
 
 class Ride(db.Model):
     __tablename__ = 'rides'
 
     id = db.Column(db.Integer, primary_key=True)
+    club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=False)
     title = db.Column(db.String(200), nullable=False)
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
@@ -55,7 +171,6 @@ class Ride(db.Model):
 
     @property
     def ridewithgps_route_id(self):
-        """Extract the numeric route ID from a RideWithGPS URL, or None."""
         if not self.route_url:
             return None
         match = re.search(r'ridewithgps\.com/routes/(\d+)', self.route_url)
@@ -63,7 +178,6 @@ class Ride(db.Model):
 
     @property
     def ridewithgps_embed_url(self):
-        """Return the iframe embed URL for a RideWithGPS route."""
         rid = self.ridewithgps_route_id
         if not rid:
             return None
@@ -71,7 +185,6 @@ class Ride(db.Model):
 
     @property
     def ridewithgps_map_image_url(self):
-        """Return the static route map preview image URL for a RideWithGPS route."""
         rid = self.ridewithgps_route_id
         if not rid:
             return None
@@ -79,7 +192,6 @@ class Ride(db.Model):
 
     @property
     def embed_url(self):
-        """Convert YouTube/Vimeo watch URL to embed URL."""
         if not self.video_url:
             return None
         yt = re.search(r'(?:youtube\.com/watch\?v=|youtu\.be/)([^&\n?#]+)', self.video_url)

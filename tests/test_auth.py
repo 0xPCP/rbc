@@ -58,12 +58,12 @@ class TestRegistration:
     def test_duplicate_email_rejected(self, client, regular_user, db):
         resp = client.post('/auth/register', data={
             'username': 'otherrider',
-            'email': 'rider@rbc.com',   # same as regular_user
+            'email': 'rider@test.com',   # same as regular_user
             'password': 'StrongPass1!',
             'confirm_password': 'StrongPass1!',
         }, follow_redirects=True)
         assert resp.status_code == 200
-        count = User.query.filter_by(email='rider@rbc.com').count()
+        count = User.query.filter_by(email='rider@test.com').count()
         assert count == 1
 
     def test_password_mismatch_rejected(self, client, db):
@@ -86,14 +86,14 @@ class TestLogin:
         assert resp.status_code == 200
 
     def test_login_with_valid_credentials(self, client, regular_user):
-        resp = login(client, 'rider@rbc.com', 'password123')
+        resp = login(client, 'rider@test.com', 'password123')
         assert resp.status_code == 200
         # Should be redirected away from login — check for username in nav
         assert b'rider' in resp.data
 
     def test_login_with_bad_password(self, client, regular_user):
         resp = client.post('/auth/login', data={
-            'email': 'rider@rbc.com',
+            'email': 'rider@test.com',
             'password': 'wrongpassword',
         }, follow_redirects=True)
         assert resp.status_code == 200
@@ -108,14 +108,14 @@ class TestLogin:
         assert resp.status_code == 200
 
     def test_logout_clears_session(self, client, regular_user):
-        login(client, 'rider@rbc.com', 'password123')
+        login(client, 'rider@test.com', 'password123')
         resp = logout(client)
         # After logout, Sign In link should appear
         assert b'Sign In' in resp.data
 
     def test_login_redirects_to_next(self, client, regular_user):
-        resp = client.post('/auth/login?next=/rides/', data={
-            'email': 'rider@rbc.com',
+        resp = client.post('/auth/login?next=/clubs/', data={
+            'email': 'rider@test.com',
             'password': 'password123',
         }, follow_redirects=True)
         assert resp.status_code == 200
@@ -125,24 +125,24 @@ class TestLogin:
 
 class TestAdminAccess:
     def test_admin_link_visible_to_admin(self, client, admin_user):
-        login(client, 'admin@rbc.com', 'password123')
+        login(client, 'admin@test.com', 'password123')
         resp = client.get('/')
         assert b'Admin' in resp.data
 
     def test_admin_link_hidden_from_regular_user(self, client, regular_user):
-        login(client, 'rider@rbc.com', 'password123')
+        login(client, 'rider@test.com', 'password123')
         resp = client.get('/')
         assert b'Admin' not in resp.data
 
     def test_admin_dashboard_requires_admin(self, client, regular_user):
-        login(client, 'rider@rbc.com', 'password123')
+        login(client, 'rider@test.com', 'password123')
         resp = client.get('/admin/', follow_redirects=True)
         # Regular user should be redirected or get 403
         assert resp.status_code in (200, 403)
         assert b'Admin Dashboard' not in resp.data
 
     def test_admin_dashboard_accessible_to_admin(self, client, admin_user):
-        login(client, 'admin@rbc.com', 'password123')
+        login(client, 'admin@test.com', 'password123')
         resp = client.get('/admin/')
         assert resp.status_code == 200
         assert b'Admin' in resp.data

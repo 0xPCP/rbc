@@ -1,20 +1,26 @@
 {% extends "base.html" %}
-{% block title %}Admin Dashboard — Reston Bike Club{% endblock %}
+{% block title %}Superadmin Dashboard — Cycling Clubs{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <div class="container">
-    <h1>Admin Dashboard</h1>
+    <h1>Superadmin Dashboard</h1>
+    <p class="mb-0">Platform-wide overview.</p>
   </div>
 </div>
 
 <div class="container py-4">
-  <!-- Stats -->
   <div class="row g-3 mb-5">
     <div class="col-6 col-lg-3">
       <div class="admin-stat-card">
+        <div class="admin-stat-num">{{ stats.total_clubs }}</div>
+        <div class="admin-stat-label">Clubs</div>
+      </div>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="admin-stat-card">
         <div class="admin-stat-num">{{ stats.total_members }}</div>
-        <div class="admin-stat-label">Members</div>
+        <div class="admin-stat-label">Users</div>
       </div>
     </div>
     <div class="col-6 col-lg-3">
@@ -25,56 +31,27 @@
     </div>
     <div class="col-6 col-lg-3">
       <div class="admin-stat-card">
-        <div class="admin-stat-num">{{ stats.total_rides }}</div>
-        <div class="admin-stat-label">Total Rides</div>
-      </div>
-    </div>
-    <div class="col-6 col-lg-3">
-      <div class="admin-stat-card">
         <div class="admin-stat-num">{{ stats.total_signups }}</div>
         <div class="admin-stat-label">Total Signups</div>
       </div>
     </div>
   </div>
 
-  <!-- Upcoming rides -->
-  <div class="d-flex justify-content-between align-items-center mb-3">
-    <h4 class="mb-0">Upcoming Rides</h4>
-    <a href="{{ url_for('admin.ride_new') }}" class="btn btn-rbc btn-sm">+ New Ride</a>
-  </div>
-
-  {% if upcoming %}
+  <h4 class="mb-3">All Clubs</h4>
   <div class="table-responsive">
     <table class="table rbc-table">
-      <thead>
-        <tr>
-          <th>Date</th>
-          <th>Title</th>
-          <th>Pace</th>
-          <th>Distance</th>
-          <th>Signups</th>
-          <th></th>
-        </tr>
-      </thead>
+      <thead><tr><th>Club</th><th>Location</th><th>Members</th><th></th></tr></thead>
       <tbody>
-        {% for ride in upcoming %}
-        <tr class="{{ 'table-danger' if ride.is_cancelled else '' }}">
-          <td>{{ ride.date.strftime('%b') }} {{ ride.date.day }}<br><small class="text-muted">{{ ride.time.strftime('%I:%M %p') }}</small></td>
-          <td><a href="{{ url_for('rides.detail', ride_id=ride.id) }}">{{ ride.title }}</a></td>
-          <td><span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span></td>
-          <td>{{ ride.distance_miles }} mi</td>
-          <td>{{ ride.signup_count }}</td>
-          <td>
-            <a href="{{ url_for('admin.ride_edit', ride_id=ride.id) }}" class="btn btn-outline-secondary btn-xs">Edit</a>
-          </td>
+        {% for club in clubs %}
+        <tr>
+          <td><a href="{{ url_for('clubs.home', slug=club.slug) }}">{{ club.name }}</a></td>
+          <td>{{ club.city }}, {{ club.state }}</td>
+          <td>{{ club.member_count }}</td>
+          <td><a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}" class="btn btn-outline-secondary btn-xs">Manage</a></td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
-  <a href="{{ url_for('admin.rides') }}" class="text-muted small">View all rides →</a>
-  {% else %}
-  <p class="text-muted">No upcoming rides. <a href="{{ url_for('admin.ride_new') }}">Create one.</a></p>
-  {% endif %}
 </div>
 {% endblock %}

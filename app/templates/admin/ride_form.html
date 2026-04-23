@@ -92,7 +92,7 @@
 
         <div class="d-flex gap-2">
           {{ form.submit(class="btn btn-rbc") }}
-          <a href="{{ url_for('admin.rides') }}" class="btn btn-outline-secondary">Cancel</a>
+          <a href="{{ url_for('admin.club_rides', slug=club.slug) }}" class="btn btn-outline-secondary">Cancel</a>
         </div>
 
       </form>

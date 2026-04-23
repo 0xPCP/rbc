@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Week of {{ week_start.strftime('%b') }} {{ week_start.day }} — {{ club.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('clubs.home', slug=club.slug) }}">{{ club.name }}</a></li>
+        <li class="breadcrumb-item active">Rides</li>
+      </ol>
+    </nav>
+    <h1>Ride Calendar</h1>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="cal-toolbar mb-4">
+    <div class="view-switcher">
+      <a href="{{ url_for('clubs.rides', slug=club.slug, view='list') }}" class="view-btn">List</a>
+      <a href="{{ url_for('clubs.rides', slug=club.slug, view='week') }}" class="view-btn active">Week</a>
+      <a href="{{ url_for('clubs.rides', slug=club.slug, view='month') }}" class="view-btn">Month</a>
+    </div>
+    <div class="cal-nav">
+      <a href="{{ url_for('clubs.rides', slug=club.slug, view='week', start=prev_start.isoformat()) }}" class="cal-nav-btn">‹ Prev</a>
+      <span class="cal-nav-title">
+        {{ week_start.strftime('%b') }} {{ week_start.day }}–{{ week_end.strftime('%b') }} {{ week_end.day }}, {{ week_end.year }}
+      </span>
+      <a href="{{ url_for('clubs.rides', slug=club.slug, view='week', start=next_start.isoformat()) }}" class="cal-nav-btn">Next ›</a>
+    </div>
+  </div>
+
+  <div class="week-grid">
+    {% for day in days %}
+    <div class="week-col {{ 'week-col-today' if day.is_today else '' }} {{ 'week-col-empty' if not day.rides else '' }}">
+      <div class="week-col-hdr">
+        <div class="wch-dow">{{ day.date.strftime('%a') }}</div>
+        <div class="wch-day {{ 'wch-day-today' if day.is_today else '' }}">{{ day.date.day }}</div>
+      </div>
+      <div class="week-col-body">
+        {% if day.rides %}
+          {% for ride in day.rides %}
+            {% set w = weather.get(ride.id) %}
+            <a href="{{ url_for('clubs.ride_detail', slug=club.slug, ride_id=ride.id) }}"
+               class="week-ride pace-cell-{{ ride.pace_category }} {{ 'week-ride-cancelled' if ride.is_cancelled else '' }} {{ 'week-ride-warn' if w and w.warning else '' }}">
+              <div class="wr-time">{{ ride.time.strftime('%I:%M %p') }}</div>
+              <div class="wr-title">{{ ride.title }}</div>
+              <div class="wr-meta">{{ ride.distance_miles }} mi · {{ ride.pace_label.split('—')[0].strip() }}</div>
+              {% if w %}
+              <div class="wr-weather sev-{{ w.severity }}">
+                {{ w.emoji }} {{ w.temp_f }}°F &bull; {{ w.wind_mph }} mph
+                {% if w.precip_prob > 20 %}&bull; {{ w.precip_prob }}% rain{% endif %}
+                {% if w.warning %}<div class="wr-warn-reasons">⚠️ {{ w.warning_reasons | join(' · ') }}</div>{% endif %}
+              </div>
+              {% endif %}
+              <div class="wr-signups">{{ ride.signup_count }} going</div>
+            </a>
+          {% endfor %}
+        {% else %}
+          <div class="week-col-empty-msg">No rides</div>
+        {% endif %}
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <div class="weather-legend mt-4">
+    <span class="wl-item"><span class="wl-dot sev-0"></span> Good conditions</span>
+    <span class="wl-item"><span class="wl-dot sev-1"></span> Use caution</span>
+    <span class="wl-item"><span class="wl-dot sev-2"></span> Weather warning</span>
+    <span class="wl-item text-muted" style="font-size:.8rem">Weather shown for rides within 14 days</span>
+  </div>
+</div>
+{% endblock %}

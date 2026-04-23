@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}{{ ride.title }} — {{ club.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header {{ 'page-header-cancelled' if ride.is_cancelled else '' }}">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-2">
+        <li class="breadcrumb-item"><a href="{{ url_for('clubs.index') }}">Clubs</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('clubs.home', slug=club.slug) }}">{{ club.name }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('clubs.rides', slug=club.slug) }}">Rides</a></li>
+        <li class="breadcrumb-item active">{{ ride.title }}</li>
+      </ol>
+    </nav>
+    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+      <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
+      {% if ride.is_cancelled %}<span class="badge bg-danger fs-6">Cancelled</span>{% endif %}
+    </div>
+    <h1>{{ ride.title }}</h1>
+    <p>{{ ride.date.strftime('%A, %B') }} {{ ride.date.day }}, {{ ride.date.year }} at {{ ride.time.strftime('%I:%M %p') }}</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row gy-4">
+
+    <div class="col-lg-8">
+      <div class="detail-card">
+        <h5 class="detail-card-title">Ride Details</h5>
+        <dl class="detail-dl">
+          <dt>Club</dt>
+          <dd><a href="{{ url_for('clubs.home', slug=club.slug) }}">{{ club.name }}</a></dd>
+
+          <dt>Meeting Location</dt>
+          <dd>{{ ride.meeting_location }}</dd>
+
+          <dt>Distance</dt>
+          <dd>{{ ride.distance_miles }} miles{% if ride.elevation_feet %} &bull; {{ ride.elevation_feet }} ft elevation gain{% endif %}</dd>
+
+          <dt>Pace</dt>
+          <dd>{{ ride.pace_label }}</dd>
+
+          {% if ride.ride_leader %}
+          <dt>Ride Leader</dt>
+          <dd>{{ ride.ride_leader }}</dd>
+          {% endif %}
+
+          {% if ride.route_url %}
+          <dt>Route</dt>
+          <dd><a href="{{ ride.route_url }}" target="_blank" rel="noopener">
+            {% if ride.ridewithgps_route_id %}View on RideWithGPS ↗{% else %}View Route ↗{% endif %}
+          </a></dd>
+          {% endif %}
+        </dl>
+      </div>
+
+      {% if ride.description %}
+      <div class="detail-card mt-3">
+        <h5 class="detail-card-title">Notes</h5>
+        <p class="mb-0">{{ ride.description }}</p>
+      </div>
+      {% endif %}
+
+      {% if ride.ridewithgps_embed_url %}
+      <div class="detail-card mt-3">
+        <h5 class="detail-card-title">
+          Route Map
+          <a href="{{ ride.route_url }}" target="_blank" rel="noopener" class="detail-card-link">Open on RideWithGPS ↗</a>
+        </h5>
+        <div class="rwgps-wrapper">
+          <iframe src="{{ ride.ridewithgps_embed_url }}" scrolling="no" allowfullscreen></iframe>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if ride.embed_url %}
+      <div class="detail-card mt-3">
+        <h5 class="detail-card-title">Video</h5>
+        <div class="video-wrapper">
+          <iframe src="{{ ride.embed_url }}" allowfullscreen></iframe>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-4">
+      {% if ride_weather %}
+      <div class="detail-card mb-3 weather-detail-card sev-bg-{{ ride_weather.severity }}">
+        <h5 class="detail-card-title">Forecast</h5>
+        <div class="weather-detail-main">
+          <span class="wd-emoji">{{ ride_weather.emoji }}</span>
+          <div>
+            <div class="wd-desc">{{ ride_weather.description }}</div>
+            <div class="wd-stats">
+              {{ ride_weather.temp_f }}°F &bull; {{ ride_weather.wind_mph }} mph &bull; {{ ride_weather.precip_prob }}% rain
+            </div>
+          </div>
+        </div>
+        {% if ride_weather.warning %}
+        <div class="weather-warning-block mt-2">
+          <strong>⚠️ Weather Warning</strong>
+          <ul class="mb-0 mt-1">{% for r in ride_weather.warning_reasons %}<li>{{ r }}</li>{% endfor %}</ul>
+        </div>
+        {% elif ride_weather.severity == 1 %}
+        <div class="weather-caution-block mt-2">⚠️ Conditions may be challenging.</div>
+        {% endif %}
+      </div>
+      {% endif %}
+
+      <div class="signup-card">
+        <div class="signup-count-big">{{ ride.signup_count }}</div>
+        <div class="signup-count-label">rider{{ 's' if ride.signup_count != 1 else '' }} signed up</div>
+
+        {% if not ride.is_cancelled %}
+          {% if current_user.is_authenticated %}
+            {% if waiver_required %}
+            <div class="alert alert-warning mt-3 mb-0 py-2 small">
+              You must <a href="{{ url_for('clubs.waiver', slug=club.slug, next=request.url) }}">accept the club waiver</a> before signing up.
+            </div>
+            {% elif user_signed_up %}
+            <form method="post" action="{{ url_for('clubs.ride_unsignup', slug=club.slug, ride_id=ride.id) }}" class="mt-3">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="btn btn-outline-secondary w-100">Cancel My Signup</button>
+            </form>
+            {% else %}
+            <form method="post" action="{{ url_for('clubs.ride_signup', slug=club.slug, ride_id=ride.id) }}" class="mt-3">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="btn btn-rbc w-100">Sign Up for This Ride</button>
+            </form>
+            {% endif %}
+          {% else %}
+          <p class="signup-login-cta">
+            <a href="{{ url_for('auth.login', next=request.path) }}">Sign in</a> to sign up for this ride.
+          </p>
+          {% endif %}
+        {% else %}
+        <p class="text-danger mt-3 mb-0"><strong>This ride has been cancelled.</strong></p>
+        {% endif %}
+
+        {% if current_user.is_authenticated and ride.signups %}
+        <hr />
+        <h6 class="signup-list-title">Who's coming</h6>
+        <ul class="signup-list">
+          {% for s in ride.signups %}<li>{{ s.user.username }}</li>{% endfor %}
+        </ul>
+        {% elif not current_user.is_authenticated and ride.signup_count > 0 %}
+        <p class="signup-private-note"><a href="{{ url_for('auth.login') }}">Sign in</a> to see who's coming.</p>
+        {% endif %}
+      </div>
+
+      {% if current_user.is_authenticated and current_user.is_club_admin(club) %}
+      <div class="mt-3 d-flex gap-2">
+        <a href="{{ url_for('admin.ride_edit', slug=club.slug, ride_id=ride.id) }}" class="btn btn-outline-secondary btn-sm">Edit Ride</a>
+        <form method="post" action="{{ url_for('admin.ride_delete', slug=club.slug, ride_id=ride.id) }}" onsubmit="return confirm('Delete this ride?')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+          <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <a href="{{ url_for('clubs.rides', slug=club.slug) }}" class="text-muted">&larr; Back to {{ club.name }} Calendar</a>
+  </div>
+</div>
+{% endblock %}
