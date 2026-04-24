@@ -1,0 +1,16 @@
+NEW RIDE — {{ ride.club.name }}
+{{ ride.title }}
+
+A new ride has been added to the {{ ride.club.name }} calendar.
+
+Date:         {{ ride.date.strftime('%A, %B %d, %Y') }}
+Start Time:   {{ ride.time.strftime('%I:%M %p') }}
+Meeting Point:{{ ride.meeting_location }}
+Distance:     {{ ride.distance_miles }} miles{% if ride.elevation_feet %} / {{ ride.elevation_feet }} ft elevation{% endif %}
+
+Pace:         {{ ride.pace_label }}
+{% if ride.ride_leader %}Ride Leader:  {{ ride.ride_leader }}
+{% endif %}{% if ride.description %}
+{{ ride.description }}
+{% endif %}
+View and sign up: https://cyclingclub.pcp.dev/clubs/{{ ride.club.slug }}/rides/{{ ride.id }}

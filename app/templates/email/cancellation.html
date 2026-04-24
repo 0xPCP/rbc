@@ -1,0 +1,24 @@
+{% extends "email/_base.html" %}
+{% block body %}
+<div class="club-tag">{{ ride.club.name }}</div>
+<h1>Ride Cancelled: {{ ride.title }}</h1>
+
+<div class="alert alert-danger">
+  <strong>This ride has been cancelled.</strong>
+  {% if ride.cancel_reason %}<br>{{ ride.cancel_reason }}{% endif %}
+</div>
+
+<table class="meta-table">
+  <tr><td>Date</td><td>{{ ride.date.strftime('%A, %B %d, %Y') }}</td></tr>
+  <tr><td>Time</td><td>{{ ride.time.strftime('%I:%M %p') }}</td></tr>
+  <tr><td>Location</td><td>{{ ride.meeting_location }}</td></tr>
+  <tr><td>Distance</td><td>{{ ride.distance_miles }} miles</td></tr>
+  <tr><td>Pace</td><td>{{ ride.pace_label }}</td></tr>
+</table>
+
+<p style="font-size:.9rem;color:#495057">
+  Keep an eye on the club calendar for any rescheduled or alternative rides.
+</p>
+
+<a href="https://cyclingclub.pcp.dev/clubs/{{ ride.club.slug }}/rides/" class="cta">View Club Calendar</a>
+{% endblock %}

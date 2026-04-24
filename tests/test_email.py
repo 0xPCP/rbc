@@ -1,0 +1,262 @@
+"""Tests for email notification helpers."""
+import pytest
+from datetime import date, time, timedelta
+from unittest.mock import patch, MagicMock, call
+
+from app.models import Ride, RideSignup, ClubMembership
+from app.extensions import db
+
+
+# ── Fixtures ──────────────────────────────────────────────────────────────────
+
+def _make_ride(db, club, title='Test Ride', days_ahead=1):
+    ride = Ride(
+        club_id=club.id,
+        title=title,
+        date=date.today() + timedelta(days=days_ahead),
+        time=time(17, 0),
+        meeting_location='Test Location',
+        distance_miles=25.0,
+        pace_category='B',
+    )
+    db.session.add(ride)
+    db.session.commit()
+    return ride
+
+
+def _sign_up(db, user, ride):
+    signup = RideSignup(ride_id=ride.id, user_id=user.id)
+    db.session.add(signup)
+    db.session.commit()
+    return signup
+
+
+# ── Cancellation email tests ──────────────────────────────────────────────────
+
+def test_cancellation_email_sent_to_signups(app, sample_club, regular_user):
+    """Cancellation email is sent to all signed-up riders."""
+    ride = _make_ride(db, sample_club)
+    _sign_up(db, regular_user, ride)
+
+    with patch('app.email.mail') as mock_mail:
+        from app.email import send_cancellation_emails
+        send_cancellation_emails(ride)
+        mock_mail.send.assert_called_once()
+        msg = mock_mail.send.call_args[0][0]
+        assert regular_user.email in msg.recipients
+        assert 'Cancelled' in msg.subject
+        assert ride.title in msg.subject
+
+
+def test_cancellation_no_email_if_no_signups(app, sample_club):
+    """No email is sent for a ride with no signups."""
+    ride = _make_ride(db, sample_club)
+
+    with patch('app.email.mail') as mock_mail:
+        from app.email import send_cancellation_emails
+        send_cancellation_emails(ride)
+        mock_mail.send.assert_not_called()
+
+
+def test_cancellation_email_multiple_recipients(app, sample_club, regular_user, second_user):
+    """Cancellation email addresses all signed-up riders."""
+    ride = _make_ride(db, sample_club)
+    _sign_up(db, regular_user, ride)
+    _sign_up(db, second_user, ride)
+
+    with patch('app.email.mail') as mock_mail:
+        from app.email import send_cancellation_emails
+        send_cancellation_emails(ride)
+        mock_mail.send.assert_called_once()
+        msg = mock_mail.send.call_args[0][0]
+        assert regular_user.email in msg.recipients
+        assert second_user.email in msg.recipients
+
+
+def test_cancellation_includes_cancel_reason(app, sample_club, regular_user):
+    """Email body contains the cancel reason when set."""
+    ride = _make_ride(db, sample_club)
+    ride.is_cancelled = True
+    ride.cancel_reason = 'Auto-cancelled due to weather: 90% precipitation probability'
+    db.session.commit()
+    _sign_up(db, regular_user, ride)
+
+    with patch('app.email.mail') as mock_mail:
+        from app.email import send_cancellation_emails
+        send_cancellation_emails(ride)
+        msg = mock_mail.send.call_args[0][0]
+        assert '90%' in msg.html or '90%' in msg.body
+
+
+def test_cancellation_email_swallows_exceptions(app, sample_club, regular_user):
+    """A mail failure does not propagate as an exception."""
+    ride = _make_ride(db, sample_club)
+    _sign_up(db, regular_user, ride)
+
+    with patch('app.email.mail') as mock_mail:
+        mock_mail.send.side_effect = Exception('SMTP error')
+        from app.email import send_cancellation_emails
+        send_cancellation_emails(ride)  # must not raise
+
+
+# ── Ride reminder tests ───────────────────────────────────────────────────────
+
+def test_reminder_email_sent_to_signups(app, sample_club, regular_user):
+    """Reminder email is sent to signed-up riders."""
+    ride = _make_ride(db, sample_club, days_ahead=0)
+    _sign_up(db, regular_user, ride)
+
+    with patch('app.email.mail') as mock_mail:
+        from app.email import send_ride_reminder
+        send_ride_reminder(ride)
+        mock_mail.send.assert_called_once()
+        msg = mock_mail.send.call_args[0][0]
+        assert regular_user.email in msg.recipients
+        assert "Today's Ride" in msg.subject
+        assert ride.title in msg.subject
+
+
+def test_reminder_no_email_if_no_signups(app, sample_club):
+    """No reminder sent when nobody is signed up."""
+    ride = _make_ride(db, sample_club, days_ahead=0)
+
+    with patch('app.email.mail') as mock_mail:
+        from app.email import send_ride_reminder
+        send_ride_reminder(ride)
+        mock_mail.send.assert_not_called()
+
+
+# ── New ride notification tests ───────────────────────────────────────────────
+
+def test_new_ride_notification_sent_to_members(app, sample_club, regular_user):
+    """New ride notification is sent to all club members."""
+    db.session.add(ClubMembership(user_id=regular_user.id, club_id=sample_club.id))
+    db.session.commit()
+    ride = _make_ride(db, sample_club)
+
+    with patch('app.email.mail') as mock_mail:
+        from app.email import send_new_ride_notification
+        send_new_ride_notification(ride)
+        mock_mail.send.assert_called_once()
+        msg = mock_mail.send.call_args[0][0]
+        assert regular_user.email in msg.recipients
+        assert 'New Ride' in msg.subject
+
+
+def test_new_ride_no_email_if_no_members(app, sample_club):
+    """No notification sent if club has no members."""
+    ride = _make_ride(db, sample_club)
+
+    with patch('app.email.mail') as mock_mail:
+        from app.email import send_new_ride_notification
+        send_new_ride_notification(ride)
+        mock_mail.send.assert_not_called()
+
+
+# ── Admin integration tests ───────────────────────────────────────────────────
+
+def test_new_ride_notification_triggered_on_admin_create(
+        client, app, sample_club, club_admin_user, regular_user):
+    """Creating a non-recurring ride via admin sends new ride notifications."""
+    db.session.add(ClubMembership(user_id=regular_user.id, club_id=sample_club.id))
+    db.session.commit()
+
+    from tests.conftest import login
+    login(client, email='clubadmin@test.com')
+
+    with patch('app.routes.admin.send_new_ride_notification') as mock_notify:
+        resp = client.post(
+            f'/admin/clubs/{sample_club.slug}/rides/new',
+            data={
+                'title': 'Notify Test Ride',
+                'date': (date.today() + timedelta(days=5)).isoformat(),
+                'time': '17:00',
+                'meeting_location': 'Test Spot',
+                'distance_miles': '25',
+                'pace_category': 'B',
+            },
+            follow_redirects=True,
+        )
+    assert resp.status_code == 200
+    mock_notify.assert_called_once()
+
+
+def test_recurring_ride_skips_new_ride_notification(
+        client, app, sample_club, club_admin_user, regular_user):
+    """Creating a recurring ride does NOT send new ride notifications (too noisy)."""
+    db.session.add(ClubMembership(user_id=regular_user.id, club_id=sample_club.id))
+    db.session.commit()
+
+    from tests.conftest import login
+    login(client, email='clubadmin@test.com')
+
+    with patch('app.routes.admin.send_new_ride_notification') as mock_notify:
+        client.post(
+            f'/admin/clubs/{sample_club.slug}/rides/new',
+            data={
+                'title': 'Recurring Ride',
+                'date': (date.today() + timedelta(days=5)).isoformat(),
+                'time': '17:00',
+                'meeting_location': 'Test Spot',
+                'distance_miles': '25',
+                'pace_category': 'B',
+                'is_recurring': 'y',
+            },
+            follow_redirects=True,
+        )
+    mock_notify.assert_not_called()
+
+
+def test_cancellation_email_triggered_on_admin_edit(
+        client, app, sample_club, club_admin_user, regular_user):
+    """Editing a ride to mark it cancelled triggers cancellation emails."""
+    ride = _make_ride(db, sample_club)
+    _sign_up(db, regular_user, ride)
+
+    from tests.conftest import login
+    login(client, email='clubadmin@test.com')
+
+    with patch('app.routes.admin.send_cancellation_emails') as mock_cancel:
+        resp = client.post(
+            f'/admin/clubs/{sample_club.slug}/rides/{ride.id}/edit',
+            data={
+                'title': ride.title,
+                'date': ride.date.isoformat(),
+                'time': '17:00',
+                'meeting_location': ride.meeting_location,
+                'distance_miles': str(ride.distance_miles),
+                'pace_category': ride.pace_category,
+                'is_cancelled': 'y',
+            },
+            follow_redirects=True,
+        )
+    assert resp.status_code == 200
+    mock_cancel.assert_called_once()
+
+
+def test_cancellation_email_not_resent_if_already_cancelled(
+        client, app, sample_club, club_admin_user, regular_user):
+    """Editing an already-cancelled ride does not re-send cancellation email."""
+    ride = _make_ride(db, sample_club)
+    ride.is_cancelled = True
+    db.session.commit()
+    _sign_up(db, regular_user, ride)
+
+    from tests.conftest import login
+    login(client, email='clubadmin@test.com')
+
+    with patch('app.routes.admin.send_cancellation_emails') as mock_cancel:
+        client.post(
+            f'/admin/clubs/{sample_club.slug}/rides/{ride.id}/edit',
+            data={
+                'title': ride.title,
+                'date': ride.date.isoformat(),
+                'time': '17:00',
+                'meeting_location': ride.meeting_location,
+                'distance_miles': str(ride.distance_miles),
+                'pace_category': ride.pace_category,
+                'is_cancelled': 'y',
+            },
+            follow_redirects=True,
+        )
+    mock_cancel.assert_not_called()

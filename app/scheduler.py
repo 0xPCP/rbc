@@ -9,6 +9,7 @@ import logging
 from datetime import date
 
 from .weather import get_weather_for_rides
+from .email import send_cancellation_emails, send_ride_reminder
 
 logger = logging.getLogger(__name__)
 
@@ -60,10 +61,33 @@ def check_auto_cancels(app):
 
             db.session.commit()
 
+            # Send cancellation emails after committing so ride state is final
+            for ride in rides_today:
+                if ride.is_cancelled and ride.cancel_reason and 'Auto-cancelled' in ride.cancel_reason:
+                    send_cancellation_emails(ride)
+
         if cancelled_count:
             logger.info('Auto-cancel job: %d ride(s) cancelled for %s', cancelled_count, today)
         else:
             logger.debug('Auto-cancel job: no cancellations for %s', today)
+
+
+def send_reminders(app):
+    """Send morning-of ride reminders to all signed-up riders."""
+    with app.app_context():
+        from .extensions import db
+        from .models import Ride
+        today = date.today()
+        rides_today = (
+            Ride.query
+            .filter_by(is_cancelled=False)
+            .filter(Ride.date == today)
+            .all()
+        )
+        for ride in rides_today:
+            if ride.signups:
+                send_ride_reminder(ride)
+        logger.debug('Reminder job: processed %d ride(s) for %s', len(rides_today), today)
 
 
 def init_scheduler(app):
@@ -86,6 +110,15 @@ def init_scheduler(app):
         args=[app],
         id='weather_auto_cancel',
         name='Weather-based ride auto-cancel',
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
+    scheduler.add_job(
+        func=send_reminders,
+        trigger=CronTrigger(hour=hour, minute=15),
+        args=[app],
+        id='ride_reminders',
+        name='Morning ride reminders',
         replace_existing=True,
         misfire_grace_time=3600,
     )

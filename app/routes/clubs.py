@@ -3,6 +3,7 @@ from datetime import date, datetime, timedelta, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, Response
 from flask_login import login_required, current_user
 from sqlalchemy.exc import IntegrityError
+import requests as http_requests
 from ..extensions import db
 from ..models import Club, ClubMembership, Ride
 from ..weather import get_weather_for_rides
@@ -249,6 +250,32 @@ def ride_ics(slug, ride_id):
     return Response(
         ics,
         mimetype='text/calendar',
+        headers={'Content-Disposition': f'attachment; filename="{filename}"'},
+    )
+
+
+@clubs_bp.route('/<slug>/rides/<int:ride_id>/gpx')
+def ride_gpx(slug, ride_id):
+    club = _get_club_or_404(slug)
+    ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
+
+    if not ride.ridewithgps_route_id:
+        abort(404)
+
+    gpx_url = f'https://ridewithgps.com/routes/{ride.ridewithgps_route_id}.gpx'
+    try:
+        upstream = http_requests.get(gpx_url, timeout=15,
+                                     headers={'User-Agent': 'CyclingClubsApp/1.0'})
+        if upstream.status_code != 200:
+            abort(404)
+    except http_requests.RequestException:
+        abort(503)
+
+    safe_title = ''.join(c if c.isalnum() or c in '-_ ' else '' for c in ride.title)
+    filename = safe_title.strip().lower().replace(' ', '-') + '.gpx'
+    return Response(
+        upstream.content,
+        mimetype='application/gpx+xml',
         headers={'Content-Disposition': f'attachment; filename="{filename}"'},
     )
 

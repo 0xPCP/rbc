@@ -1,0 +1,24 @@
+{% extends "email/_base.html" %}
+{% block body %}
+<div class="club-tag">{{ ride.club.name }}</div>
+<h1>New Ride: {{ ride.title }}</h1>
+
+<div class="alert alert-info">
+  A new ride has been added to the <strong>{{ ride.club.name }}</strong> calendar.
+</div>
+
+<table class="meta-table">
+  <tr><td>Date</td><td>{{ ride.date.strftime('%A, %B %d, %Y') }}</td></tr>
+  <tr><td>Start Time</td><td>{{ ride.time.strftime('%I:%M %p') }}</td></tr>
+  <tr><td>Meeting Point</td><td>{{ ride.meeting_location }}</td></tr>
+  <tr><td>Distance</td><td>{{ ride.distance_miles }} miles{% if ride.elevation_feet %} &bull; {{ ride.elevation_feet }} ft{% endif %}</td></tr>
+  <tr><td>Pace</td><td>{{ ride.pace_label }}</td></tr>
+  {% if ride.ride_leader %}<tr><td>Ride Leader</td><td>{{ ride.ride_leader }}</td></tr>{% endif %}
+</table>
+
+{% if ride.description %}
+<p style="font-size:.9rem;color:#495057;margin-bottom:20px">{{ ride.description }}</p>
+{% endif %}
+
+<a href="https://cyclingclub.pcp.dev/clubs/{{ ride.club.slug }}/rides/{{ ride.id }}" class="cta">View &amp; Sign Up</a>
+{% endblock %}

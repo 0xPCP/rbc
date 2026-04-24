@@ -7,6 +7,7 @@ from ..models import Club, Ride, RideSignup, User, ClubMembership
 from ..forms import RideForm, ClubForm, ClubSettingsForm
 from ..recurrence import generate_instances, delete_future_instances
 from ..geocoding import geocode_zip
+from ..email import send_cancellation_emails, send_new_ride_notification
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -193,6 +194,7 @@ def ride_new(slug):
             flash(f'Ride created with {count} recurring instances.', 'success')
         else:
             flash('Ride created.', 'success')
+            send_new_ride_notification(ride)
         return redirect(url_for('admin.club_rides', slug=slug))
     return render_template('admin/ride_form.html', form=form, club=club, title='New Ride')
 
@@ -204,7 +206,8 @@ def ride_edit(slug, ride_id):
     ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
     form = RideForm(obj=ride)
     if form.validate_on_submit():
-        was_recurring = ride.is_recurring
+        was_recurring  = ride.is_recurring
+        was_cancelled  = ride.is_cancelled
         ride.title          = form.title.data
         ride.date           = form.date.data
         ride.time           = form.time.data
@@ -219,6 +222,8 @@ def ride_edit(slug, ride_id):
         ride.is_cancelled   = form.is_cancelled.data
         ride.is_recurring   = form.is_recurring.data
         db.session.commit()
+        if not was_cancelled and ride.is_cancelled:
+            send_cancellation_emails(ride)
         # Regenerate instances if this is (or was) a recurring template
         if ride.is_recurring or was_recurring:
             delete_future_instances(ride)
