@@ -7,7 +7,28 @@ def test_map_page_renders(client, sample_club):
     resp = client.get('/clubs/map/')
     assert resp.status_code == 200
     assert b'leaflet' in resp.data.lower()
-    assert b'map-data' in resp.data
+    # Club data is now server-side embedded JSON, not a client-side fetch
+    assert sample_club.slug.encode() in resp.data
+
+
+def test_map_page_embeds_club_coords(client, sample_club):
+    """Club lat/lng is embedded in the page as JSON when the club is geocoded."""
+    resp = client.get('/clubs/map/')
+    assert resp.status_code == 200
+    assert str(sample_club.lat).encode() in resp.data
+    assert str(sample_club.lng).encode() in resp.data
+
+
+def test_map_page_excludes_ungeocoded_clubs(client, sample_club):
+    """A club without lat/lng is not embedded in the page data."""
+    sample_club.lat = None
+    sample_club.lng = None
+    from app.extensions import db
+    db.session.commit()
+
+    resp = client.get('/clubs/map/')
+    assert resp.status_code == 200
+    assert sample_club.slug.encode() not in resp.data
 
 
 def test_map_data_no_coords(client, sample_club):

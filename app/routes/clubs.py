@@ -58,7 +58,33 @@ def index():
 
 @clubs_bp.route('/map/')
 def club_map():
-    return render_template('clubs/map.html')
+    import json
+    today = date.today()
+    clubs = Club.query.filter_by(is_active=True).order_by(Club.name.asc()).all()
+    features = []
+    for club in clubs:
+        if club.lat is None or club.lng is None:
+            continue
+        upcoming_count = (Ride.query
+                          .filter_by(club_id=club.id, is_cancelled=False)
+                          .filter(Ride.date >= today).count())
+        is_member = (current_user.is_authenticated and
+                     current_user.is_member_of(club))
+        features.append({
+            'id':        club.id,
+            'name':      club.name,
+            'slug':      club.slug,
+            'lat':       club.lat,
+            'lng':       club.lng,
+            'city':      club.city or '',
+            'state':     club.state or '',
+            'members':   club.member_count,
+            'upcoming':  upcoming_count,
+            'is_member': is_member,
+            'url':       f'/clubs/{club.slug}/',
+        })
+    clubs_json = json.dumps(features)
+    return render_template('clubs/map.html', clubs_json=clubs_json)
 
 
 # ── Club home ─────────────────────────────────────────────────────────────────

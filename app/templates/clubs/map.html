@@ -140,28 +140,22 @@
       </div>`;
   }
 
-  fetch('/api/clubs/map-data')
-    .then(r => r.json())
-    .then(clubs => {
-      const subtitle = document.getElementById('map-subtitle');
-      if (clubs.length === 0) {
-        subtitle.textContent = 'No geocoded clubs yet.';
-        return;
-      }
-      subtitle.textContent = `${clubs.length} club${clubs.length !== 1 ? 's' : ''} on the map`;
+  const clubs = {{ clubs_json | safe }};
+  const subtitle = document.getElementById('map-subtitle');
+  if (clubs.length === 0) {
+    subtitle.textContent = 'No geocoded clubs yet.';
+  } else {
+    subtitle.textContent = `${clubs.length} club${clubs.length !== 1 ? 's' : ''} on the map`;
 
-      const latLngs = clubs.map(c => [c.lat, c.lng]);
-      map.fitBounds(latLngs, { padding: [48, 48], maxZoom: 11 });
+    const latLngs = clubs.map(c => [c.lat, c.lng]);
+    map.fitBounds(latLngs, { padding: [48, 48], maxZoom: 11 });
 
-      clubs.forEach(club => {
-        L.marker([club.lat, club.lng], { icon: makeIcon(club.is_member) })
-          .addTo(map)
-          .bindPopup(buildPopup(club), { maxWidth: 300, minWidth: 240 });
-      });
-    })
-    .catch(() => {
-      document.getElementById('map-subtitle').textContent = 'Could not load club data.';
+    clubs.forEach(club => {
+      L.marker([club.lat, club.lng], { icon: makeIcon(club.is_member) })
+        .addTo(map)
+        .bindPopup(buildPopup(club), { maxWidth: 300, minWidth: 240 });
     });
+  }
 
   document.getElementById('locate-btn').addEventListener('click', function () {
     this.disabled = true;
