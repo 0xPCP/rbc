@@ -135,6 +135,9 @@
           {% endif %}
         {% else %}
         <p class="text-danger mt-3 mb-0"><strong>This ride has been cancelled.</strong></p>
+        {% if ride.cancel_reason %}
+        <p class="text-muted small mt-1 mb-0">{{ ride.cancel_reason }}</p>
+        {% endif %}
         {% endif %}
 
         {% if current_user.is_authenticated and ride.signups %}

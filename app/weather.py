@@ -45,20 +45,50 @@ _WMO = {
 _cache = {}
 
 
-def get_weather_for_rides(rides):
+def _fetch_hourly(lat, lng, forecast_days):
+    """Fetch and cache hourly forecast data for a lat/lng. Returns hourly dict or {}."""
+    cache_key = (round(lat, 3), round(lng, 3), forecast_days)
+    now = time.time()
+    if cache_key in _cache and now - _cache[cache_key]['_ts'] < 1800:
+        return _cache[cache_key]['hourly']
+    try:
+        resp = requests.get(
+            'https://api.open-meteo.com/v1/forecast',
+            params={
+                'latitude':        lat,
+                'longitude':       lng,
+                'hourly':          'temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code',
+                'temperature_unit':'fahrenheit',
+                'wind_speed_unit': 'mph',
+                'forecast_days':   forecast_days,
+                'timezone':        'auto',
+            },
+            timeout=10,
+        )
+        data = resp.json()
+    except Exception:
+        return {}
+    hourly = {}
+    for i, t in enumerate(data['hourly']['time']):
+        hourly[t] = {
+            'temp_f':      round(data['hourly']['temperature_2m'][i]),
+            'precip_prob': data['hourly']['precipitation_probability'][i] or 0,
+            'precip_mm':   data['hourly']['precipitation'][i] or 0,
+            'wind_mph':    round(data['hourly']['wind_speed_10m'][i]),
+            'code':        data['hourly']['weather_code'][i],
+        }
+    _cache[cache_key] = {'hourly': hourly, '_ts': now}
+    return hourly
+
+
+def get_weather_for_rides(rides, lat=None, lng=None):
     """
     Return {ride.id: weather_dict} for rides within the next 14 days.
-
-    Weather dict keys:
-        description  str     human-readable condition label
-        emoji        str     WMO condition emoji
-        severity     int     0=good, 1=caution, 2=warning
-        temp_f       int     temperature in °F
-        wind_mph     int     wind speed in mph
-        precip_prob  int     precipitation probability 0-100
-        warning      bool    True if cycling conditions are poor
-        warning_reasons  list[str]
+    Uses lat/lng if provided, otherwise falls back to module-level defaults.
     """
+    lat = lat if lat is not None else _LAT
+    lng = lng if lng is not None else _LNG
+
     today = date.today()
     in_window = [r for r in rides if 0 <= (r.date - today).days <= 14]
     if not in_window:
@@ -67,40 +97,9 @@ def get_weather_for_rides(rides):
     dates = sorted({r.date for r in in_window})
     forecast_days = min((dates[-1] - today).days + 2, 16)
 
-    cache_key = (dates[0].isoformat(), forecast_days)
-    now = time.time()
-
-    if cache_key in _cache and now - _cache[cache_key]['_ts'] < 1800:
-        hourly = _cache[cache_key]['hourly']
-    else:
-        try:
-            resp = requests.get(
-                'https://api.open-meteo.com/v1/forecast',
-                params={
-                    'latitude':        _LAT,
-                    'longitude':       _LNG,
-                    'hourly':          'temperature_2m,precipitation_probability,precipitation,wind_speed_10m,weather_code',
-                    'temperature_unit':'fahrenheit',
-                    'wind_speed_unit': 'mph',
-                    'forecast_days':   forecast_days,
-                    'timezone':        'America/New_York',
-                },
-                timeout=10,
-            )
-            data = resp.json()
-        except Exception:
-            return {}
-
-        hourly = {}
-        for i, t in enumerate(data['hourly']['time']):
-            hourly[t] = {
-                'temp_f':      round(data['hourly']['temperature_2m'][i]),
-                'precip_prob': data['hourly']['precipitation_probability'][i] or 0,
-                'precip_mm':   data['hourly']['precipitation'][i] or 0,
-                'wind_mph':    round(data['hourly']['wind_speed_10m'][i]),
-                'code':        data['hourly']['weather_code'][i],
-            }
-        _cache[cache_key] = {'hourly': hourly, '_ts': now}
+    hourly = _fetch_hourly(lat, lng, forecast_days)
+    if not hourly:
+        return {}
 
     result = {}
     for ride in in_window:

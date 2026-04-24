@@ -83,6 +83,46 @@
           {% for e in form.logo_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
         </div>
 
+        <hr class="my-4" />
+        <h5 class="mb-3">Weather Auto-Cancel</h5>
+        <p class="text-muted small mb-3">
+          When enabled, rides scheduled for today are automatically cancelled each morning (6 AM)
+          if forecast conditions exceed any threshold. Thresholds are checked independently — any
+          one trigger is enough to cancel.
+        </p>
+
+        <div class="mb-3">
+          <div class="form-check form-switch">
+            {{ form.auto_cancel_enabled(class="form-check-input", role="switch", id="auto_cancel_enabled") }}
+            {{ form.auto_cancel_enabled.label(class="form-check-label", for="auto_cancel_enabled") }}
+          </div>
+        </div>
+
+        <div id="cancel-thresholds" class="{{ '' if club.auto_cancel_enabled else 'opacity-50' }}">
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              {{ form.cancel_rain_prob.label(class="form-label") }}
+              {{ form.cancel_rain_prob(class="form-control form-control-sm" + (" is-invalid" if form.cancel_rain_prob.errors else "")) }}
+              {% for e in form.cancel_rain_prob.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-sm-6">
+              {{ form.cancel_wind_mph.label(class="form-label") }}
+              {{ form.cancel_wind_mph(class="form-control form-control-sm" + (" is-invalid" if form.cancel_wind_mph.errors else "")) }}
+              {% for e in form.cancel_wind_mph.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-sm-6">
+              {{ form.cancel_temp_min_f.label(class="form-label") }}
+              {{ form.cancel_temp_min_f(class="form-control form-control-sm" + (" is-invalid" if form.cancel_temp_min_f.errors else "")) }}
+              {% for e in form.cancel_temp_min_f.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-sm-6">
+              {{ form.cancel_temp_max_f.label(class="form-label") }}
+              {{ form.cancel_temp_max_f(class="form-control form-control-sm" + (" is-invalid" if form.cancel_temp_max_f.errors else "")) }}
+              {% for e in form.cancel_temp_max_f.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+          </div>
+        </div>
+
         <div class="d-flex gap-2">
           {{ form.submit(class="btn btn-rbc") }}
           <a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}" class="btn btn-outline-secondary">Cancel</a>
@@ -107,4 +147,14 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const toggle = document.getElementById('auto_cancel_enabled');
+  const panel  = document.getElementById('cancel-thresholds');
+  toggle.addEventListener('change', () => {
+    panel.classList.toggle('opacity-50', !toggle.checked);
+  });
+</script>
 {% endblock %}

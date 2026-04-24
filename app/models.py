@@ -74,6 +74,13 @@ class Club(db.Model):
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
+    # Weather-based auto-cancel thresholds
+    auto_cancel_enabled  = db.Column(db.Boolean, default=False, nullable=False)
+    cancel_rain_prob     = db.Column(db.Integer, default=80, nullable=False)   # % precip probability
+    cancel_wind_mph      = db.Column(db.Integer, default=35, nullable=False)   # mph
+    cancel_temp_min_f    = db.Column(db.Integer, default=28, nullable=False)   # °F floor
+    cancel_temp_max_f    = db.Column(db.Integer, default=100, nullable=False)  # °F ceiling
+
     rides = db.relationship('Ride', backref='club', lazy=True, cascade='all, delete-orphan')
     memberships = db.relationship('ClubMembership', backref='club', lazy=True, cascade='all, delete-orphan')
     admin_roles = db.relationship('ClubAdmin', backref='club', lazy=True, cascade='all, delete-orphan')
@@ -163,6 +170,7 @@ class Ride(db.Model):
     description = db.Column(db.Text, nullable=True)
     video_url = db.Column(db.String(500), nullable=True)
     is_cancelled = db.Column(db.Boolean, default=False, nullable=False)
+    cancel_reason = db.Column(db.String(500), nullable=True)
     is_recurring = db.Column(db.Boolean, default=False, nullable=False)
     recurrence_parent_id = db.Column(db.Integer, db.ForeignKey('rides.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))

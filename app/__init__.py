@@ -33,4 +33,9 @@ def create_app(config_class=Config):
     def inject_globals():
         return {'now': datetime.utcnow(), 'version': __version__}
 
+    # Start weather auto-cancel scheduler (skipped in testing)
+    if not app.config.get('TESTING'):
+        from .scheduler import init_scheduler
+        init_scheduler(app)
+
     return app

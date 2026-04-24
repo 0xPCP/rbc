@@ -1,0 +1,94 @@
+"""
+APScheduler background job: weather-based ride auto-cancel.
+
+Runs once daily (configurable via AUTO_CANCEL_HOUR, default 6 AM local time).
+For every club with auto_cancel_enabled=True, checks all non-cancelled rides
+scheduled for today and marks them cancelled if weather exceeds thresholds.
+"""
+import logging
+from datetime import date
+
+from .weather import get_weather_for_rides
+
+logger = logging.getLogger(__name__)
+
+
+def check_auto_cancels(app):
+    """Called by the scheduler; runs inside a pushed app context."""
+    with app.app_context():
+        from .extensions import db
+        from .models import Club, Ride
+
+        today = date.today()
+        clubs = Club.query.filter_by(is_active=True, auto_cancel_enabled=True).all()
+
+        cancelled_count = 0
+        for club in clubs:
+            rides_today = (
+                Ride.query
+                .filter_by(club_id=club.id, is_cancelled=False)
+                .filter(Ride.date == today)
+                .all()
+            )
+            if not rides_today:
+                continue
+
+            lat = club.lat or None
+            lng = club.lng or None
+            weather = get_weather_for_rides(rides_today, lat=lat, lng=lng)
+
+            for ride in rides_today:
+                w = weather.get(ride.id)
+                if w is None:
+                    continue
+
+                reasons = []
+                if w['precip_prob'] >= club.cancel_rain_prob:
+                    reasons.append(f"{w['precip_prob']}% precipitation probability (threshold {club.cancel_rain_prob}%)")
+                if w['wind_mph'] >= club.cancel_wind_mph:
+                    reasons.append(f"{w['wind_mph']} mph winds (threshold {club.cancel_wind_mph} mph)")
+                if w['temp_f'] < club.cancel_temp_min_f:
+                    reasons.append(f"{w['temp_f']}°F below minimum {club.cancel_temp_min_f}°F")
+                if w['temp_f'] > club.cancel_temp_max_f:
+                    reasons.append(f"{w['temp_f']}°F above maximum {club.cancel_temp_max_f}°F")
+
+                if reasons:
+                    ride.is_cancelled = True
+                    ride.cancel_reason = 'Auto-cancelled due to weather: ' + '; '.join(reasons)
+                    cancelled_count += 1
+                    logger.info('Auto-cancelled ride %d (%s) — %s', ride.id, ride.title, ride.cancel_reason)
+
+            db.session.commit()
+
+        if cancelled_count:
+            logger.info('Auto-cancel job: %d ride(s) cancelled for %s', cancelled_count, today)
+        else:
+            logger.debug('Auto-cancel job: no cancellations for %s', today)
+
+
+def init_scheduler(app):
+    """Start the APScheduler background scheduler if AUTO_CANCEL_ENABLED config is set."""
+    if not app.config.get('AUTO_CANCEL_ENABLED', True):
+        return
+
+    try:
+        from apscheduler.schedulers.background import BackgroundScheduler
+        from apscheduler.triggers.cron import CronTrigger
+    except ImportError:
+        logger.warning('APScheduler not installed — weather auto-cancel disabled')
+        return
+
+    hour = app.config.get('AUTO_CANCEL_HOUR', 6)
+    scheduler = BackgroundScheduler(daemon=True)
+    scheduler.add_job(
+        func=check_auto_cancels,
+        trigger=CronTrigger(hour=hour, minute=0),
+        args=[app],
+        id='weather_auto_cancel',
+        name='Weather-based ride auto-cancel',
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
+    scheduler.start()
+    logger.info('Auto-cancel scheduler started (runs daily at %02d:00)', hour)
+    return scheduler

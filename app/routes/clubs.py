@@ -54,6 +54,11 @@ def index():
                            geo_error=geo_error)
 
 
+@clubs_bp.route('/map/')
+def club_map():
+    return render_template('clubs/map.html')
+
+
 # ── Club home ─────────────────────────────────────────────────────────────────
 
 @clubs_bp.route('/<slug>/')

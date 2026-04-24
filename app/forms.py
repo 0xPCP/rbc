@@ -54,6 +54,16 @@ class ClubSettingsForm(FlaskForm):
     website     = StringField('Website', validators=[Optional(), URL(), Length(max=500)])
     contact_email = StringField('Contact Email', validators=[Optional(), Email(), Length(max=255)])
     logo_url    = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
+    # Weather auto-cancel
+    auto_cancel_enabled = BooleanField('Enable weather-based auto-cancel')
+    cancel_rain_prob    = IntegerField('Cancel if rain probability ≥ (%)',
+                                      validators=[Optional(), NumberRange(1, 100)], default=80)
+    cancel_wind_mph     = IntegerField('Cancel if wind speed ≥ (mph)',
+                                      validators=[Optional(), NumberRange(1, 200)], default=35)
+    cancel_temp_min_f   = IntegerField('Cancel if temperature below (°F)',
+                                      validators=[Optional(), NumberRange(-60, 120)], default=28)
+    cancel_temp_max_f   = IntegerField('Cancel if temperature above (°F)',
+                                      validators=[Optional(), NumberRange(-60, 150)], default=100)
     submit      = SubmitField('Save Settings')
 
 

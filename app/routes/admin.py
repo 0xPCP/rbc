@@ -141,6 +141,12 @@ def club_settings(slug):
                 else:
                     flash('Zip code saved but could not be geocoded.', 'warning')
 
+        club.auto_cancel_enabled = form.auto_cancel_enabled.data
+        club.cancel_rain_prob    = form.cancel_rain_prob.data or 80
+        club.cancel_wind_mph     = form.cancel_wind_mph.data or 35
+        club.cancel_temp_min_f   = form.cancel_temp_min_f.data if form.cancel_temp_min_f.data is not None else 28
+        club.cancel_temp_max_f   = form.cancel_temp_max_f.data if form.cancel_temp_max_f.data is not None else 100
+
         db.session.commit()
         flash('Club settings updated.', 'success')
         return redirect(url_for('admin.club_settings', slug=slug))
