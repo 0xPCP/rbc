@@ -4,6 +4,7 @@ ride detail, signup, unsignup, and waiver flows.
 """
 import pytest
 from datetime import date, time, timedelta
+from unittest.mock import patch
 from app.models import Club, ClubMembership, Ride, RideSignup, WaiverSignature
 from app.extensions import db
 from tests.conftest import login
@@ -66,6 +67,46 @@ class TestClubIndex:
         html = resp.data.decode()
         assert 'Test Cycling Club' in html
         assert 'Other Cycling Club' in html
+
+
+# ── Zip code search ───────────────────────────────────────────────────────────
+
+class TestZipSearch:
+    def test_zip_search_returns_200(self, client, sample_club):
+        with patch('app.geocoding.geocode_zip', return_value=(38.9376, -77.3476)):
+            resp = client.get('/clubs/?zip=20191')
+        assert resp.status_code == 200
+
+    def test_zip_search_finds_nearby_club(self, client, sample_club):
+        # sample_club is at (38.9376, -77.3476) — same coords, so 0 mi away
+        with patch('app.geocoding.geocode_zip', return_value=(38.9376, -77.3476)):
+            resp = client.get('/clubs/?zip=20191&radius=25')
+        assert b'Test Cycling Club' in resp.data
+
+    def test_zip_search_excludes_distant_club(self, client, sample_club):
+        # Geocode to Seattle — far from Reston VA
+        with patch('app.geocoding.geocode_zip', return_value=(47.6062, -122.3321)):
+            resp = client.get('/clubs/?zip=98101&radius=25')
+        assert b'Test Cycling Club' not in resp.data
+
+    def test_zip_search_shows_distance_badge(self, client, sample_club):
+        with patch('app.geocoding.geocode_zip', return_value=(38.9376, -77.3476)):
+            html = client.get('/clubs/?zip=20191').data.decode()
+        assert 'mi away' in html
+
+    def test_zip_search_bad_zip_shows_error(self, client, sample_club):
+        with patch('app.geocoding.geocode_zip', return_value=None):
+            html = client.get('/clubs/?zip=00000').data.decode()
+        assert 'Could not locate' in html
+
+    def test_zip_search_invalid_radius_defaults_to_25(self, client, sample_club):
+        with patch('app.geocoding.geocode_zip', return_value=(38.9376, -77.3476)):
+            resp = client.get('/clubs/?zip=20191&radius=999')
+        assert resp.status_code == 200
+
+    def test_text_search_still_works_without_zip(self, client, sample_club):
+        resp = client.get('/clubs/?q=Test')
+        assert b'Test Cycling Club' in resp.data
 
 
 # ── Club home ─────────────────────────────────────────────────────────────────

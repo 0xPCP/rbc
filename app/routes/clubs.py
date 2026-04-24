@@ -6,6 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from ..extensions import db
 from ..models import Club, ClubMembership, Ride
 from ..weather import get_weather_for_rides
+from ..geocoding import clubs_near_zip
 
 clubs_bp = Blueprint('clubs', __name__)
 
@@ -18,15 +19,39 @@ def _get_club_or_404(slug):
 
 @clubs_bp.route('/')
 def index():
-    q = request.args.get('q', '').strip()
-    query = Club.query.filter_by(is_active=True)
-    if q:
-        query = query.filter(
-            db.or_(Club.name.ilike(f'%{q}%'), Club.city.ilike(f'%{q}%'),
-                   Club.state.ilike(f'%{q}%'), Club.zip_code.ilike(f'%{q}%'))
-        )
-    clubs = query.order_by(Club.name.asc()).all()
-    return render_template('clubs/index.html', clubs=clubs, q=q)
+    q        = request.args.get('q', '').strip()
+    zip_q    = request.args.get('zip', '').strip()
+    radius   = request.args.get('radius', '25')
+    try:
+        radius = int(radius)
+        if radius not in (10, 25, 50, 100):
+            radius = 25
+    except ValueError:
+        radius = 25
+
+    all_clubs = Club.query.filter_by(is_active=True).order_by(Club.name.asc()).all()
+
+    # Zip-based proximity search takes priority over text search
+    zip_results = None
+    geo_error   = None
+    if zip_q:
+        zip_results, geo_error = clubs_near_zip(zip_q, all_clubs, radius_miles=radius)
+        clubs = [c for c, _ in zip_results]
+        distances = {c.id: d for c, d in zip_results}
+    else:
+        distances = {}
+        if q:
+            clubs = [c for c in all_clubs if
+                     q.lower() in c.name.lower() or
+                     q.lower() in (c.city or '').lower() or
+                     q.lower() in (c.state or '').lower() or
+                     q.lower() in (c.zip_code or '').lower()]
+        else:
+            clubs = all_clubs
+
+    return render_template('clubs/index.html', clubs=clubs, q=q,
+                           zip_q=zip_q, radius=radius, distances=distances,
+                           geo_error=geo_error)
 
 
 # ── Club home ─────────────────────────────────────────────────────────────────
