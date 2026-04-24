@@ -37,7 +37,10 @@
     </div>
   </div>
 
-  <h4 class="mb-3">All Clubs</h4>
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">All Clubs</h4>
+    <a href="{{ url_for('admin.club_new') }}" class="btn btn-rbc btn-sm">+ New Club</a>
+  </div>
   <div class="table-responsive">
     <table class="table rbc-table">
       <thead><tr><th>Club</th><th>Location</th><th>Members</th><th></th></tr></thead>
@@ -47,7 +50,10 @@
           <td><a href="{{ url_for('clubs.home', slug=club.slug) }}">{{ club.name }}</a></td>
           <td>{{ club.city }}, {{ club.state }}</td>
           <td>{{ club.member_count }}</td>
-          <td><a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}" class="btn btn-outline-secondary btn-xs">Manage</a></td>
+          <td class="d-flex gap-1">
+            <a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}" class="btn btn-outline-secondary btn-xs">Manage</a>
+            <a href="{{ url_for('admin.club_settings', slug=club.slug) }}" class="btn btn-outline-secondary btn-xs">Settings</a>
+          </td>
         </tr>
         {% endfor %}
       </tbody>

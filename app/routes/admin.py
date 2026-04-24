@@ -4,8 +4,9 @@ from flask import Blueprint, render_template, redirect, url_for, flash, abort, r
 from flask_login import login_required, current_user
 from ..extensions import db
 from ..models import Club, Ride, RideSignup, User, ClubMembership
-from ..forms import RideForm
+from ..forms import RideForm, ClubForm, ClubSettingsForm
 from ..recurrence import generate_instances, delete_future_instances
+from ..geocoding import geocode_zip
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -56,6 +57,41 @@ def dashboard():
     return render_template('admin/dashboard.html', stats=stats, clubs=clubs)
 
 
+@admin_bp.route('/clubs/new', methods=['GET', 'POST'])
+@superadmin_required
+def club_new():
+    form = ClubForm()
+    if form.validate_on_submit():
+        slug = form.slug.data.strip().lower()
+        if Club.query.filter_by(slug=slug).first():
+            flash('That slug is already taken.', 'danger')
+            return render_template('admin/club_form.html', form=form, title='New Club', club=None)
+
+        club = Club(
+            slug=slug,
+            name=form.name.data,
+            description=form.description.data or None,
+            city=form.city.data or None,
+            state=form.state.data or None,
+            zip_code=form.zip_code.data or None,
+            address=form.address.data or None,
+            website=form.website.data or None,
+            contact_email=form.contact_email.data or None,
+            logo_url=form.logo_url.data or None,
+            is_active=form.is_active.data,
+        )
+        if club.zip_code:
+            coords = geocode_zip(club.zip_code)
+            if coords:
+                club.lat, club.lng = coords
+        db.session.add(club)
+        db.session.commit()
+        flash(f'Club "{club.name}" created.', 'success')
+        return redirect(url_for('admin.club_dashboard', slug=club.slug))
+
+    return render_template('admin/club_form.html', form=form, title='New Club', club=None)
+
+
 # ── Club admin ────────────────────────────────────────────────────────────────
 
 @admin_bp.route('/clubs/<slug>/')
@@ -76,6 +112,40 @@ def club_dashboard(slug):
     }
     return render_template('admin/club_dashboard.html', club=club,
                            upcoming=upcoming, stats=stats)
+
+
+@admin_bp.route('/clubs/<slug>/settings', methods=['GET', 'POST'])
+@club_admin_required
+def club_settings(slug):
+    club = _get_club_or_404(slug)
+    form = ClubSettingsForm(obj=club)
+    if form.validate_on_submit():
+        club.name         = form.name.data
+        club.description  = form.description.data or None
+        club.city         = form.city.data or None
+        club.state        = form.state.data or None
+        club.address      = form.address.data or None
+        club.website      = form.website.data or None
+        club.contact_email = form.contact_email.data or None
+        club.logo_url     = form.logo_url.data or None
+
+        new_zip = (form.zip_code.data or '').strip()
+        if new_zip != (club.zip_code or ''):
+            club.zip_code = new_zip or None
+            club.lat = None
+            club.lng = None
+            if new_zip:
+                coords = geocode_zip(new_zip)
+                if coords:
+                    club.lat, club.lng = coords
+                else:
+                    flash('Zip code saved but could not be geocoded.', 'warning')
+
+        db.session.commit()
+        flash('Club settings updated.', 'success')
+        return redirect(url_for('admin.club_settings', slug=slug))
+
+    return render_template('admin/club_settings.html', form=form, club=club)
 
 
 @admin_bp.route('/clubs/<slug>/rides')

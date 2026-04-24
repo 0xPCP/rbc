@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    {% if club %}
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Superadmin</a></li>
+        <li class="breadcrumb-item active">{{ title }}</li>
+      </ol>
+    </nav>
+    {% endif %}
+    <h1>{{ title }}</h1>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row">
+    <div class="col-lg-8">
+      <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="row g-3 mb-3">
+          <div class="col-sm-8">
+            {{ form.name.label(class="form-label") }}
+            {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="e.g. Reston Bike Club") }}
+            {% for e in form.name.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-sm-4">
+            {{ form.slug.label(class="form-label") }}
+            {{ form.slug(class="form-control" + (" is-invalid" if form.slug.errors else ""), placeholder="rbc") }}
+            <div class="form-text">URL-safe, lowercase. Cannot be changed later.</div>
+            {% for e in form.slug.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          {{ form.description.label(class="form-label") }}
+          {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=3) }}
+          {% for e in form.description.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-sm-5">
+            {{ form.city.label(class="form-label") }}
+            {{ form.city(class="form-control" + (" is-invalid" if form.city.errors else ""), placeholder="Reston") }}
+            {% for e in form.city.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-sm-3">
+            {{ form.state.label(class="form-label") }}
+            {{ form.state(class="form-control" + (" is-invalid" if form.state.errors else ""), placeholder="VA") }}
+            {% for e in form.state.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-sm-4">
+            {{ form.zip_code.label(class="form-label") }}
+            {{ form.zip_code(class="form-control" + (" is-invalid" if form.zip_code.errors else ""), placeholder="20191", maxlength=10) }}
+            <div class="form-text">Used for location-based search.</div>
+            {% for e in form.zip_code.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          {{ form.address.label(class="form-label") }}
+          {{ form.address(class="form-control" + (" is-invalid" if form.address.errors else ""), placeholder="Optional full address") }}
+          {% for e in form.address.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-sm-6">
+            {{ form.website.label(class="form-label") }}
+            {{ form.website(class="form-control" + (" is-invalid" if form.website.errors else ""), placeholder="https://example.com") }}
+            {% for e in form.website.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-sm-6">
+            {{ form.contact_email.label(class="form-label") }}
+            {{ form.contact_email(class="form-control" + (" is-invalid" if form.contact_email.errors else ""), placeholder="info@club.com") }}
+            {% for e in form.contact_email.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          {{ form.logo_url.label(class="form-label") }}
+          {{ form.logo_url(class="form-control" + (" is-invalid" if form.logo_url.errors else ""), placeholder="https://...") }}
+          {% for e in form.logo_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-4 form-check">
+          {{ form.is_active(class="form-check-input") }}
+          {{ form.is_active.label(class="form-check-label") }}
+        </div>
+
+        <div class="d-flex gap-2">
+          {{ form.submit(class="btn btn-rbc") }}
+          <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

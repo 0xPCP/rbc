@@ -28,6 +28,35 @@ class ProfileForm(FlaskForm):
     submit   = SubmitField('Save Changes')
 
 
+class ClubForm(FlaskForm):
+    name        = StringField('Club Name', validators=[DataRequired(), Length(max=200)])
+    slug        = StringField('URL Slug', validators=[DataRequired(), Length(max=80)])
+    description = TextAreaField('Description', validators=[Optional()])
+    city        = StringField('City', validators=[Optional(), Length(max=100)])
+    state       = StringField('State', validators=[Optional(), Length(max=50)])
+    zip_code    = StringField('Zip Code', validators=[Optional(), Length(max=10)])
+    address     = StringField('Address', validators=[Optional(), Length(max=500)])
+    website     = StringField('Website', validators=[Optional(), URL(), Length(max=500)])
+    contact_email = StringField('Contact Email', validators=[Optional(), Email(), Length(max=255)])
+    logo_url    = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
+    is_active   = BooleanField('Active (visible to users)', default=True)
+    submit      = SubmitField('Save Club')
+
+
+class ClubSettingsForm(FlaskForm):
+    """Club admin version — no slug, no is_active."""
+    name        = StringField('Club Name', validators=[DataRequired(), Length(max=200)])
+    description = TextAreaField('Description', validators=[Optional()])
+    city        = StringField('City', validators=[Optional(), Length(max=100)])
+    state       = StringField('State', validators=[Optional(), Length(max=50)])
+    zip_code    = StringField('Zip Code', validators=[Optional(), Length(max=10)])
+    address     = StringField('Address', validators=[Optional(), Length(max=500)])
+    website     = StringField('Website', validators=[Optional(), URL(), Length(max=500)])
+    contact_email = StringField('Contact Email', validators=[Optional(), Email(), Length(max=255)])
+    logo_url    = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
+    submit      = SubmitField('Save Settings')
+
+
 class RideForm(FlaskForm):
     title = StringField('Ride Title', validators=[DataRequired(), Length(max=200)])
     date = DateField('Date', validators=[DataRequired()])
