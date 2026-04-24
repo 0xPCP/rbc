@@ -40,6 +40,27 @@ The current codebase started as a single-club app (Reston Bike Club). It is bein
 - If a feature requires test data beyond what conftest provides, add it to `seed.py`
 - Run the full suite before every commit: all tests must pass
 
+## Headless browser / screenshot testing
+
+For any feature with a significant UI component (maps, interactive widgets, theming, dynamic JS), add a `tests/test_browser_<feature>.py` module that uses **Playwright** (pytest-playwright) to:
+
+1. Launch a headless Chromium browser
+2. Navigate to the relevant page on the live dev server (`https://cyclingclub.pcp.dev`) or the local test server
+3. Wait for the UI to settle (e.g., `.wait_for_selector()`)
+4. Take a screenshot with `page.screenshot(path='tests/screenshots/<feature>.png')`
+5. Assert that key visible elements are present (`page.locator(...).is_visible()`)
+
+This catches Cloudflare Access intercepts, JS runtime errors, CDN failures, and rendering regressions that Flask's test client cannot see.
+
+**Install:** `pip install pytest-playwright && playwright install chromium`
+
+**Screenshot directory:** `tests/screenshots/` (gitignored — add `tests/screenshots/` to `.gitignore`)
+
+**Known issue:** `cyclingclub.pcp.dev` is behind Cloudflare Access. Browser tests that need to reach the live URL must either:
+- Use a Cloudflare service token passed as a header, OR
+- Run against the local Flask dev server (`flask run`) started before the test session
+- Preferred approach: use `pytest-playwright` with `base_url` pointed at `http://localhost:5000` with `FLASK_ENV=testing`
+
 ## Infrastructure notes
 
 - Traefik reverse proxy handles TLS (`*.pcp.dev` wildcard cert, entrypoint-level — do NOT add per-router `tls.certresolver` labels)
