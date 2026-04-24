@@ -131,6 +131,16 @@
           {% for e in form.banner_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
         </div>
 
+        <div class="mb-3">
+          {{ form.strava_club_id.label(class="form-label") }}
+          {{ form.strava_club_id(class="form-control font-monospace" + (" is-invalid" if form.strava_club_id.errors else ""),
+              placeholder="e.g. 12345", value=(club.strava_club_id or '')) }}
+          <div class="form-text">
+            Numeric Strava club ID (visible in your Strava club URL). Recent member activities will be shown on the club home page.
+          </div>
+          {% for e in form.strava_club_id.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
         {% if club.theme_primary or club.theme_accent or club.banner_url %}
         <div class="mb-4 p-3 rounded" id="theme-preview"
              style="background:{{ club.theme_primary or '#1b4332' }};color:#fff;display:flex;align-items:center;gap:1rem;border-radius:8px;">

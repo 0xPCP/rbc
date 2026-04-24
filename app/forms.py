@@ -64,6 +64,8 @@ class ClubSettingsForm(FlaskForm):
         Regexp(r'^#[0-9a-fA-F]{6}$', message='Enter a valid hex color (e.g. #e76f51).'),
     ])
     banner_url    = StringField('Banner Image URL', validators=[Optional(), URL(), Length(max=500)])
+    # Strava integration
+    strava_club_id = StringField('Strava Club ID', validators=[Optional(), Length(max=20)])
     # Weather auto-cancel
     auto_cancel_enabled = BooleanField('Enable weather-based auto-cancel')
     cancel_rain_prob    = IntegerField('Cancel if rain probability ≥ (%)',

@@ -58,11 +58,18 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done
 - [ ] Write tests for GPX proxy
 
 ## Email notifications
-- [ ] Flask-Mail integration (SMTP config via env vars)
-- [ ] Cancellation email to all signed-up riders when a ride is cancelled
-- [ ] Ride reminder email to signed-up riders (via scheduler, morning of ride)
-- [ ] New ride notification to club members when admin creates a ride
-- [ ] Write tests (mock SMTP)
+- [x] Flask-Mail integration (SMTP config via env vars)
+- [x] Cancellation email to all signed-up riders when a ride is cancelled
+- [x] Ride reminder email to signed-up riders (via scheduler, morning of ride)
+- [x] New ride notification to club members when admin creates a ride
+- [x] Write tests (mock SMTP)
+
+## Club theming
+- [x] Per-club primary color + derived CSS variable palette (dark/light/pale variants)
+- [x] Per-club accent/button color
+- [x] Logo URL + banner image on club home page header (with gradient overlay)
+- [x] Admin settings UI: color pickers + live preview card
+- [x] Write tests for color utilities, template injection, admin form
 
 ## Advanced integrations (research required)
 

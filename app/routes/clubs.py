@@ -8,6 +8,7 @@ from ..extensions import db
 from ..models import Club, ClubMembership, Ride
 from ..weather import get_weather_for_rides
 from ..geocoding import clubs_near_zip
+from .strava import get_club_activities
 
 clubs_bp = Blueprint('clubs', __name__)
 
@@ -74,8 +75,10 @@ def home(slug):
     weather = get_weather_for_rides(upcoming)
     is_member = (current_user.is_authenticated and
                  current_user.is_member_of(club))
+    strava_activities = get_club_activities(club.strava_club_id)
     return render_template('clubs/home.html', club=club, upcoming=upcoming,
-                           weather=weather, is_member=is_member, today=today)
+                           weather=weather, is_member=is_member, today=today,
+                           strava_activities=strava_activities)
 
 
 # ── Club calendar ─────────────────────────────────────────────────────────────

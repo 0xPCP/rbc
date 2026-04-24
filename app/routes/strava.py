@@ -6,13 +6,13 @@ from ..extensions import db
 
 strava_bp = Blueprint('strava', __name__)
 
-# In-memory cache for club token and activity feed
+# In-memory cache: token + per-club activity feeds keyed by strava_club_id
 _token_cache = {}
-_activity_cache = {}
+_activity_cache = {}   # {strava_club_id: {'ts': float, 'data': list}}
 
 
 def _get_club_token():
-    """Return a valid Strava access token for the club feed, refreshing if needed."""
+    """Return a valid Strava access token using the app-level refresh token."""
     now = time.time()
     if _token_cache.get('expires_at', 0) > now + 60:
         return _token_cache.get('access_token')
@@ -45,20 +45,23 @@ def _get_club_token():
         return None
 
 
-def get_club_activities(limit=6):
-    """Fetch recent club activities, cached for 5 minutes."""
+def get_club_activities(strava_club_id, limit=6):
+    """Fetch recent activities for a Strava club, cached 5 minutes per club ID."""
+    if not strava_club_id:
+        return []
+
     now = time.time()
-    if now - _activity_cache.get('ts', 0) < 300:
-        return _activity_cache.get('data', [])
+    cached = _activity_cache.get(strava_club_id)
+    if cached and now - cached['ts'] < 300:
+        return cached['data']
 
     token = _get_club_token()
-    club_id = current_app.config.get('STRAVA_CLUB_ID')
-    if not token or not club_id:
+    if not token:
         return []
 
     try:
         resp = requests.get(
-            f'https://www.strava.com/api/v3/clubs/{club_id}/activities',
+            f'https://www.strava.com/api/v3/clubs/{strava_club_id}/activities',
             headers={'Authorization': f'Bearer {token}'},
             params={'per_page': limit},
             timeout=10,
@@ -66,14 +69,12 @@ def get_club_activities(limit=6):
         if resp.status_code != 200:
             return []
         activities = resp.json()
-        # Convert units: meters → miles, meters → feet
         for a in activities:
             a['distance_miles'] = round(a.get('distance', 0) / 1609.34, 1)
             a['elevation_feet'] = round(a.get('total_elevation_gain', 0) * 3.28084)
             secs = a.get('moving_time', 0)
             a['moving_time_fmt'] = f"{secs // 3600}h {(secs % 3600) // 60}m" if secs >= 3600 else f"{secs // 60}m"
-        _activity_cache['data'] = activities
-        _activity_cache['ts'] = now
+        _activity_cache[strava_club_id] = {'data': activities, 'ts': now}
         return activities
     except requests.RequestException:
         return []
