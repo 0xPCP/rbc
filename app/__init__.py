@@ -29,6 +29,9 @@ def create_app(config_class=Config):
 
     from datetime import datetime
     from .version import __version__
+    from .utils import club_theme_vars
+
+    app.jinja_env.globals['club_theme_vars'] = club_theme_vars
 
     @app.context_processor
     def inject_globals():

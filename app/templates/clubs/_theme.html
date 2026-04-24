@@ -1,0 +1,10 @@
+{%- set _vars = club_theme_vars(club) -%}
+{%- if _vars %}
+<style>
+:root {
+{%- for prop, val in _vars.items() %}
+  {{ prop }}: {{ val }};
+{%- endfor %}
+}
+</style>
+{%- endif %}

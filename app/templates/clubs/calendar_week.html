@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Week of {{ week_start.strftime('%b') }} {{ week_start.day }} — {{ club.name }}{% endblock %}
+{% block head %}{% include 'clubs/_theme.html' %}{% endblock %}
 
 {% block content %}
 <div class="page-header">

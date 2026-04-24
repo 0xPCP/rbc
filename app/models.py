@@ -74,6 +74,11 @@ class Club(db.Model):
     is_active = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
+    # Club theming
+    theme_primary = db.Column(db.String(7), nullable=True)   # hex e.g. "#2d6a4f"
+    theme_accent  = db.Column(db.String(7), nullable=True)   # hex e.g. "#e76f51"
+    banner_url    = db.Column(db.String(500), nullable=True)  # header background image
+
     # Weather-based auto-cancel thresholds
     auto_cancel_enabled  = db.Column(db.Boolean, default=False, nullable=False)
     cancel_rain_prob     = db.Column(db.Integer, default=80, nullable=False)   # % precip probability

@@ -751,6 +751,14 @@ body {
 .wtw-gear-item { font-size: .85rem; display: flex; align-items: center; gap: .4rem; }
 .wtw-gear-icon { width: 1.3em; text-align: center; flex-shrink: 0; }
 
+/* ── Club banner / theming ───────────────────────────────────────────────── */
+.club-banner { min-height: 160px; }
+.club-banner-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(0,0,0,.55) 0%, rgba(0,0,0,.3) 100%);
+}
+
 /* ── Misc ────────────────────────────────────────────────────────────────── */
 .empty-state { text-align: center; padding: 4rem 1rem; color: var(--rbc-gray); }
 .flash-container { margin-bottom: 0; }

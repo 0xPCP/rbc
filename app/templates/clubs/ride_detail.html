@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% block title %}{{ ride.title }} — {{ club.name }}{% endblock %}
+{% block head %}{% include 'clubs/_theme.html' %}{% endblock %}
 
 {% block content %}
 <div class="page-header {{ 'page-header-cancelled' if ride.is_cancelled else '' }}">

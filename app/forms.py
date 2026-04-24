@@ -3,7 +3,7 @@ from wtforms import (
     StringField, PasswordField, BooleanField, SubmitField,
     TextAreaField, SelectField, FloatField, IntegerField, DateField, TimeField
 )
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, URL, NumberRange
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, URL, NumberRange, Regexp
 
 
 class RegisterForm(FlaskForm):
@@ -54,6 +54,16 @@ class ClubSettingsForm(FlaskForm):
     website     = StringField('Website', validators=[Optional(), URL(), Length(max=500)])
     contact_email = StringField('Contact Email', validators=[Optional(), Email(), Length(max=255)])
     logo_url    = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
+    # Appearance / theming
+    theme_primary = StringField('Primary Color', validators=[
+        Optional(), Length(max=7),
+        Regexp(r'^#[0-9a-fA-F]{6}$', message='Enter a valid hex color (e.g. #3a7bd5).'),
+    ])
+    theme_accent  = StringField('Accent / Button Color', validators=[
+        Optional(), Length(max=7),
+        Regexp(r'^#[0-9a-fA-F]{6}$', message='Enter a valid hex color (e.g. #e76f51).'),
+    ])
+    banner_url    = StringField('Banner Image URL', validators=[Optional(), URL(), Length(max=500)])
     # Weather auto-cancel
     auto_cancel_enabled = BooleanField('Enable weather-based auto-cancel')
     cancel_rain_prob    = IntegerField('Cancel if rain probability ≥ (%)',

@@ -1,21 +1,31 @@
 {% extends "base.html" %}
 {% block title %}{{ club.name }} — Cycling Clubs{% endblock %}
+{% block head %}{% include 'clubs/_theme.html' %}{% endblock %}
 
 {% block content %}
-<div class="page-header">
-  <div class="container">
+<div class="page-header{% if club.banner_url %} club-banner{% endif %}"
+     {% if club.banner_url %}style="background-image:url('{{ club.banner_url }}');background-size:cover;background-position:center;position:relative;"{% endif %}>
+  {% if club.banner_url %}<div class="club-banner-overlay"></div>{% endif %}
+  <div class="container" style="position:relative;z-index:1">
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-3">
-      <div>
-        <h1>{{ club.name }}</h1>
-        {% if club.city %}<p class="mb-1 text-muted">{{ club.city }}, {{ club.state }}</p>{% endif %}
-        <p class="mb-0">{{ club.member_count }} members</p>
+      <div class="d-flex align-items-center gap-3">
+        {% if club.logo_url %}
+        <img src="{{ club.logo_url }}" alt="{{ club.name }} logo"
+             style="width:64px;height:64px;object-fit:contain;border-radius:8px;background:#fff;padding:4px;flex-shrink:0"
+             onerror="this.style.display='none'">
+        {% endif %}
+        <div>
+          <h1>{{ club.name }}</h1>
+          {% if club.city %}<p class="mb-1" style="color:rgba(255,255,255,.75)">{{ club.city }}, {{ club.state }}</p>{% endif %}
+          <p class="mb-0" style="color:rgba(255,255,255,.75)">{{ club.member_count }} member{{ 's' if club.member_count != 1 else '' }}</p>
+        </div>
       </div>
       <div class="d-flex gap-2 align-items-center">
         {% if current_user.is_authenticated %}
           {% if is_member %}
           <form method="post" action="{{ url_for('clubs.leave', slug=club.slug) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-            <button class="btn btn-outline-secondary">Leave Club</button>
+            <button class="btn btn-outline-light">Leave Club</button>
           </form>
           {% else %}
           <form method="post" action="{{ url_for('clubs.join', slug=club.slug) }}">
@@ -27,7 +37,7 @@
         <a href="{{ url_for('auth.login') }}" class="btn btn-rbc">Sign In to Join</a>
         {% endif %}
         {% if current_user.is_authenticated and current_user.is_club_admin(club) %}
-        <a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}" class="btn btn-outline-secondary">Admin</a>
+        <a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}" class="btn btn-outline-light">Admin</a>
         {% endif %}
       </div>
     </div>

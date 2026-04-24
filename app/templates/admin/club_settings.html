@@ -80,8 +80,67 @@
         <div class="mb-4">
           {{ form.logo_url.label(class="form-label") }}
           {{ form.logo_url(class="form-control" + (" is-invalid" if form.logo_url.errors else ""), placeholder="https://...") }}
+          <div class="form-text">Direct link to your club's logo image.</div>
           {% for e in form.logo_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
         </div>
+
+        <hr class="my-4" />
+        <h5 class="mb-1">Appearance</h5>
+        <p class="text-muted small mb-3">
+          Customize your club's colors. The primary color sets the header and link palette;
+          the accent color is used for sign-up buttons. Leave blank to use the platform defaults.
+        </p>
+
+        <div class="row g-3 mb-3">
+          <div class="col-sm-6">
+            {{ form.theme_primary.label(class="form-label") }}
+            <div class="d-flex gap-2 align-items-center">
+              <input type="color" id="theme_primary_picker"
+                     value="{{ club.theme_primary or '#2d6a4f' }}"
+                     class="form-control form-control-color flex-shrink-0"
+                     style="width:48px;height:38px;padding:2px 4px"
+                     oninput="document.getElementById('theme_primary').value=this.value">
+              {{ form.theme_primary(id='theme_primary',
+                  class="form-control font-monospace" + (" is-invalid" if form.theme_primary.errors else ""),
+                  placeholder="#2d6a4f", maxlength=7,
+                  oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value))document.getElementById('theme_primary_picker').value=this.value") }}
+            </div>
+            {% for e in form.theme_primary.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-sm-6">
+            {{ form.theme_accent.label(class="form-label") }}
+            <div class="d-flex gap-2 align-items-center">
+              <input type="color" id="theme_accent_picker"
+                     value="{{ club.theme_accent or '#e76f51' }}"
+                     class="form-control form-control-color flex-shrink-0"
+                     style="width:48px;height:38px;padding:2px 4px"
+                     oninput="document.getElementById('theme_accent').value=this.value">
+              {{ form.theme_accent(id='theme_accent',
+                  class="form-control font-monospace" + (" is-invalid" if form.theme_accent.errors else ""),
+                  placeholder="#e76f51", maxlength=7,
+                  oninput="if(/^#[0-9a-fA-F]{6}$/.test(this.value))document.getElementById('theme_accent_picker').value=this.value") }}
+            </div>
+            {% for e in form.theme_accent.errors %}<div class="text-danger small mt-1">{{ e }}</div>{% endfor %}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          {{ form.banner_url.label(class="form-label") }}
+          {{ form.banner_url(class="form-control" + (" is-invalid" if form.banner_url.errors else ""), placeholder="https://...") }}
+          <div class="form-text">Wide landscape image shown as the club home page header background.</div>
+          {% for e in form.banner_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        {% if club.theme_primary or club.theme_accent or club.banner_url %}
+        <div class="mb-4 p-3 rounded" id="theme-preview"
+             style="background:{{ club.theme_primary or '#1b4332' }};color:#fff;display:flex;align-items:center;gap:1rem;border-radius:8px;">
+          {% if club.logo_url %}
+          <img src="{{ club.logo_url }}" alt="" style="width:40px;height:40px;object-fit:contain;border-radius:6px;background:#fff;padding:3px" onerror="this.style.display='none'">
+          {% endif %}
+          <span style="font-weight:700;font-size:1.05rem">{{ club.name }}</span>
+          <a href="#" onclick="return false" style="background:{{ club.theme_accent or '#e76f51' }};color:#fff;padding:.3rem .8rem;border-radius:5px;font-weight:600;font-size:.85rem;text-decoration:none;margin-left:auto">Join Club</a>
+        </div>
+        {% endif %}
 
         <hr class="my-4" />
         <h5 class="mb-3">Weather Auto-Cancel</h5>
