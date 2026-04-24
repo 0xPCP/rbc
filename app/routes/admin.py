@@ -5,6 +5,7 @@ from flask_login import login_required, current_user
 from ..extensions import db
 from ..models import Club, Ride, RideSignup, User, ClubMembership
 from ..forms import RideForm
+from ..recurrence import generate_instances, delete_future_instances
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -106,11 +107,16 @@ def ride_new(slug):
             video_url=form.video_url.data or None,
             description=form.description.data or None,
             is_cancelled=form.is_cancelled.data,
+            is_recurring=form.is_recurring.data,
             created_by=current_user.id,
         )
         db.session.add(ride)
         db.session.commit()
-        flash('Ride created.', 'success')
+        if ride.is_recurring:
+            count = len(generate_instances(ride))
+            flash(f'Ride created with {count} recurring instances.', 'success')
+        else:
+            flash('Ride created.', 'success')
         return redirect(url_for('admin.club_rides', slug=slug))
     return render_template('admin/ride_form.html', form=form, club=club, title='New Ride')
 
@@ -122,6 +128,7 @@ def ride_edit(slug, ride_id):
     ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
     form = RideForm(obj=ride)
     if form.validate_on_submit():
+        was_recurring = ride.is_recurring
         ride.title          = form.title.data
         ride.date           = form.date.data
         ride.time           = form.time.data
@@ -134,8 +141,18 @@ def ride_edit(slug, ride_id):
         ride.video_url      = form.video_url.data or None
         ride.description    = form.description.data or None
         ride.is_cancelled   = form.is_cancelled.data
+        ride.is_recurring   = form.is_recurring.data
         db.session.commit()
-        flash('Ride updated.', 'success')
+        # Regenerate instances if this is (or was) a recurring template
+        if ride.is_recurring or was_recurring:
+            delete_future_instances(ride)
+            if ride.is_recurring:
+                count = len(generate_instances(ride))
+                flash(f'Ride updated — {count} upcoming instances regenerated.', 'success')
+            else:
+                flash('Ride updated — recurrence removed, future instances deleted.', 'success')
+        else:
+            flash('Ride updated.', 'success')
         return redirect(url_for('admin.club_rides', slug=slug))
     return render_template('admin/ride_form.html', form=form, club=club,
                            title='Edit Ride', ride=ride)

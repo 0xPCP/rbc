@@ -39,4 +39,5 @@ class RideForm(FlaskForm):
     video_url = StringField('Video URL (YouTube or Vimeo)', validators=[Optional(), URL(), Length(max=500)])
     description = TextAreaField('Description / Notes', validators=[Optional()])
     is_cancelled = BooleanField('Mark as Cancelled')
+    is_recurring = BooleanField('Repeat weekly (generates 8 weeks of instances)')
     submit = SubmitField('Save Ride')

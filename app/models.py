@@ -160,10 +160,17 @@ class Ride(db.Model):
     description = db.Column(db.Text, nullable=True)
     video_url = db.Column(db.String(500), nullable=True)
     is_cancelled = db.Column(db.Boolean, default=False, nullable=False)
+    is_recurring = db.Column(db.Boolean, default=False, nullable=False)
+    recurrence_parent_id = db.Column(db.Integer, db.ForeignKey('rides.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
 
     signups = db.relationship('RideSignup', backref='ride', lazy=True, cascade='all, delete-orphan')
+    recurrence_instances = db.relationship(
+        'Ride', foreign_keys='Ride.recurrence_parent_id',
+        backref=db.backref('recurrence_parent', remote_side='Ride.id'),
+        lazy=True,
+    )
 
     @property
     def signup_count(self):

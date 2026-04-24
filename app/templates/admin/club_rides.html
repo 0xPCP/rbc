@@ -32,7 +32,12 @@
           <td><span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span></td>
           <td>{{ ride.distance_miles }} mi</td>
           <td>{{ ride.signup_count }}</td>
-          <td>{% if ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>{% else %}<span class="badge bg-success">Active</span>{% endif %}</td>
+          <td>
+            {% if ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>
+            {% else %}<span class="badge bg-success">Active</span>{% endif %}
+            {% if ride.is_recurring %}<span class="badge bg-info text-dark">Recurring</span>{% endif %}
+            {% if ride.recurrence_parent_id %}<span class="badge bg-light text-dark border">Instance</span>{% endif %}
+          </td>
           <td class="d-flex gap-1">
             <a href="{{ url_for('admin.ride_edit', slug=club.slug, ride_id=ride.id) }}" class="btn btn-outline-secondary btn-xs">Edit</a>
             <form method="post" action="{{ url_for('admin.ride_delete', slug=club.slug, ride_id=ride.id) }}" onsubmit="return confirm('Delete this ride and all signups?')">

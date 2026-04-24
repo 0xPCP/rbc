@@ -85,6 +85,14 @@
           {% for e in form.description.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
         </div>
 
+        <div class="mb-3 form-check">
+          {{ form.is_recurring(class="form-check-input") }}
+          {{ form.is_recurring.label(class="form-check-label") }}
+          {% if ride and ride.recurrence_instances %}
+          <div class="form-text">{{ ride.recurrence_instances|length }} instance(s) already generated.</div>
+          {% endif %}
+        </div>
+
         <div class="mb-4 form-check">
           {{ form.is_cancelled(class="form-check-input") }}
           {{ form.is_cancelled.label(class="form-check-label text-danger") }}
