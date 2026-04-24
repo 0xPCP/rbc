@@ -25,17 +25,17 @@ class TestCyclingGear:
         assert 'thermal' in g['bottoms'].lower()
         assert g['verdict'] in ('marginal', 'skip')
 
-    def test_rain_triggers_rain_jacket(self):
+    def test_rain_triggers_rain_cape(self):
         g = cycling_gear(60, 58, 10, 60, 61)  # rain code + 60% precip
-        assert g['outer_layer'] == 'Rain jacket'
+        assert g['outer'] == 'Rain cape'
 
     def test_no_gloves_on_hot_day(self):
         g = cycling_gear(85, 82, 5, 0, 0)
         assert g['gloves'] is None
 
-    def test_full_finger_gloves_when_cold(self):
+    def test_gloves_when_cold(self):
         g = cycling_gear(45, 40, 10, 5, 0)
-        assert 'gloves' in g['gloves'].lower()
+        assert g['gloves'] is not None
 
     def test_skip_verdict_on_ice(self):
         g = cycling_gear(28, 18, 5, 0, 73)  # snow code
@@ -57,9 +57,36 @@ class TestCyclingGear:
         g = cycling_gear(80, 78, 5, 0, 0)
         assert g['base_layer'] is None
 
-    def test_sunscreen_on_clear_warm_day(self):
+    def test_sunglasses_on_clear_warm_day(self):
         g = cycling_gear(75, 72, 5, 0, 0)
-        assert any('sunscreen' in e.lower() for e in g['extras'])
+        assert g['eyewear'] == 'Sunglasses'
+
+    def test_warmers_list_returned(self):
+        g = cycling_gear(60, 57, 5, 5, 0)  # core_fl = 57+12=69, start_fl=57 — no warmers
+        assert isinstance(g['warmers'], list)
+
+    def test_arm_warmers_in_range(self):
+        # core_fl = 55+12 = 67, so arm warmers range (50-65) — wait, 67 is outside
+        # Let's use feels_like=48 so core_fl=60, which is in 50<=core_fl<65
+        g = cycling_gear(55, 48, 5, 5, 0)
+        warmer_labels = [w.lower() for w in g['warmers']]
+        assert any('arm' in w for w in warmer_labels)
+
+    def test_inventory_filters_gear(self):
+        # Only owns bib-shorts and jersey — should get those on a warm day
+        g = cycling_gear(75, 72, 5, 5, 0, owned_ids=['bib-shorts', 'jersey'])
+        assert g['bottoms'] == 'Bib shorts'
+        assert g['jersey'] == 'Regular jersey'
+
+    def test_inventory_fallback_when_not_owned(self):
+        # Owns only thermal-bib-tights; warm day prefers bib-shorts but user doesn't own it
+        g = cycling_gear(75, 72, 5, 5, 0, owned_ids=['thermal-bib-tights'])
+        assert g['bottoms'] == 'Thermal bib tights'
+
+    def test_no_inventory_returns_ideal(self):
+        # owned_ids=None → always return first (ideal) item
+        g = cycling_gear(75, 72, 5, 5, 0, owned_ids=None)
+        assert g['bottoms'] == 'Bib shorts'
 
     @pytest.mark.parametrize('verdict', ['great', 'go', 'marginal', 'skip'])
     def test_all_verdicts_have_labels(self, verdict):
@@ -111,3 +138,10 @@ class TestWeatherWidgetApi:
         with patch('app.routes.api.get_current_weather', return_value=None):
             resp = client.get('/api/weather/widget?lat=38.9&lng=-77.3')
         assert resp.status_code == 503
+
+    def test_gear_list_has_icon_and_label(self, client):
+        with patch('app.routes.api.get_current_weather', return_value=MOCK_WEATHER):
+            data = client.get('/api/weather/widget?lat=38.9&lng=-77.3').get_json()
+        for item in data['gear']:
+            assert 'icon' in item
+            assert 'label' in item

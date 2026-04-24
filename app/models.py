@@ -25,6 +25,9 @@ class User(db.Model, UserMixin):
     lat = db.Column(db.Float, nullable=True)
     lng = db.Column(db.Float, nullable=True)
 
+    # Gear inventory — list of item IDs from gear.py GEAR_CATALOG
+    gear_inventory = db.Column(db.JSON, nullable=True)
+
     # Strava linking
     strava_id = db.Column(db.BigInteger, unique=True, nullable=True)
     strava_access_token = db.Column(db.Text, nullable=True)

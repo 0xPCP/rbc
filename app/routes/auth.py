@@ -4,6 +4,7 @@ from ..extensions import db, bcrypt
 from ..models import User
 from ..forms import RegisterForm, LoginForm, ProfileForm
 from ..geocoding import geocode_zip
+from ..gear import GEAR_CATALOG
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -77,14 +78,21 @@ def profile():
         if form.username.data != current_user.username:
             if User.query.filter_by(username=form.username.data).first():
                 flash('That username is already taken.', 'danger')
-                return render_template('profile.html', form=form)
+                owned = set(current_user.gear_inventory or [])
+                return render_template('profile.html', form=form,
+                                       gear_catalog=GEAR_CATALOG, owned_gear=owned)
         if form.email.data.lower() != current_user.email:
             if User.query.filter_by(email=form.email.data.lower()).first():
                 flash('An account with that email already exists.', 'danger')
-                return render_template('profile.html', form=form)
+                owned = set(current_user.gear_inventory or [])
+                return render_template('profile.html', form=form,
+                                       gear_catalog=GEAR_CATALOG, owned_gear=owned)
 
         current_user.username = form.username.data
         current_user.email    = form.email.data.lower()
+
+        # Gear inventory — list of checked item IDs
+        current_user.gear_inventory = request.form.getlist('gear_items') or None
 
         new_zip = (form.zip_code.data or '').strip()
         if new_zip != (current_user.zip_code or ''):
@@ -102,4 +110,6 @@ def profile():
         flash('Profile updated.', 'success')
         return redirect(url_for('auth.profile'))
 
-    return render_template('profile.html', form=form)
+    owned = set(current_user.gear_inventory or [])
+    return render_template('profile.html', form=form,
+                           gear_catalog=GEAR_CATALOG, owned_gear=owned)

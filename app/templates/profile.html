@@ -12,7 +12,7 @@
   <div class="row gy-4">
 
     <div class="col-lg-6">
-      <div class="detail-card">
+      <div class="detail-card mb-4">
         <h5 class="detail-card-title">Account Details</h5>
         <form method="post" novalidate>
           {{ form.hidden_tag() }}
@@ -40,6 +40,37 @@
             {{ form.submit(class="btn btn-rbc") }}
             <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">Cancel</a>
           </div>
+        </form>
+      </div>
+
+      <!-- Gear Inventory -->
+      <div class="detail-card">
+        <h5 class="detail-card-title">My Gear</h5>
+        <p class="text-muted small mb-3">Check the items you own. The "What to Wear" widget will only suggest gear you have.</p>
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+          {# Re-submit account fields unchanged so they don't get wiped #}
+          <input type="hidden" name="username" value="{{ current_user.username }}">
+          <input type="hidden" name="email" value="{{ current_user.email }}">
+          <input type="hidden" name="zip_code" value="{{ current_user.zip_code or '' }}">
+
+          {% for category, items in gear_catalog.items() %}
+          <div class="mb-3">
+            <div class="fw-semibold small text-uppercase text-muted mb-1">{{ category }}</div>
+            <div class="d-flex flex-wrap gap-2">
+              {% for item in items %}
+              <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" name="gear_items"
+                       id="gear-{{ item.id }}" value="{{ item.id }}"
+                       {{ 'checked' if item.id in owned_gear else '' }}>
+                <label class="form-check-label small" for="gear-{{ item.id }}">{{ item.label }}</label>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endfor %}
+
+          <button type="submit" class="btn btn-rbc">Save Gear</button>
         </form>
       </div>
     </div>
