@@ -146,3 +146,48 @@ class TestAdminAccess:
         resp = client.get('/admin/')
         assert resp.status_code == 200
         assert b'Admin' in resp.data
+
+
+# ── Profile ───────────────────────────────────────────────────────────────────
+
+class TestProfile:
+    def test_profile_requires_login(self, client):
+        resp = client.get('/auth/profile', follow_redirects=True)
+        assert b'Sign In' in resp.data
+
+    def test_profile_page_loads(self, client, regular_user):
+        login(client)
+        resp = client.get('/auth/profile')
+        assert resp.status_code == 200
+        assert b'rider' in resp.data
+
+    def test_profile_shows_zip_field(self, client, regular_user):
+        login(client)
+        assert b'Zip Code' in client.get('/auth/profile').data
+
+    def test_profile_update_username(self, client, regular_user, db):
+        login(client)
+        client.post('/auth/profile', data={
+            'username': 'newrider', 'email': 'rider@test.com', 'zip_code': '',
+        }, follow_redirects=True)
+        from app.models import User
+        assert User.query.filter_by(username='newrider').first() is not None
+
+    def test_profile_update_zip_saves(self, client, regular_user, db):
+        from unittest.mock import patch
+        login(client)
+        with patch('app.routes.auth.geocode_zip', return_value=(38.9, -77.3)):
+            client.post('/auth/profile', data={
+                'username': 'rider', 'email': 'rider@test.com', 'zip_code': '22101',
+            }, follow_redirects=True)
+        from app.models import User
+        u = User.query.filter_by(username='rider').first()
+        assert u.zip_code == '22101'
+        assert u.lat == 38.9
+
+    def test_duplicate_username_rejected(self, client, regular_user, second_user, db):
+        login(client)
+        resp = client.post('/auth/profile', data={
+            'username': 'rider2', 'email': 'rider@test.com', 'zip_code': '',
+        }, follow_redirects=True)
+        assert b'already taken' in resp.data

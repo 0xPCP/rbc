@@ -21,6 +21,13 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 
 
+class ProfileForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(3, 50)])
+    email    = StringField('Email Address', validators=[DataRequired(), Email()])
+    zip_code = StringField('Zip Code', validators=[Optional(), Length(max=10)])
+    submit   = SubmitField('Save Changes')
+
+
 class RideForm(FlaskForm):
     title = StringField('Ride Title', validators=[DataRequired(), Length(max=200)])
     date = DateField('Date', validators=[DataRequired()])

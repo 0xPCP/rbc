@@ -84,7 +84,7 @@
         <div class="wtw-header">
           <span class="wtw-title">What to Wear</span>
           <span class="wtw-location" id="wtw-location-label">
-            {% if current_user.zip_code %}{{ current_user.zip_code }}{% else %}detecting location…{% endif %}
+            {% if current_user.zip_code %}{{ current_user.zip_code }}{% else %}no location set{% endif %}
           </span>
         </div>
         <div id="wtw-body">
@@ -94,10 +94,15 @@
             <span class="ms-2 text-muted small">Loading…</span>
           </div>
           {% else %}
-          <p class="text-muted small mb-0">
-            Allow location access or <a href="/profile">save your zip code</a> to get gear recommendations.
+          <p class="text-muted small mb-2">
+            <a href="{{ url_for('auth.profile') }}">Save your zip code</a> for gear recommendations.
           </p>
           {% endif %}
+        </div>
+        <div class="mt-2" id="wtw-geo-row">
+          <button class="btn btn-outline-secondary btn-sm" id="wtw-geo-btn" type="button">
+            📍 Use my current location
+          </button>
         </div>
       </div>
 
@@ -138,11 +143,9 @@ const savedZip = {{ (current_user.zip_code | tojson) if current_user.zip_code el
 function renderWidget(data) {
   const verdictColors = {great:'success', go:'primary', marginal:'warning', skip:'danger'};
   const cls = verdictColors[data.verdict] || 'secondary';
-
   const gearHtml = data.gear.map(g =>
     `<li class="wtw-gear-item"><span class="wtw-gear-icon">${g.icon}</span>${g.label}</li>`
   ).join('');
-
   document.getElementById('wtw-body').innerHTML = `
     <div class="wtw-conditions">
       <span class="wtw-emoji">${data.emoji}</span>
@@ -158,9 +161,16 @@ function renderWidget(data) {
   `;
 }
 
-function fetchWidget(params) {
-  const url = WTW_API + '?' + new URLSearchParams(params);
-  fetch(url)
+function setLoading() {
+  document.getElementById('wtw-body').innerHTML =
+    '<div class="wtw-loading"><div class="spinner-border spinner-border-sm text-secondary" role="status"></div>' +
+    '<span class="ms-2 text-muted small">Loading…</span></div>';
+}
+
+function fetchWidget(params, locationLabel) {
+  setLoading();
+  if (locationLabel) document.getElementById('wtw-location-label').textContent = locationLabel;
+  fetch(WTW_API + '?' + new URLSearchParams(params))
     .then(r => r.json())
     .then(data => {
       if (data.error) {
@@ -172,27 +182,40 @@ function fetchWidget(params) {
     })
     .catch(() => {
       document.getElementById('wtw-body').innerHTML =
-        '<p class="text-muted small mb-0">Weather unavailable.</p>';
+        '<p class="text-muted small mb-0">Weather service unavailable.</p>';
     });
 }
 
-function loadWithGeo(position) {
-  const {latitude: lat, longitude: lng} = position.coords;
-  document.getElementById('wtw-location-label').textContent = 'current location';
-  fetchWidget({lat, lng});
+function useGeolocation() {
+  const btn = document.getElementById('wtw-geo-btn');
+  btn.disabled = true;
+  btn.textContent = '📍 Detecting…';
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const {latitude: lat, longitude: lng} = pos.coords;
+      fetchWidget({lat, lng}, 'current location');
+      btn.textContent = '📍 Current location';
+    },
+    () => {
+      btn.disabled = false;
+      btn.textContent = '📍 Use my current location';
+      if (savedZip) fetchWidget({zip: savedZip}, savedZip);
+    },
+    {timeout: 8000}
+  );
 }
 
-function loadWithZip() {
-  if (savedZip) {
-    fetchWidget({zip: savedZip});
+document.getElementById('wtw-geo-btn').addEventListener('click', () => {
+  if (!navigator.geolocation) {
+    alert('Geolocation is not supported by your browser.');
+    return;
   }
-}
+  useGeolocation();
+});
 
-// Try live geolocation first; fall back to saved zip
-if (navigator.geolocation) {
-  navigator.geolocation.getCurrentPosition(loadWithGeo, loadWithZip, {timeout: 6000});
-} else {
-  loadWithZip();
+// On load: auto-fetch with saved zip (no geolocation prompt yet)
+if (savedZip) {
+  fetchWidget({zip: savedZip}, savedZip);
 }
 </script>
 {% endblock %}

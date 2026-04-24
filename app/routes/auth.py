@@ -2,7 +2,8 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from ..extensions import db, bcrypt
 from ..models import User
-from ..forms import RegisterForm, LoginForm
+from ..forms import RegisterForm, LoginForm, ProfileForm
+from ..geocoding import geocode_zip
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -67,7 +68,38 @@ def logout():
     return redirect(url_for('main.index'))
 
 
-@auth_bp.route('/profile')
+@auth_bp.route('/profile', methods=['GET', 'POST'])
 @login_required
 def profile():
-    return render_template('profile.html')
+    form = ProfileForm(obj=current_user)
+    if form.validate_on_submit():
+        # Check uniqueness for changed fields
+        if form.username.data != current_user.username:
+            if User.query.filter_by(username=form.username.data).first():
+                flash('That username is already taken.', 'danger')
+                return render_template('profile.html', form=form)
+        if form.email.data.lower() != current_user.email:
+            if User.query.filter_by(email=form.email.data.lower()).first():
+                flash('An account with that email already exists.', 'danger')
+                return render_template('profile.html', form=form)
+
+        current_user.username = form.username.data
+        current_user.email    = form.email.data.lower()
+
+        new_zip = (form.zip_code.data or '').strip()
+        if new_zip != (current_user.zip_code or ''):
+            current_user.zip_code = new_zip or None
+            current_user.lat = None
+            current_user.lng = None
+            if new_zip:
+                coords = geocode_zip(new_zip)
+                if coords:
+                    current_user.lat, current_user.lng = coords
+                else:
+                    flash('Zip code saved but could not be geocoded.', 'warning')
+
+        db.session.commit()
+        flash('Profile updated.', 'success')
+        return redirect(url_for('auth.profile'))
+
+    return render_template('profile.html', form=form)

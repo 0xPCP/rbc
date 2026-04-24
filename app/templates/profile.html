@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Profile — Reston Bike Club{% endblock %}
+{% block title %}My Profile — Cycling Clubs{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -10,42 +10,74 @@
 
 <div class="container py-4">
   <div class="row gy-4">
+
     <div class="col-lg-6">
       <div class="detail-card">
-        <h5 class="detail-card-title">Account</h5>
-        <dl class="detail-dl">
-          <dt>Username</dt>
-          <dd>{{ current_user.username }}</dd>
-          <dt>Email</dt>
-          <dd>{{ current_user.email }}</dd>
+        <h5 class="detail-card-title">Account Details</h5>
+        <form method="post" novalidate>
+          {{ form.hidden_tag() }}
+
+          <div class="mb-3">
+            {{ form.username.label(class="form-label") }}
+            {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+            {% for e in form.username.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+
+          <div class="mb-3">
+            {{ form.email.label(class="form-label") }}
+            {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else "")) }}
+            {% for e in form.email.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+
+          <div class="mb-3">
+            {{ form.zip_code.label(class="form-label") }}
+            {{ form.zip_code(class="form-control" + (" is-invalid" if form.zip_code.errors else ""), placeholder="e.g. 20191", maxlength=10) }}
+            {% for e in form.zip_code.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            <div class="form-text">Used as the fallback location for the What to Wear widget on your dashboard.</div>
+          </div>
+
+          <div class="d-flex gap-2">
+            {{ form.submit(class="btn btn-rbc") }}
+            <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="detail-card mb-3">
+        <h5 class="detail-card-title">Account Info</h5>
+        <dl class="detail-dl mb-0">
           <dt>Member since</dt>
           <dd>{{ current_user.created_at.strftime('%B %Y') }}</dd>
           {% if current_user.is_admin %}
           <dt>Role</dt>
-          <dd><span class="badge bg-success">Admin</span></dd>
+          <dd><span class="badge bg-success">Superadmin</span></dd>
+          {% endif %}
+          {% if current_user.zip_code %}
+          <dt>Location</dt>
+          <dd>{{ current_user.zip_code }}{% if current_user.lat %} <span class="text-muted small">(geocoded)</span>{% endif %}</dd>
           {% endif %}
         </dl>
       </div>
-    </div>
 
-    <div class="col-lg-6">
       <div class="detail-card">
-        <h5 class="detail-card-title">Strava</h5>
-        {% if current_user.strava_id %}
-        <p>Your Strava account is linked.</p>
-        <p class="text-muted small">Strava ID: {{ current_user.strava_id }}</p>
-        <form method="post" action="{{ url_for('strava.disconnect') }}">
-          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-          <button type="submit" class="btn btn-outline-danger btn-sm">Disconnect Strava</button>
-        </form>
+        <h5 class="detail-card-title">Club Memberships</h5>
+        {% if current_user.club_memberships %}
+        <ul class="list-unstyled mb-0">
+          {% for m in current_user.club_memberships %}
+          <li class="mb-1">
+            <a href="{{ url_for('clubs.home', slug=m.club.slug) }}">{{ m.club.name }}</a>
+            {% if m.club.city %}<span class="text-muted small">— {{ m.club.city }}, {{ m.club.state }}</span>{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
         {% else %}
-        <p>Link your Strava account to share your rides with the club.</p>
-        <a href="{{ url_for('strava.connect') }}" class="btn btn-strava">
-          Connect with Strava
-        </a>
+        <p class="text-muted small mb-0">You haven't joined any clubs yet. <a href="{{ url_for('clubs.index') }}">Find one.</a></p>
         {% endif %}
       </div>
     </div>
+
   </div>
 </div>
 {% endblock %}
