@@ -148,8 +148,14 @@
         {% endif %}
       </div>
 
+      <div class="mt-3">
+        <a href="{{ url_for('clubs.ride_ics', slug=club.slug, ride_id=ride.id) }}" class="btn btn-outline-secondary btn-sm w-100">
+          Add to Calendar
+        </a>
+      </div>
+
       {% if current_user.is_authenticated and current_user.is_club_admin(club) %}
-      <div class="mt-3 d-flex gap-2">
+      <div class="mt-2 d-flex gap-2">
         <a href="{{ url_for('admin.ride_edit', slug=club.slug, ride_id=ride.id) }}" class="btn btn-outline-secondary btn-sm">Edit Ride</a>
         <form method="post" action="{{ url_for('admin.ride_delete', slug=club.slug, ride_id=ride.id) }}" onsubmit="return confirm('Delete this ride?')">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />

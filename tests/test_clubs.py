@@ -180,6 +180,44 @@ class TestRideDetail:
         resp = client.get(f'/clubs/test-club/rides/{one_ride.id}')
         assert b'Back to' in resp.data
 
+    def test_add_to_calendar_button_present(self, client, sample_club, one_ride, mock_weather):
+        resp = client.get(f'/clubs/test-club/rides/{one_ride.id}')
+        assert b'Add to Calendar' in resp.data
+
+
+# ── .ics download ─────────────────────────────────────────────────────────────
+
+class TestRideIcs:
+    def test_returns_ics_content_type(self, client, sample_club, one_ride):
+        resp = client.get(f'/clubs/test-club/rides/{one_ride.id}/ics')
+        assert resp.status_code == 200
+        assert 'text/calendar' in resp.content_type
+
+    def test_ics_contains_ride_title(self, client, sample_club, one_ride):
+        resp = client.get(f'/clubs/test-club/rides/{one_ride.id}/ics')
+        assert b'Saturday Group Ride' in resp.data
+
+    def test_ics_contains_location(self, client, sample_club, one_ride):
+        resp = client.get(f'/clubs/test-club/rides/{one_ride.id}/ics')
+        assert b'Lake Newport' in resp.data
+
+    def test_ics_valid_structure(self, client, sample_club, one_ride):
+        body = client.get(f'/clubs/test-club/rides/{one_ride.id}/ics').data.decode()
+        assert 'BEGIN:VCALENDAR' in body
+        assert 'BEGIN:VEVENT' in body
+        assert 'END:VEVENT' in body
+        assert 'END:VCALENDAR' in body
+        assert 'DTSTART:' in body
+        assert 'DTEND:' in body
+
+    def test_ics_attachment_header(self, client, sample_club, one_ride):
+        resp = client.get(f'/clubs/test-club/rides/{one_ride.id}/ics')
+        assert 'attachment' in resp.headers.get('Content-Disposition', '')
+
+    def test_ics_404_for_missing_ride(self, client, sample_club):
+        resp = client.get('/clubs/test-club/rides/99999/ics')
+        assert resp.status_code == 404
+
 
 # ── Signup / Unsignup ─────────────────────────────────────────────────────────
 

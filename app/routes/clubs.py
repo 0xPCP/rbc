@@ -1,6 +1,6 @@
 import calendar as cal_module
-from datetime import date, timedelta
-from flask import Blueprint, render_template, redirect, url_for, flash, request, abort
+from datetime import date, datetime, timedelta, timezone
+from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, Response
 from flask_login import login_required, current_user
 from sqlalchemy.exc import IntegrityError
 from ..extensions import db
@@ -177,6 +177,50 @@ def ride_detail(slug, ride_id):
                            user_signed_up=user_signed_up,
                            waiver_required=waiver_required,
                            ride_weather=weather.get(ride.id))
+
+
+@clubs_bp.route('/<slug>/rides/<int:ride_id>/ics')
+def ride_ics(slug, ride_id):
+    club = _get_club_or_404(slug)
+    ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
+
+    dt_start = datetime.combine(ride.date, ride.time)
+    dt_end   = dt_start + timedelta(hours=2)
+    dt_stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
+
+    desc_parts = [f'Pace: {ride.pace_label}', f'Distance: {ride.distance_miles} mi']
+    if ride.elevation_feet:
+        desc_parts.append(f'Elevation: {ride.elevation_feet} ft')
+    if ride.ride_leader:
+        desc_parts.append(f'Leader: {ride.ride_leader}')
+    if ride.description:
+        desc_parts.append(ride.description)
+    description = '\\n'.join(desc_parts)
+
+    ics = (
+        'BEGIN:VCALENDAR\r\n'
+        'VERSION:2.0\r\n'
+        'PRODID:-//Cycling Clubs//cyclingclub.pcp.dev//EN\r\n'
+        'CALSCALE:GREGORIAN\r\n'
+        'METHOD:PUBLISH\r\n'
+        'BEGIN:VEVENT\r\n'
+        f'UID:ride-{ride.id}@cyclingclub.pcp.dev\r\n'
+        f'DTSTAMP:{dt_stamp}\r\n'
+        f'DTSTART:{dt_start.strftime("%Y%m%dT%H%M%S")}\r\n'
+        f'DTEND:{dt_end.strftime("%Y%m%dT%H%M%S")}\r\n'
+        f'SUMMARY:{ride.title} — {club.name}\r\n'
+        f'DESCRIPTION:{description}\r\n'
+        f'LOCATION:{ride.meeting_location}\r\n'
+        'END:VEVENT\r\n'
+        'END:VCALENDAR\r\n'
+    )
+
+    filename = f'ride-{ride.id}.ics'
+    return Response(
+        ics,
+        mimetype='text/calendar',
+        headers={'Content-Disposition': f'attachment; filename="{filename}"'},
+    )
 
 
 @clubs_bp.route('/<slug>/rides/<int:ride_id>/signup', methods=['POST'])
