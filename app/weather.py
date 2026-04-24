@@ -5,7 +5,7 @@ Results cached for 30 minutes.
 """
 import time
 import requests
-from datetime import date
+from datetime import date, datetime, timezone
 
 # All RBC rides are within a ~5-mile radius — one forecast point covers everything.
 # Reston, VA centroid.
@@ -142,3 +142,53 @@ def get_weather_for_rides(rides):
         }
 
     return result
+
+
+# Cache for current-conditions widget: key=(lat_r, lng_r) → {data, _ts}
+_widget_cache = {}
+
+
+def get_current_weather(lat: float, lng: float) -> dict | None:
+    """
+    Fetch current-hour weather for an arbitrary lat/lng.
+    Returns a dict with temp_f, feels_like_f, wind_mph, precip_prob,
+    weather_code, description, emoji, severity — or None on failure.
+    Cached 15 minutes per location (rounded to 2 decimal places).
+    """
+    key = (round(lat, 2), round(lng, 2))
+    now = time.time()
+    if key in _widget_cache and now - _widget_cache[key]['_ts'] < 900:
+        return _widget_cache[key]['data']
+
+    try:
+        resp = requests.get(
+            'https://api.open-meteo.com/v1/forecast',
+            params={
+                'latitude':         lat,
+                'longitude':        lng,
+                'current':          'temperature_2m,apparent_temperature,precipitation_probability,wind_speed_10m,weather_code',
+                'temperature_unit': 'fahrenheit',
+                'wind_speed_unit':  'mph',
+                'timezone':         'auto',
+            },
+            timeout=8,
+        )
+        c = resp.json().get('current', {})
+    except Exception:
+        return None
+
+    code = c.get('weather_code', 0)
+    desc, emoji, sev = _WMO.get(code, ('Unknown', '❓', 1))
+
+    data = {
+        'temp_f':       round(c.get('temperature_2m', 0)),
+        'feels_like_f': round(c.get('apparent_temperature', 0)),
+        'wind_mph':     round(c.get('wind_speed_10m', 0)),
+        'precip_prob':  c.get('precipitation_probability') or 0,
+        'weather_code': code,
+        'description':  desc,
+        'emoji':        emoji,
+        'severity':     sev,
+    }
+    _widget_cache[key] = {'data': data, '_ts': now}
+    return data

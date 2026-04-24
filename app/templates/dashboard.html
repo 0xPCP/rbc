@@ -76,8 +76,32 @@
       {% endif %}
     </div>
 
-    <!-- Sidebar: discover clubs -->
+    <!-- Sidebar -->
     <div class="col-lg-4">
+
+      <!-- What to Wear widget -->
+      <div class="wtw-card mb-4" id="wtw-widget">
+        <div class="wtw-header">
+          <span class="wtw-title">What to Wear</span>
+          <span class="wtw-location" id="wtw-location-label">
+            {% if current_user.zip_code %}{{ current_user.zip_code }}{% else %}detecting location…{% endif %}
+          </span>
+        </div>
+        <div id="wtw-body">
+          {% if current_user.zip_code %}
+          <div class="wtw-loading">
+            <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+            <span class="ms-2 text-muted small">Loading…</span>
+          </div>
+          {% else %}
+          <p class="text-muted small mb-0">
+            Allow location access or <a href="/profile">save your zip code</a> to get gear recommendations.
+          </p>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Discover clubs -->
       <h4 class="mb-3">Discover Clubs</h4>
       {% if suggested_clubs %}
         {% for club in suggested_clubs %}
@@ -104,4 +128,71 @@
 
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const WTW_API = '/api/weather/widget';
+const savedZip = {{ (current_user.zip_code | tojson) if current_user.zip_code else 'null' }};
+
+function renderWidget(data) {
+  const verdictColors = {great:'success', go:'primary', marginal:'warning', skip:'danger'};
+  const cls = verdictColors[data.verdict] || 'secondary';
+
+  const gearHtml = data.gear.map(g =>
+    `<li class="wtw-gear-item"><span class="wtw-gear-icon">${g.icon}</span>${g.label}</li>`
+  ).join('');
+
+  document.getElementById('wtw-body').innerHTML = `
+    <div class="wtw-conditions">
+      <span class="wtw-emoji">${data.emoji}</span>
+      <div class="wtw-stats">
+        <strong>${data.temp_f}°F</strong>
+        <span class="text-muted small">feels ${data.feels_like_f}°F</span>
+        <span class="text-muted small">${data.wind_mph} mph wind</span>
+        <span class="text-muted small">${data.precip_prob}% rain</span>
+      </div>
+    </div>
+    <div class="wtw-verdict alert-${cls} mb-2">${data.verdict_text}</div>
+    <ul class="wtw-gear-list">${gearHtml}</ul>
+  `;
+}
+
+function fetchWidget(params) {
+  const url = WTW_API + '?' + new URLSearchParams(params);
+  fetch(url)
+    .then(r => r.json())
+    .then(data => {
+      if (data.error) {
+        document.getElementById('wtw-body').innerHTML =
+          `<p class="text-muted small mb-0">${data.error}</p>`;
+      } else {
+        renderWidget(data);
+      }
+    })
+    .catch(() => {
+      document.getElementById('wtw-body').innerHTML =
+        '<p class="text-muted small mb-0">Weather unavailable.</p>';
+    });
+}
+
+function loadWithGeo(position) {
+  const {latitude: lat, longitude: lng} = position.coords;
+  document.getElementById('wtw-location-label').textContent = 'current location';
+  fetchWidget({lat, lng});
+}
+
+function loadWithZip() {
+  if (savedZip) {
+    fetchWidget({zip: savedZip});
+  }
+}
+
+// Try live geolocation first; fall back to saved zip
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(loadWithGeo, loadWithZip, {timeout: 6000});
+} else {
+  loadWithZip();
+}
+</script>
 {% endblock %}

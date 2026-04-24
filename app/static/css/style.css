@@ -702,6 +702,55 @@ body {
 .wl-dot.sev-1 { background: #eab308; }
 .wl-dot.sev-2 { background: #f97316; }
 
+/* ── What to Wear widget ─────────────────────────────────────────────────── */
+.wtw-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 1rem 1.15rem;
+  box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+.wtw-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: .75rem;
+}
+.wtw-title { font-weight: 600; font-size: 1rem; }
+.wtw-location { font-size: .75rem; color: var(--rbc-gray); }
+.wtw-loading { display: flex; align-items: center; min-height: 48px; }
+.wtw-conditions {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+  margin-bottom: .6rem;
+}
+.wtw-emoji { font-size: 2.2rem; line-height: 1; }
+.wtw-stats { display: flex; flex-direction: column; gap: 1px; }
+.wtw-stats strong { font-size: 1.25rem; line-height: 1.2; }
+.wtw-verdict {
+  font-size: .82rem;
+  font-weight: 600;
+  padding: .3rem .6rem;
+  border-radius: 6px;
+  margin-bottom: .5rem;
+  display: inline-block;
+}
+.wtw-verdict.alert-success  { background: #dcfce7; color: #166534; }
+.wtw-verdict.alert-primary  { background: #dbeafe; color: #1e40af; }
+.wtw-verdict.alert-warning  { background: #fef9c3; color: #854d0e; }
+.wtw-verdict.alert-danger   { background: #fee2e2; color: #991b1b; }
+.wtw-gear-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: .25rem;
+}
+.wtw-gear-item { font-size: .85rem; display: flex; align-items: center; gap: .4rem; }
+.wtw-gear-icon { width: 1.3em; text-align: center; flex-shrink: 0; }
+
 /* ── Misc ────────────────────────────────────────────────────────────────── */
 .empty-state { text-align: center; padding: 4rem 1rem; color: var(--rbc-gray); }
 .flash-container { margin-bottom: 0; }

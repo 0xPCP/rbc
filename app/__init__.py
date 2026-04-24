@@ -17,12 +17,14 @@ def create_app(config_class=Config):
     from .routes.clubs import clubs_bp
     from .routes.admin import admin_bp
     from .routes.strava import strava_bp
+    from .routes.api import api_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(clubs_bp, url_prefix='/clubs')
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(strava_bp, url_prefix='/strava')
+    app.register_blueprint(api_bp, url_prefix='/api')
 
     from datetime import datetime
     from .version import __version__
