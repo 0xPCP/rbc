@@ -64,6 +64,12 @@ class ClubSettingsForm(FlaskForm):
         Regexp(r'^#[0-9a-fA-F]{6}$', message='Enter a valid hex color (e.g. #e76f51).'),
     ])
     banner_url    = StringField('Banner Image URL', validators=[Optional(), URL(), Length(max=500)])
+    # Membership settings
+    require_membership = BooleanField('Require membership to sign up for rides')
+    join_approval = SelectField('Join Approval Mode', choices=[
+        ('auto',   'Auto-approve — users join immediately upon request'),
+        ('manual', 'Manual approval — admin must approve each request'),
+    ])
     # Strava integration
     strava_club_id = StringField('Strava Club ID', validators=[Optional(), Length(max=20)])
     # Weather auto-cancel

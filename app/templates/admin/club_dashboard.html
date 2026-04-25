@@ -48,7 +48,9 @@
       <a href="{{ url_for('admin.ride_new', slug=club.slug) }}" class="btn btn-rbc btn-sm">+ New Ride</a>
       <a href="{{ url_for('admin.club_rides', slug=club.slug) }}" class="btn btn-outline-secondary btn-sm">All Rides</a>
       {% if is_full_admin %}
-      <a href="{{ url_for('admin.club_team', slug=club.slug) }}" class="btn btn-outline-secondary btn-sm">Team</a>
+      <a href="{{ url_for('admin.club_team', slug=club.slug) }}" class="btn btn-outline-secondary btn-sm">
+        Team{% if stats.pending %} <span class="badge bg-warning text-dark">{{ stats.pending }}</span>{% endif %}
+      </a>
       <a href="{{ url_for('admin.club_settings', slug=club.slug) }}" class="btn btn-outline-secondary btn-sm">Settings</a>
       {% endif %}
     </div>

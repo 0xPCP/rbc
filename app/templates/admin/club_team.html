@@ -87,11 +87,47 @@
         <div class="card-body">
           <h5 class="card-title mb-3">Members
             <span class="badge bg-secondary ms-1">{{ members | length }}</span>
+            {% if pending %}
+            <span class="badge bg-warning text-dark ms-1">{{ pending | length }} pending</span>
+            {% endif %}
           </h5>
 
           {% if club.is_private %}
           <div class="alert alert-info py-2 small mb-3">
-            🔒 This is a <strong>private club</strong>. Members must be added manually.
+            🔒 This is a <strong>private club</strong>. Route details are hidden from non-members.
+          </div>
+          {% endif %}
+
+          {% if pending %}
+          <h6 class="mb-2">Pending Requests</h6>
+          <div class="rbc-table-wrap mb-3">
+            <table class="table table-sm rbc-table">
+              <thead><tr><th>User</th><th>Requested</th><th></th></tr></thead>
+              <tbody>
+                {% for row, user in pending %}
+                <tr>
+                  <td>
+                    <strong>{{ user.username }}</strong><br>
+                    <small class="text-muted">{{ user.email }}</small>
+                  </td>
+                  <td><small class="text-muted">{{ row.joined_at.strftime('%b %d, %Y') }}</small></td>
+                  <td>
+                    <div class="d-flex gap-1">
+                      <form method="post" action="{{ url_for('admin.club_member_approve', slug=club.slug, uid=user.id) }}">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-success btn-xs">Approve</button>
+                      </form>
+                      <form method="post" action="{{ url_for('admin.club_member_reject', slug=club.slug, uid=user.id) }}"
+                            onsubmit="return confirm('Reject {{ user.username }}\'s request?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-outline-danger btn-xs">Reject</button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
           </div>
           {% endif %}
 

@@ -55,7 +55,18 @@ class User(db.Model, UserMixin):
         return self.is_club_admin(club) or self.is_ride_manager(club)
 
     def is_member_of(self, club):
+        """True for any membership record (active or pending)."""
         return ClubMembership.query.filter_by(user_id=self.id, club_id=club.id).first() is not None
+
+    def is_active_member_of(self, club):
+        """True only if the membership is approved/active."""
+        row = ClubMembership.query.filter_by(user_id=self.id, club_id=club.id).first()
+        return row is not None and row.status == 'active'
+
+    def is_pending_member_of(self, club):
+        """True if the user has requested to join but is awaiting admin approval."""
+        row = ClubMembership.query.filter_by(user_id=self.id, club_id=club.id).first()
+        return row is not None and row.status == 'pending'
 
     def has_signed_waiver(self, club, year=None):
         if year is None:
@@ -92,6 +103,10 @@ class Club(db.Model):
     # Privacy
     is_private = db.Column(db.Boolean, default=False, nullable=False)
 
+    # Membership settings
+    require_membership = db.Column(db.Boolean, default=False, nullable=False)  # must join before ride signup
+    join_approval = db.Column(db.String(10), default='auto', nullable=False)   # 'auto' | 'manual'
+
     # Strava integration
     strava_club_id = db.Column(db.BigInteger, nullable=True)  # numeric Strava club ID
 
@@ -112,7 +127,7 @@ class Club(db.Model):
 
     @property
     def member_count(self):
-        return len(self.memberships)
+        return ClubMembership.query.filter_by(club_id=self.id, status='active').count()
 
     @property
     def current_waiver(self):
@@ -130,6 +145,7 @@ class ClubMembership(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=False)
+    status = db.Column(db.String(10), default='active', nullable=False)  # 'active' | 'pending'
     joined_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (db.UniqueConstraint('user_id', 'club_id', name='uq_membership'),)

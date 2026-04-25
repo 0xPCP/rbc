@@ -153,6 +153,30 @@
         {% endif %}
 
         <hr class="my-4" />
+        <h5 class="mb-1">Membership</h5>
+        <p class="text-muted small mb-3">
+          Control who can sign up for rides and how new members join the club.
+        </p>
+
+        <div class="mb-3">
+          <div class="form-check form-switch">
+            {{ form.require_membership(class="form-check-input", role="switch", id="require_membership") }}
+            {{ form.require_membership.label(class="form-check-label", for="require_membership") }}
+          </div>
+          <div class="form-text">When enabled, users must join the club before they can sign up for any ride.</div>
+        </div>
+
+        <div class="mb-4">
+          {{ form.join_approval.label(class="form-label") }}
+          {% for subfield in form.join_approval %}
+          <div class="form-check">
+            {{ subfield(class="form-check-input") }}
+            {{ subfield.label(class="form-check-label") }}
+          </div>
+          {% endfor %}
+        </div>
+
+        <hr class="my-4" />
         <h5 class="mb-3">Weather Auto-Cancel</h5>
         <p class="text-muted small mb-3">
           When enabled, rides scheduled for today are automatically cancelled each morning (6 AM)

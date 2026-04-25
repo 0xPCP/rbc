@@ -183,12 +183,12 @@ def home(slug):
                 .order_by(Ride.date.asc(), Ride.time.asc())
                 .limit(5).all())
     weather = get_weather_for_rides(upcoming)
-    is_member = (current_user.is_authenticated and
-                 current_user.is_member_of(club))
+    is_member  = current_user.is_authenticated and current_user.is_active_member_of(club)
+    is_pending = current_user.is_authenticated and current_user.is_pending_member_of(club)
     strava_activities = get_club_activities(club.strava_club_id)
     return render_template('clubs/home.html', club=club, upcoming=upcoming,
-                           weather=weather, is_member=is_member, today=today,
-                           strava_activities=strava_activities)
+                           weather=weather, is_member=is_member, is_pending=is_pending,
+                           today=today, strava_activities=strava_activities)
 
 
 # ── Club calendar ─────────────────────────────────────────────────────────────
@@ -308,6 +308,8 @@ def ride_detail(slug, ride_id):
 
     user_signed_up = False
     waiver_required = False
+    membership_required = False
+    show_route = True
     if current_user.is_authenticated:
         from ..models import RideSignup
         user_signed_up = RideSignup.query.filter_by(
@@ -315,11 +317,22 @@ def ride_detail(slug, ride_id):
         ).first() is not None
         if club.current_waiver and not current_user.has_signed_waiver(club):
             waiver_required = True
+        if club.require_membership and not current_user.is_active_member_of(club):
+            membership_required = True
+        if club.is_private and not current_user.is_active_member_of(club):
+            show_route = False
+    else:
+        if club.require_membership:
+            membership_required = True
+        if club.is_private:
+            show_route = False
 
     weather = get_weather_for_rides([ride])
     return render_template('clubs/ride_detail.html', club=club, ride=ride,
                            user_signed_up=user_signed_up,
                            waiver_required=waiver_required,
+                           membership_required=membership_required,
+                           show_route=show_route,
                            ride_weather=weather.get(ride.id))
 
 
@@ -375,6 +388,12 @@ def ride_gpx(slug, ride_id):
     if not ride.ridewithgps_route_id:
         abort(404)
 
+    # Private clubs hide route details from non-members
+    if club.is_private and not (
+        current_user.is_authenticated and current_user.is_active_member_of(club)
+    ):
+        abort(403)
+
     gpx_url = f'https://ridewithgps.com/routes/{ride.ridewithgps_route_id}.gpx'
     try:
         upstream = http_requests.get(gpx_url, timeout=15,
@@ -402,6 +421,10 @@ def ride_signup(slug, ride_id):
     if ride.is_cancelled:
         flash('This ride has been cancelled.', 'warning')
         return redirect(url_for('clubs.ride_detail', slug=slug, ride_id=ride_id))
+
+    if club.require_membership and not current_user.is_active_member_of(club):
+        flash('You must be an active member of this club to sign up for rides.', 'warning')
+        return redirect(url_for('clubs.home', slug=slug))
 
     if club.current_waiver and not current_user.has_signed_waiver(club):
         flash('Please accept the club waiver before signing up for rides.', 'warning')
@@ -439,10 +462,19 @@ def ride_unsignup(slug, ride_id):
 @login_required
 def join(slug):
     club = _get_club_or_404(slug)
-    db.session.add(ClubMembership(user_id=current_user.id, club_id=club.id))
+
+    existing = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club.id).first()
+    if existing:
+        return redirect(url_for('clubs.home', slug=slug))
+
+    status = 'pending' if club.join_approval == 'manual' else 'active'
+    db.session.add(ClubMembership(user_id=current_user.id, club_id=club.id, status=status))
     try:
         db.session.commit()
-        flash(f"You've joined {club.name}!", 'success')
+        if status == 'pending':
+            flash(f"Your request to join {club.name} has been submitted. An admin will review it shortly.", 'info')
+        else:
+            flash(f"You've joined {club.name}!", 'success')
     except IntegrityError:
         db.session.rollback()
     return redirect(url_for('clubs.home', slug=slug))

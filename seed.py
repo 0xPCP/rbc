@@ -23,6 +23,7 @@ with app.app_context():
 
     superadmin = User(username='superadmin', email='admin@cyclingclub.dev',      password_hash=pw, is_admin=True)
     phil       = User(username='phil',       email='phil@pcp.dev',               password_hash=pw, zip_code='20148', address='Ashburn, VA')
+    testadmin  = User(username='testadmin',  email='test@pcp.dev',               password_hash=bcrypt.generate_password_hash('password').decode())
     jsmith     = User(username='jsmith',     email='john.smith@example.com',     password_hash=pw, zip_code='20191')
     mbaker     = User(username='mbaker',     email='mary.baker@example.com',     password_hash=pw, zip_code='20190')
     twheels    = User(username='twheels',    email='tom.wheels@example.com',     password_hash=pw, zip_code='20194')
@@ -37,7 +38,7 @@ with app.app_context():
     art_admin  = User(username='art_admin',  email='admin@artemis.dev',          password_hash=pw)
     cspinner   = User(username='cspinner',   email='claire.spin@example.com',    password_hash=pw, zip_code='22201')
 
-    all_users = [superadmin, phil, jsmith, mbaker, twheels, kroller, dkeller, smartin,
+    all_users = [superadmin, phil, testadmin, jsmith, mbaker, twheels, kroller, dkeller, smartin,
                  nvcc_admin, arider, bclimber, art_admin, cspinner]
     db.session.add_all(all_users)
     db.session.commit()
@@ -70,7 +71,9 @@ with app.app_context():
         address='McLean Community Center, 1234 Ingleside Ave',
         city='McLean', state='VA', zip_code='22101',
         lat=38.9339, lng=-77.1773,
-        is_private=True,  # invite-only example
+        is_private=True,
+        require_membership=True,
+        join_approval='manual',
         theme_preset='ocean',
         theme_primary='#1a5276',
         theme_accent='#f39c12',
@@ -96,6 +99,7 @@ with app.app_context():
     # ── Club admins ───────────────────────────────────────────────────────────
     db.session.add_all([
         ClubAdmin(user_id=dkeller.id,    club_id=rbc.id,     role='admin'),
+        ClubAdmin(user_id=testadmin.id,  club_id=rbc.id,     role='admin'),   # test@pcp.dev
         ClubAdmin(user_id=nvcc_admin.id, club_id=nvcc.id,    role='admin'),
         ClubAdmin(user_id=art_admin.id,  club_id=artemis.id, role='admin'),
         # Phil can manage rides at RBC but not settings
@@ -104,12 +108,13 @@ with app.app_context():
     db.session.commit()
 
     # ── Club memberships ──────────────────────────────────────────────────────
-    def join(club, *users):
+    def join(club, *users, status='active'):
         for u in users:
-            db.session.add(ClubMembership(user_id=u.id, club_id=club.id))
+            db.session.add(ClubMembership(user_id=u.id, club_id=club.id, status=status))
 
-    join(rbc,     phil, jsmith, mbaker, twheels, kroller, dkeller, smartin)
-    join(nvcc,    phil, arider, bclimber, dkeller)
+    join(rbc,     phil, testadmin, jsmith, mbaker, twheels, kroller, dkeller, smartin)
+    join(nvcc,    arider, bclimber, dkeller)       # active NVCC members
+    join(nvcc,    phil, status='pending')           # phil pending on manual-approval club
     join(artemis, mbaker, kroller, smartin, cspinner, bclimber)
     db.session.commit()
     print("Created club memberships")
@@ -414,11 +419,12 @@ with app.app_context():
     print("Created signups")
 
     print("\nSeed complete!")
-    print("\nLogin credentials (all use password: password123):")
+    print("\nLogin credentials (all use password: password123 unless noted):")
     print("  superadmin@cyclingclub.dev  — global superadmin")
-    print("  phil@pcp.dev                — member of RBC + NVCC")
+    print("  test@pcp.dev / password     — RBC club admin (testing account)")
+    print("  phil@pcp.dev                — RBC member + NVCC pending")
     print("  dave.keller@...             — RBC club admin")
-    print("  admin@nvcc.dev              — NVCC club admin")
+    print("  admin@nvcc.dev              — NVCC club admin (manual-approval)")
     print("  admin@artemis.dev           — Artemis club admin")
     print("  john.smith@...              — RBC member")
     print("  mary.baker@...              — RBC + Artemis member")

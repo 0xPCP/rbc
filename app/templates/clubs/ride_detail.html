@@ -63,15 +63,29 @@
       {% endif %}
 
       {% if ride.ridewithgps_embed_url %}
-      <div class="detail-card mt-3">
-        <h5 class="detail-card-title">
-          Route Map
-          <a href="{{ ride.route_url }}" target="_blank" rel="noopener" class="detail-card-link">Open on RideWithGPS ↗</a>
-        </h5>
-        <div class="rwgps-wrapper">
-          <iframe src="{{ ride.ridewithgps_embed_url }}" scrolling="no" allowfullscreen></iframe>
+        {% if show_route %}
+        <div class="detail-card mt-3">
+          <h5 class="detail-card-title">
+            Route Map
+            <a href="{{ ride.route_url }}" target="_blank" rel="noopener" class="detail-card-link">Open on RideWithGPS ↗</a>
+          </h5>
+          <div class="rwgps-wrapper">
+            <iframe src="{{ ride.ridewithgps_embed_url }}" scrolling="no" allowfullscreen></iframe>
+          </div>
         </div>
-      </div>
+        {% else %}
+        <div class="detail-card mt-3">
+          <h5 class="detail-card-title">Route Map</h5>
+          <div class="alert alert-info mb-0">
+            🔒 Route details are available to club members only.
+            {% if not current_user.is_authenticated %}
+            <a href="{{ url_for('auth.login') }}">Sign in</a> and join the club to view.
+            {% else %}
+            <a href="{{ url_for('clubs.home', slug=club.slug) }}">Join {{ club.name }}</a> to access route details.
+            {% endif %}
+          </div>
+        </div>
+        {% endif %}
       {% endif %}
 
       {% if ride.embed_url %}
@@ -114,7 +128,11 @@
 
         {% if not ride.is_cancelled %}
           {% if current_user.is_authenticated %}
-            {% if waiver_required %}
+            {% if membership_required and not user_signed_up %}
+            <div class="alert alert-warning mt-3 mb-0 py-2 small">
+              You must <a href="{{ url_for('clubs.home', slug=club.slug) }}">join {{ club.name }}</a> before signing up for rides.
+            </div>
+            {% elif waiver_required %}
             <div class="alert alert-warning mt-3 mb-0 py-2 small">
               You must <a href="{{ url_for('clubs.waiver', slug=club.slug, next=request.url) }}">accept the club waiver</a> before signing up.
             </div>
@@ -156,7 +174,7 @@
         <a href="{{ url_for('clubs.ride_ics', slug=club.slug, ride_id=ride.id) }}" class="btn btn-outline-secondary btn-sm w-100">
           Add to Calendar
         </a>
-        {% if ride.ridewithgps_route_id %}
+        {% if ride.ridewithgps_route_id and show_route %}
         <a href="{{ url_for('clubs.ride_gpx', slug=club.slug, ride_id=ride.id) }}" class="btn btn-outline-secondary btn-sm w-100">
           Download GPX
         </a>

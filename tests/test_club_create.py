@@ -225,13 +225,14 @@ def test_private_club_shows_private_badge(client, db, sample_club):
     assert b'Private' in r.data
 
 
-def test_private_club_hides_join_button_for_non_member(client, db, sample_club, regular_user):
+def test_private_club_still_shows_join_button(client, db, sample_club, regular_user):
+    # Private clubs are now joinable — they just hide route details from non-members
     sample_club.is_private = True
     from app.extensions import db as _db
     _db.session.commit()
     login(client)
     r = client.get(f'/clubs/{sample_club.slug}/')
-    assert b'Join Club' not in r.data
+    assert b'Join Club' in r.data
 
 
 def test_public_club_shows_join_button_for_non_member(client, sample_club, regular_user):

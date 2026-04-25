@@ -30,8 +30,8 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <button class="btn btn-outline-light">Leave Club</button>
           </form>
-          {% elif club.is_private %}
-          <span class="btn btn-outline-light disabled" title="This is a private club — contact the admin to join.">🔒 Private Club</span>
+          {% elif is_pending %}
+          <span class="btn btn-outline-light disabled" title="Your membership request is awaiting admin approval.">Pending Approval</span>
           {% else %}
           <form method="post" action="{{ url_for('clubs.join', slug=club.slug) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
@@ -39,11 +39,7 @@
           </form>
           {% endif %}
         {% else %}
-          {% if club.is_private %}
-          <span class="btn btn-outline-light disabled">🔒 Private Club</span>
-          {% else %}
           <a href="{{ url_for('auth.login') }}" class="btn btn-rbc">Sign In to Join</a>
-          {% endif %}
         {% endif %}
         {% if current_user.is_authenticated and current_user.is_club_admin(club) %}
         <a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}" class="btn btn-outline-light">Admin</a>

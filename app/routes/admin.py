@@ -121,7 +121,8 @@ def club_dashboard(slug):
                 .filter(Ride.date >= today)
                 .order_by(Ride.date.asc()).limit(5).all())
     stats = {
-        'members':        ClubMembership.query.filter_by(club_id=club.id).count(),
+        'members':        ClubMembership.query.filter_by(club_id=club.id, status='active').count(),
+        'pending':        ClubMembership.query.filter_by(club_id=club.id, status='pending').count(),
         'upcoming_rides': Ride.query.filter_by(club_id=club.id).filter(Ride.date >= today).count(),
         'total_rides':    Ride.query.filter_by(club_id=club.id).count(),
         'total_signups':  (RideSignup.query
@@ -173,6 +174,9 @@ def club_settings(slug):
         club.cancel_wind_mph     = form.cancel_wind_mph.data or 35
         club.cancel_temp_min_f   = form.cancel_temp_min_f.data if form.cancel_temp_min_f.data is not None else 28
         club.cancel_temp_max_f   = form.cancel_temp_max_f.data if form.cancel_temp_max_f.data is not None else 100
+
+        club.require_membership = form.require_membership.data
+        club.join_approval      = form.join_approval.data if form.join_approval.data in ('auto', 'manual') else 'auto'
 
         db.session.commit()
         flash('Club settings updated.', 'success')
@@ -285,11 +289,14 @@ def club_team(slug):
     admins = (ClubAdmin.query.filter_by(club_id=club.id)
               .join(User, ClubAdmin.user_id == User.id)
               .add_entity(User).all())
-    members = (ClubMembership.query.filter_by(club_id=club.id)
+    members = (ClubMembership.query.filter_by(club_id=club.id, status='active')
+               .join(User, ClubMembership.user_id == User.id)
+               .add_entity(User).all())
+    pending = (ClubMembership.query.filter_by(club_id=club.id, status='pending')
                .join(User, ClubMembership.user_id == User.id)
                .add_entity(User).all())
     return render_template('admin/club_team.html', club=club,
-                           admins=admins, members=members)
+                           admins=admins, members=members, pending=pending)
 
 
 @admin_bp.route('/clubs/<slug>/team/add', methods=['POST'])
@@ -352,10 +359,16 @@ def club_member_add(slug):
         flash(f'No user found with email or username "{identifier}".', 'danger')
         return redirect(url_for('admin.club_team', slug=slug))
 
-    if ClubMembership.query.filter_by(user_id=user.id, club_id=club.id).first():
-        flash(f'{user.username} is already a member.', 'info')
+    existing = ClubMembership.query.filter_by(user_id=user.id, club_id=club.id).first()
+    if existing:
+        if existing.status == 'active':
+            flash(f'{user.username} is already a member.', 'info')
+        else:
+            existing.status = 'active'
+            db.session.commit()
+            flash(f'{user.username} approved and added as a member.', 'success')
     else:
-        db.session.add(ClubMembership(user_id=user.id, club_id=club.id))
+        db.session.add(ClubMembership(user_id=user.id, club_id=club.id, status='active'))
         db.session.commit()
         flash(f'{user.username} added as a member.', 'success')
 
@@ -371,4 +384,27 @@ def club_member_remove(slug, uid):
     db.session.delete(row)
     db.session.commit()
     flash(f'{username} removed from club.', 'info')
+    return redirect(url_for('admin.club_team', slug=slug))
+
+
+@admin_bp.route('/clubs/<slug>/members/<int:uid>/approve', methods=['POST'])
+@club_admin_required
+def club_member_approve(slug, uid):
+    club = _get_club_or_404(slug)
+    row = ClubMembership.query.filter_by(user_id=uid, club_id=club.id, status='pending').first_or_404()
+    row.status = 'active'
+    db.session.commit()
+    flash(f'{row.user.username} approved and is now an active member.', 'success')
+    return redirect(url_for('admin.club_team', slug=slug))
+
+
+@admin_bp.route('/clubs/<slug>/members/<int:uid>/reject', methods=['POST'])
+@club_admin_required
+def club_member_reject(slug, uid):
+    club = _get_club_or_404(slug)
+    row = ClubMembership.query.filter_by(user_id=uid, club_id=club.id, status='pending').first_or_404()
+    username = row.user.username
+    db.session.delete(row)
+    db.session.commit()
+    flash(f'{username}\'s membership request was rejected.', 'info')
     return redirect(url_for('admin.club_team', slug=slug))
