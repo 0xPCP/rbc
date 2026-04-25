@@ -1,0 +1,489 @@
+{% extends "base.html" %}
+{% block title %}Create a Club — Cycling Clubs{% endblock %}
+
+{% block head %}
+<style>
+  /* ── Wizard chrome ── */
+  .wizard-wrap { max-width: 720px; margin: 0 auto; }
+
+  .wizard-steps {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+    margin-bottom: 2.5rem;
+  }
+  .wizard-steps::before {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 0; right: 0;
+    height: 2px;
+    background: #dee2e6;
+    z-index: 0;
+  }
+  .wz-step {
+    display: flex; flex-direction: column; align-items: center;
+    flex: 1; position: relative; z-index: 1;
+    cursor: pointer;
+  }
+  .wz-dot {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .9rem;
+    background: #fff; border: 2px solid #dee2e6; color: #6c757d;
+    transition: background .2s, border-color .2s, color .2s;
+  }
+  .wz-step.active   .wz-dot { background: var(--rbc-primary, #2d6a4f); border-color: var(--rbc-primary, #2d6a4f); color: #fff; }
+  .wz-step.done     .wz-dot { background: var(--rbc-primary, #2d6a4f); border-color: var(--rbc-primary, #2d6a4f); color: #fff; }
+  .wz-label { font-size: .72rem; color: #6c757d; margin-top: .35rem; text-align: center; }
+  .wz-step.active .wz-label { color: var(--rbc-primary, #2d6a4f); font-weight: 600; }
+
+  /* ── Step panels ── */
+  .wz-panel { display: none; }
+  .wz-panel.active { display: block; }
+
+  /* ── Privacy cards ── */
+  .privacy-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .privacy-card {
+    border: 2px solid #dee2e6; border-radius: 12px; padding: 1.25rem;
+    cursor: pointer; transition: border-color .15s, background .15s;
+  }
+  .privacy-card:hover { border-color: #adb5bd; }
+  .privacy-card.selected { border-color: var(--rbc-primary, #2d6a4f); background: #f0faf5; }
+  .privacy-card-icon { font-size: 2rem; margin-bottom: .5rem; }
+  .privacy-card-title { font-weight: 700; font-size: 1rem; margin-bottom: .2rem; }
+  .privacy-card-desc { font-size: .85rem; color: #6c757d; }
+
+  /* ── Theme cards ── */
+  .theme-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: .75rem; }
+  @media (max-width: 575px) { .theme-grid { grid-template-columns: repeat(2, 1fr); } }
+  .theme-card {
+    border: 2px solid #dee2e6; border-radius: 10px; padding: .85rem;
+    cursor: pointer; transition: border-color .15s;
+    display: flex; flex-direction: column; gap: .5rem; align-items: center;
+  }
+  .theme-card:hover { border-color: #adb5bd; }
+  .theme-card.selected { border-color: #495057; border-width: 2.5px; }
+  .theme-swatch {
+    display: flex; width: 100%; height: 28px; border-radius: 6px; overflow: hidden;
+  }
+  .theme-swatch-a { flex: 2; }
+  .theme-swatch-b { flex: 1; }
+  .theme-card-label { font-size: .8rem; font-weight: 600; color: #495057; }
+
+  /* custom color inputs */
+  .custom-colors { display: none; }
+  .custom-colors.visible { display: flex; gap: 1rem; flex-wrap: wrap; margin-top: .75rem; }
+  .color-preview-row { display: flex; align-items: center; gap: .5rem; }
+  input[type=color] { width: 42px; height: 42px; padding: 2px; border-radius: 6px; cursor: pointer; border: 1px solid #dee2e6; }
+
+  /* ── Preview banner ── */
+  #preview-banner {
+    border-radius: 10px; padding: 1.1rem 1.25rem; margin-bottom: 1.5rem;
+    display: flex; align-items: center; justify-content: space-between;
+    transition: background .3s;
+  }
+  #preview-name { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 700; color: #fff; }
+  .preview-btn {
+    padding: .45rem 1.1rem; border-radius: 6px; font-weight: 600; font-size: .9rem;
+    border: none; cursor: default; transition: background .3s;
+  }
+
+  /* ── Review step ── */
+  .review-row { display: flex; gap: 1rem; padding: .6rem 0; border-bottom: 1px solid #f0f0f0; }
+  .review-label { min-width: 140px; font-size: .82rem; color: #6c757d; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+  .review-value { font-size: .92rem; color: #212529; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('clubs.index') }}">Clubs</a></li>
+        <li class="breadcrumb-item active">Create a Club</li>
+      </ol>
+    </nav>
+    <h1>Create a Club</h1>
+    <p class="mb-0" style="color:rgba(255,255,255,.8)">Set up your club in a few steps — you can change everything later.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="wizard-wrap">
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}{% for cat, msg in messages %}
+      <div class="alert alert-{{ cat }} alert-dismissible fade show">{{ msg }}<button class="btn-close" data-bs-dismiss="alert"></button></div>
+      {% endfor %}{% endif %}
+    {% endwith %}
+
+    <!-- Step indicator -->
+    <div class="wizard-steps mb-4" id="wz-steps">
+      <div class="wz-step active" data-step="1" onclick="goStep(1)">
+        <div class="wz-dot">1</div><div class="wz-label">Basics</div>
+      </div>
+      <div class="wz-step" data-step="2" onclick="goStep(2)">
+        <div class="wz-dot">2</div><div class="wz-label">Privacy</div>
+      </div>
+      <div class="wz-step" data-step="3" onclick="goStep(3)">
+        <div class="wz-dot">3</div><div class="wz-label">Theme</div>
+      </div>
+      <div class="wz-step" data-step="4" onclick="goStep(4)">
+        <div class="wz-dot">4</div><div class="wz-label">Details</div>
+      </div>
+      <div class="wz-step" data-step="5" onclick="goStep(5)">
+        <div class="wz-dot">5</div><div class="wz-label">Review</div>
+      </div>
+    </div>
+
+    <form method="post" id="create-form" novalidate>
+      {{ form.hidden_tag() }}
+
+      <!-- Hidden fields written by JS -->
+      <input type="hidden" name="is_private"   id="f-is-private"   value="0">
+      <input type="hidden" name="theme_preset" id="f-theme-preset" value="forest">
+      <input type="hidden" name="theme_primary" id="f-theme-primary" value="#2d6a4f">
+      <input type="hidden" name="theme_accent"  id="f-theme-accent"  value="#e76f51">
+
+      <!-- ── Step 1: Basics ── -->
+      <div class="wz-panel active" id="step-1">
+        <div class="card border-0 shadow-sm p-4">
+          <h4 class="mb-1">Club Basics</h4>
+          <p class="text-muted small mb-4">Start with the essentials. You can update everything in settings later.</p>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Club Name <span class="text-danger">*</span></label>
+            <input type="text" name="name" id="f-name" class="form-control form-control-lg"
+                   placeholder="e.g. Reston Bike Club" value="{{ form.name.data or '' }}" required>
+            {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors[0] }}</div>{% endif %}
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-5">
+              <label class="form-label fw-semibold">City</label>
+              <input type="text" name="city" class="form-control" placeholder="Reston"
+                     value="{{ form.city.data or '' }}">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">State</label>
+              <input type="text" name="state" class="form-control" placeholder="VA" maxlength="50"
+                     value="{{ form.state.data or '' }}">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label fw-semibold">Zip Code</label>
+              <input type="text" name="zip_code" class="form-control" placeholder="20191" maxlength="10"
+                     value="{{ form.zip_code.data or '' }}">
+              <div class="form-text">Used for map placement and nearby search.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+          <button type="button" class="btn btn-rbc px-4" onclick="nextStep(1)">Next: Privacy →</button>
+        </div>
+      </div>
+
+      <!-- ── Step 2: Privacy ── -->
+      <div class="wz-panel" id="step-2">
+        <div class="card border-0 shadow-sm p-4">
+          <h4 class="mb-1">Membership Privacy</h4>
+          <p class="text-muted small mb-4">Who can join your club?</p>
+
+          <div class="privacy-cards">
+            <div class="privacy-card selected" id="card-public" onclick="setPrivacy(false)">
+              <div class="privacy-card-icon">🌐</div>
+              <div class="privacy-card-title">Public</div>
+              <div class="privacy-card-desc">Anyone can join with one click. Great for open community clubs.</div>
+            </div>
+            <div class="privacy-card" id="card-private" onclick="setPrivacy(true)">
+              <div class="privacy-card-icon">🔒</div>
+              <div class="privacy-card-title">Private</div>
+              <div class="privacy-card-desc">Members must be invited by a club admin. Good for team or workplace clubs.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+          <button type="button" class="btn btn-outline-secondary" onclick="goStep(1)">← Back</button>
+          <button type="button" class="btn btn-rbc px-4" onclick="goStep(3)">Next: Theme →</button>
+        </div>
+      </div>
+
+      <!-- ── Step 3: Theme ── -->
+      <div class="wz-panel" id="step-3">
+        <div class="card border-0 shadow-sm p-4">
+          <h4 class="mb-1">Club Theme</h4>
+          <p class="text-muted small mb-3">Choose a color palette for your club's page. You can always change it in settings.</p>
+
+          <div id="preview-banner" style="background:#2d6a4f">
+            <span id="preview-name">Your Club Name</span>
+            <span class="preview-btn" id="preview-btn" style="background:#e76f51;color:#fff">Join Club</span>
+          </div>
+
+          <div class="theme-grid mb-3">
+            {% for p in presets %}
+            <div class="theme-card {% if loop.first %}selected{% endif %}"
+                 id="theme-{{ p.id }}"
+                 onclick="selectPreset('{{ p.id }}', '{{ p.primary }}', '{{ p.accent }}')"
+                 data-primary="{{ p.primary }}" data-accent="{{ p.accent }}">
+              <div class="theme-swatch">
+                <div class="theme-swatch-a" style="background:{{ p.primary }}"></div>
+                <div class="theme-swatch-b" style="background:{{ p.accent }}"></div>
+              </div>
+              <div class="theme-card-label">{{ p.label }}</div>
+            </div>
+            {% endfor %}
+            <div class="theme-card" id="theme-custom" onclick="selectPreset('custom', '', '')">
+              <div class="theme-swatch" id="custom-swatch">
+                <div class="theme-swatch-a" style="background:#888888" id="custom-swatch-a"></div>
+                <div class="theme-swatch-b" style="background:#aaaaaa" id="custom-swatch-b"></div>
+              </div>
+              <div class="theme-card-label">Custom</div>
+            </div>
+          </div>
+
+          <div class="custom-colors" id="custom-colors">
+            <div>
+              <label class="form-label small fw-semibold">Primary (header)</label>
+              <div class="color-preview-row">
+                <input type="color" id="cp-primary" value="#888888" oninput="updateCustom()">
+                <input type="text" id="ct-primary" class="form-control form-control-sm" style="width:90px"
+                       placeholder="#888888" oninput="syncColorText('primary')">
+              </div>
+            </div>
+            <div>
+              <label class="form-label small fw-semibold">Accent (buttons)</label>
+              <div class="color-preview-row">
+                <input type="color" id="cp-accent" value="#aaaaaa" oninput="updateCustom()">
+                <input type="text" id="ct-accent" class="form-control form-control-sm" style="width:90px"
+                       placeholder="#aaaaaa" oninput="syncColorText('accent')">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+          <button type="button" class="btn btn-outline-secondary" onclick="goStep(2)">← Back</button>
+          <button type="button" class="btn btn-rbc px-4" onclick="goStep(4)">Next: Details →</button>
+        </div>
+      </div>
+
+      <!-- ── Step 4: Details (optional) ── -->
+      <div class="wz-panel" id="step-4">
+        <div class="card border-0 shadow-sm p-4">
+          <h4 class="mb-1">Club Details <span class="text-muted fw-normal" style="font-size:.9rem">— optional</span></h4>
+          <p class="text-muted small mb-4">All of these can be added or changed later in Club Settings.</p>
+
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Description</label>
+            <textarea name="description" class="form-control" rows="3"
+                      placeholder="Tell riders what your club is about…">{{ form.description.data or '' }}</textarea>
+          </div>
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Contact Email</label>
+              <input type="email" name="contact_email" class="form-control"
+                     placeholder="rides@yourclub.org" value="{{ form.contact_email.data or '' }}">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Website</label>
+              <input type="url" name="website" class="form-control"
+                     placeholder="https://yourclub.org" value="{{ form.website.data or '' }}">
+            </div>
+          </div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Logo URL</label>
+              <input type="url" name="logo_url" class="form-control"
+                     placeholder="https://…/logo.png" value="{{ form.logo_url.data or '' }}">
+              <div class="form-text">Displayed in the club header. 64×64 px recommended.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Banner Image URL</label>
+              <input type="url" name="banner_url" class="form-control"
+                     placeholder="https://…/banner.jpg" value="{{ form.banner_url.data or '' }}">
+              <div class="form-text">Wide photo shown behind the club name.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+          <button type="button" class="btn btn-outline-secondary" onclick="goStep(3)">← Back</button>
+          <button type="button" class="btn btn-rbc px-4" onclick="buildReview()">Review →</button>
+        </div>
+      </div>
+
+      <!-- ── Step 5: Review ── -->
+      <div class="wz-panel" id="step-5">
+        <div class="card border-0 shadow-sm p-4">
+          <h4 class="mb-3">Review Your Club</h4>
+          <div id="review-content"></div>
+        </div>
+
+        <div class="d-flex justify-content-between mt-3">
+          <button type="button" class="btn btn-outline-secondary" onclick="goStep(4)">← Back</button>
+          <button type="submit" class="btn btn-rbc btn-lg px-5">Create Club</button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  let currentStep = 1;
+  const totalSteps = 5;
+
+  // ── Preset data from server ───────────────────────────────────────────
+  const PRESETS = {{ presets | tojson }};
+
+  // ── Step navigation ───────────────────────────────────────────────────
+  window.goStep = function(n) {
+    document.querySelectorAll('.wz-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('step-' + n).classList.add('active');
+    document.querySelectorAll('.wz-step').forEach(s => {
+      const sn = parseInt(s.dataset.step);
+      s.classList.remove('active', 'done');
+      if (sn === n) s.classList.add('active');
+      else if (sn < n) s.classList.add('done');
+    });
+    currentStep = n;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  window.nextStep = function(n) {
+    if (n === 1) {
+      const nameField = document.getElementById('f-name');
+      if (!nameField.value.trim()) {
+        nameField.classList.add('is-invalid');
+        nameField.focus();
+        if (!nameField.nextElementSibling || !nameField.nextElementSibling.classList.contains('invalid-feedback')) {
+          const err = document.createElement('div');
+          err.className = 'invalid-feedback';
+          err.textContent = 'Club name is required.';
+          nameField.after(err);
+        }
+        return;
+      }
+      nameField.classList.remove('is-invalid');
+      updatePreviewName();
+    }
+    goStep(n + 1);
+  };
+
+  // ── Update live theme preview from name field ─────────────────────────
+  document.getElementById('f-name').addEventListener('input', updatePreviewName);
+
+  function updatePreviewName() {
+    const v = document.getElementById('f-name').value.trim();
+    document.getElementById('preview-name').textContent = v || 'Your Club Name';
+  }
+
+  // ── Privacy selection ─────────────────────────────────────────────────
+  window.setPrivacy = function(isPrivate) {
+    document.getElementById('f-is-private').value = isPrivate ? '1' : '0';
+    document.getElementById('card-public').classList.toggle('selected', !isPrivate);
+    document.getElementById('card-private').classList.toggle('selected', isPrivate);
+  };
+
+  // ── Theme preset selection ────────────────────────────────────────────
+  let currentPreset = 'forest';
+
+  window.selectPreset = function(id, primary, accent) {
+    document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById('theme-' + id).classList.add('selected');
+    currentPreset = id;
+
+    const customDiv = document.getElementById('custom-colors');
+    if (id === 'custom') {
+      customDiv.classList.add('visible');
+      primary = document.getElementById('cp-primary').value;
+      accent  = document.getElementById('cp-accent').value;
+    } else {
+      customDiv.classList.remove('visible');
+    }
+
+    document.getElementById('f-theme-preset').value  = id;
+    document.getElementById('f-theme-primary').value = primary;
+    document.getElementById('f-theme-accent').value  = accent;
+
+    document.getElementById('preview-banner').style.background = primary;
+    document.getElementById('preview-btn').style.background    = accent;
+  };
+
+  window.updateCustom = function() {
+    const primary = document.getElementById('cp-primary').value;
+    const accent  = document.getElementById('cp-accent').value;
+    document.getElementById('ct-primary').value = primary;
+    document.getElementById('ct-accent').value  = accent;
+    document.getElementById('custom-swatch-a').style.background = primary;
+    document.getElementById('custom-swatch-b').style.background = accent;
+    document.getElementById('f-theme-primary').value = primary;
+    document.getElementById('f-theme-accent').value  = accent;
+    document.getElementById('preview-banner').style.background = primary;
+    document.getElementById('preview-btn').style.background    = accent;
+  };
+
+  window.syncColorText = function(which) {
+    const txt = document.getElementById('ct-' + which).value.trim();
+    if (/^#[0-9a-fA-F]{6}$/.test(txt)) {
+      document.getElementById('cp-' + which).value = txt;
+      updateCustom();
+    }
+  };
+
+  // ── Review step ───────────────────────────────────────────────────────
+  window.buildReview = function() {
+    const name        = document.getElementById('f-name').value.trim() || '(not set)';
+    const city        = document.querySelector('[name=city]').value.trim();
+    const state       = document.querySelector('[name=state]').value.trim();
+    const zip         = document.querySelector('[name=zip_code]').value.trim();
+    const locationStr = [city, state, zip].filter(Boolean).join(', ') || '(not set)';
+    const isPrivate   = document.getElementById('f-is-private').value === '1';
+    const presetId    = document.getElementById('f-theme-preset').value;
+    const primary     = document.getElementById('f-theme-primary').value;
+    const accent      = document.getElementById('f-theme-accent').value;
+    const desc        = document.querySelector('[name=description]').value.trim();
+    const email       = document.querySelector('[name=contact_email]').value.trim();
+    const website     = document.querySelector('[name=website]').value.trim();
+
+    const presetLabel = presetId === 'custom'
+      ? 'Custom'
+      : (PRESETS.find(p => p.id === presetId) || {}).label || presetId;
+
+    const swatchHtml = `<span style="display:inline-flex;gap:4px;vertical-align:middle">
+      <span style="width:18px;height:18px;border-radius:4px;background:${primary};display:inline-block"></span>
+      <span style="width:18px;height:18px;border-radius:4px;background:${accent};display:inline-block"></span>
+    </span>`;
+
+    const rows = [
+      ['Club Name',  `<strong>${name}</strong>`],
+      ['Location',   locationStr],
+      ['Membership', isPrivate ? '🔒 Private — invite only' : '🌐 Public — anyone can join'],
+      ['Theme',      `${presetLabel} ${swatchHtml}`],
+      ['Description', desc || '<em class="text-muted">None</em>'],
+      ['Contact',    email || '<em class="text-muted">None</em>'],
+      ['Website',    website || '<em class="text-muted">None</em>'],
+    ];
+
+    document.getElementById('review-content').innerHTML = rows.map(([label, value]) => `
+      <div class="review-row">
+        <div class="review-label">${label}</div>
+        <div class="review-value">${value}</div>
+      </div>`).join('');
+
+    goStep(5);
+  };
+
+  // Initial state
+  selectPreset('forest', '#2d6a4f', '#e76f51');
+  updatePreviewName();
+}());
+</script>
+{% endblock %}

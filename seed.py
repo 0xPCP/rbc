@@ -70,6 +70,10 @@ with app.app_context():
         address='McLean Community Center, 1234 Ingleside Ave',
         city='McLean', state='VA', zip_code='22101',
         lat=38.9339, lng=-77.1773,
+        is_private=True,  # invite-only example
+        theme_preset='ocean',
+        theme_primary='#1a5276',
+        theme_accent='#f39c12',
     )
     artemis = Club(
         slug='artemis',
@@ -91,9 +95,11 @@ with app.app_context():
 
     # ── Club admins ───────────────────────────────────────────────────────────
     db.session.add_all([
-        ClubAdmin(user_id=dkeller.id,    club_id=rbc.id),
-        ClubAdmin(user_id=nvcc_admin.id, club_id=nvcc.id),
-        ClubAdmin(user_id=art_admin.id,  club_id=artemis.id),
+        ClubAdmin(user_id=dkeller.id,    club_id=rbc.id,     role='admin'),
+        ClubAdmin(user_id=nvcc_admin.id, club_id=nvcc.id,    role='admin'),
+        ClubAdmin(user_id=art_admin.id,  club_id=artemis.id, role='admin'),
+        # Phil can manage rides at RBC but not settings
+        ClubAdmin(user_id=phil.id,       club_id=rbc.id,     role='ride_manager'),
     ])
     db.session.commit()
 

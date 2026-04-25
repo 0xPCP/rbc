@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Team — {{ club.name }} Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('clubs.home', slug=club.slug) }}">{{ club.name }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}">Admin</a></li>
+        <li class="breadcrumb-item active">Team</li>
+      </ol>
+    </nav>
+    <h1>{{ club.name }} — Team</h1>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-4">
+
+    <!-- Admin roles -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-3">Admin Team</h5>
+          <p class="text-muted small mb-3">
+            <strong>Admin</strong> — full access to settings, members, and rides.<br>
+            <strong>Ride Manager</strong> — can add, edit, and cancel rides only.
+          </p>
+
+          {% if admins %}
+          <div class="rbc-table-wrap mb-3">
+            <table class="table table-sm rbc-table">
+              <thead><tr><th>User</th><th>Role</th><th></th></tr></thead>
+              <tbody>
+                {% for row, user in admins %}
+                <tr>
+                  <td>
+                    <strong>{{ user.username }}</strong><br>
+                    <small class="text-muted">{{ user.email }}</small>
+                  </td>
+                  <td>
+                    {% if row.role == 'admin' %}
+                    <span class="badge" style="background:var(--rbc-green,#2d6a4f)">Admin</span>
+                    {% else %}
+                    <span class="badge bg-secondary">Ride Manager</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    {% if user.id != current_user.id %}
+                    <form method="post" action="{{ url_for('admin.club_team_remove', slug=club.slug, admin_id=row.id) }}"
+                          onsubmit="return confirm('Remove {{ user.username }} from the admin team?')">
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button class="btn btn-outline-danger btn-xs">Remove</button>
+                    </form>
+                    {% else %}
+                    <span class="text-muted small">you</span>
+                    {% endif %}
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <p class="text-muted small">No admins listed yet.</p>
+          {% endif %}
+
+          <h6 class="mt-3 mb-2">Add to Admin Team</h6>
+          <form method="post" action="{{ url_for('admin.club_team_add', slug=club.slug) }}" class="d-flex gap-2 flex-wrap">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="text" name="identifier" class="form-control form-control-sm" style="min-width:180px"
+                   placeholder="Username or email" required>
+            <select name="role" class="form-select form-select-sm" style="width:auto">
+              <option value="admin">Admin</option>
+              <option value="ride_manager">Ride Manager</option>
+            </select>
+            <button type="submit" class="btn btn-rbc btn-sm">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <!-- Members -->
+    <div class="col-lg-6">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body">
+          <h5 class="card-title mb-3">Members
+            <span class="badge bg-secondary ms-1">{{ members | length }}</span>
+          </h5>
+
+          {% if club.is_private %}
+          <div class="alert alert-info py-2 small mb-3">
+            🔒 This is a <strong>private club</strong>. Members must be added manually.
+          </div>
+          {% endif %}
+
+          {% if members %}
+          <div style="max-height:340px;overflow-y:auto" class="mb-3">
+            <div class="rbc-table-wrap">
+              <table class="table table-sm rbc-table">
+                <thead><tr><th>User</th><th>Joined</th><th></th></tr></thead>
+                <tbody>
+                  {% for row, user in members %}
+                  <tr>
+                    <td>
+                      <strong>{{ user.username }}</strong><br>
+                      <small class="text-muted">{{ user.email }}</small>
+                    </td>
+                    <td><small class="text-muted">{{ row.joined_at.strftime('%b %d, %Y') }}</small></td>
+                    <td>
+                      <form method="post"
+                            action="{{ url_for('admin.club_member_remove', slug=club.slug, uid=user.id) }}"
+                            onsubmit="return confirm('Remove {{ user.username }} from this club?')">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="btn btn-outline-danger btn-xs">Remove</button>
+                      </form>
+                    </td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {% else %}
+          <p class="text-muted small mb-3">No members yet.</p>
+          {% endif %}
+
+          <h6 class="mb-2">Add Member</h6>
+          <form method="post" action="{{ url_for('admin.club_member_add', slug=club.slug) }}" class="d-flex gap-2">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="text" name="identifier" class="form-control form-control-sm"
+                   placeholder="Username or email" required>
+            <button type="submit" class="btn btn-rbc btn-sm">Add</button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

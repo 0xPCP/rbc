@@ -40,9 +40,19 @@ class User(db.Model, UserMixin):
     waiver_signatures = db.relationship('WaiverSignature', backref='user', lazy=True, cascade='all, delete-orphan')
 
     def is_club_admin(self, club):
+        """Full club admin: can manage settings, members, and rides."""
         if self.is_admin:
             return True
-        return ClubAdmin.query.filter_by(user_id=self.id, club_id=club.id).first() is not None
+        row = ClubAdmin.query.filter_by(user_id=self.id, club_id=club.id).first()
+        return row is not None and row.role == 'admin'
+
+    def is_ride_manager(self, club):
+        """Ride-only manager: can add/edit/cancel rides but not club settings."""
+        row = ClubAdmin.query.filter_by(user_id=self.id, club_id=club.id).first()
+        return row is not None and row.role == 'ride_manager'
+
+    def can_manage_rides(self, club):
+        return self.is_club_admin(club) or self.is_ride_manager(club)
 
     def is_member_of(self, club):
         return ClubMembership.query.filter_by(user_id=self.id, club_id=club.id).first() is not None
@@ -79,8 +89,14 @@ class Club(db.Model):
     theme_accent  = db.Column(db.String(7), nullable=True)   # hex e.g. "#e76f51"
     banner_url    = db.Column(db.String(500), nullable=True)  # header background image
 
+    # Privacy
+    is_private = db.Column(db.Boolean, default=False, nullable=False)
+
     # Strava integration
     strava_club_id = db.Column(db.BigInteger, nullable=True)  # numeric Strava club ID
+
+    # Theme preset identifier (matches THEME_PRESETS in routes/clubs.py), or 'custom'
+    theme_preset = db.Column(db.String(30), nullable=True)
 
     # Weather-based auto-cancel thresholds
     auto_cancel_enabled  = db.Column(db.Boolean, default=False, nullable=False)
@@ -127,6 +143,7 @@ class ClubAdmin(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=False)
     granted_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    role = db.Column(db.String(20), default='admin', nullable=False)  # 'admin' | 'ride_manager'
 
     __table_args__ = (db.UniqueConstraint('user_id', 'club_id', name='uq_club_admin'),)
 

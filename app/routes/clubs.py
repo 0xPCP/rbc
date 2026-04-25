@@ -1,3 +1,4 @@
+import re
 import calendar as cal_module
 from datetime import date, datetime, timedelta, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, Response
@@ -5,12 +6,25 @@ from flask_login import login_required, current_user
 from sqlalchemy.exc import IntegrityError
 import requests as http_requests
 from ..extensions import db
-from ..models import Club, ClubMembership, Ride
+from ..models import Club, ClubAdmin, ClubMembership, Ride
 from ..weather import get_weather_for_rides
 from ..geocoding import clubs_near_zip
 from .strava import get_club_activities
+from ..forms import ClubCreateForm
+from ..geocoding import geocode_zip
 
 clubs_bp = Blueprint('clubs', __name__)
+
+THEME_PRESETS = [
+    {'id': 'forest',  'label': 'Forest',  'primary': '#2d6a4f', 'accent': '#e76f51'},
+    {'id': 'ocean',   'label': 'Ocean',   'primary': '#1a5276', 'accent': '#f39c12'},
+    {'id': 'slate',   'label': 'Slate',   'primary': '#2c3e50', 'accent': '#27ae60'},
+    {'id': 'sunset',  'label': 'Sunset',  'primary': '#7d3c98', 'accent': '#e74c3c'},
+    {'id': 'crimson', 'label': 'Crimson', 'primary': '#922b21', 'accent': '#3498db'},
+    {'id': 'desert',  'label': 'Desert',  'primary': '#b7522a', 'accent': '#f1c40f'},
+]
+
+_PRESET_MAP = {p['id']: p for p in THEME_PRESETS}
 
 
 def _get_club_or_404(slug):
@@ -85,6 +99,76 @@ def club_map():
         })
     clubs_json = json.dumps(features)
     return render_template('clubs/map.html', clubs_json=clubs_json)
+
+
+# ── Club creation wizard ──────────────────────────────────────────────────────
+
+def _generate_slug(name):
+    """Turn a club name into a URL-safe slug, disambiguating if taken."""
+    base = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')[:70]
+    slug = base
+    n = 2
+    while Club.query.filter_by(slug=slug).first():
+        slug = f'{base}-{n}'
+        n += 1
+    return slug
+
+
+@clubs_bp.route('/create', methods=['GET', 'POST'])
+@login_required
+def create():
+    form = ClubCreateForm()
+    if form.validate_on_submit():
+        slug = _generate_slug(form.name.data)
+        preset_id = (form.theme_preset.data or '').strip().lower()
+        preset = _PRESET_MAP.get(preset_id)
+
+        if preset and preset_id != 'custom':
+            primary = preset['primary']
+            accent  = preset['accent']
+        else:
+            primary = (form.theme_primary.data or '').strip().lower() or None
+            accent  = (form.theme_accent.data or '').strip().lower() or None
+            if primary or accent:
+                preset_id = 'custom'
+            else:
+                preset_id = 'forest'
+                primary   = '#2d6a4f'
+                accent    = '#e76f51'
+
+        club = Club(
+            slug          = slug,
+            name          = form.name.data.strip(),
+            city          = form.city.data.strip() or None,
+            state         = form.state.data.strip() or None,
+            zip_code      = form.zip_code.data.strip() or None,
+            is_private    = request.form.get('is_private') == '1',
+            theme_preset  = preset_id,
+            theme_primary = primary,
+            theme_accent  = accent,
+            description   = form.description.data or None,
+            contact_email = form.contact_email.data or None,
+            website       = form.website.data or None,
+            logo_url      = form.logo_url.data or None,
+            banner_url    = form.banner_url.data or None,
+        )
+        if club.zip_code:
+            coords = geocode_zip(club.zip_code)
+            if coords:
+                club.lat, club.lng = coords
+
+        db.session.add(club)
+        db.session.flush()  # get club.id before adding relations
+
+        # Creator becomes admin + member
+        db.session.add(ClubAdmin(user_id=current_user.id, club_id=club.id, role='admin'))
+        db.session.add(ClubMembership(user_id=current_user.id, club_id=club.id))
+        db.session.commit()
+
+        flash(f'"{club.name}" has been created! Set up your first ride to get started.', 'success')
+        return redirect(url_for('admin.club_dashboard', slug=club.slug))
+
+    return render_template('clubs/create.html', form=form, presets=THEME_PRESETS)
 
 
 # ── Club home ─────────────────────────────────────────────────────────────────

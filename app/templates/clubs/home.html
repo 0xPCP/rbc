@@ -15,8 +15,11 @@
              onerror="this.style.display='none'">
         {% endif %}
         <div>
-          <h1>{{ club.name }}</h1>
-          {% if club.city %}<p class="mb-1" style="color:rgba(255,255,255,.75)">{{ club.city }}, {{ club.state }}</p>{% endif %}
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <h1 class="mb-0">{{ club.name }}</h1>
+            {% if club.is_private %}<span class="badge bg-dark" style="font-size:.7rem;letter-spacing:.04em">🔒 Private</span>{% endif %}
+          </div>
+          {% if club.city %}<p class="mb-1 mt-1" style="color:rgba(255,255,255,.75)">{{ club.city }}, {{ club.state }}</p>{% endif %}
           <p class="mb-0" style="color:rgba(255,255,255,.75)">{{ club.member_count }} member{{ 's' if club.member_count != 1 else '' }}</p>
         </div>
       </div>
@@ -27,6 +30,8 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <button class="btn btn-outline-light">Leave Club</button>
           </form>
+          {% elif club.is_private %}
+          <span class="btn btn-outline-light disabled" title="This is a private club — contact the admin to join.">🔒 Private Club</span>
           {% else %}
           <form method="post" action="{{ url_for('clubs.join', slug=club.slug) }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
@@ -34,7 +39,11 @@
           </form>
           {% endif %}
         {% else %}
-        <a href="{{ url_for('auth.login') }}" class="btn btn-rbc">Sign In to Join</a>
+          {% if club.is_private %}
+          <span class="btn btn-outline-light disabled">🔒 Private Club</span>
+          {% else %}
+          <a href="{{ url_for('auth.login') }}" class="btn btn-rbc">Sign In to Join</a>
+          {% endif %}
         {% endif %}
         {% if current_user.is_authenticated and current_user.is_club_admin(club) %}
         <a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}" class="btn btn-outline-light">Admin</a>

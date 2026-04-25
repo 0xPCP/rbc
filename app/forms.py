@@ -79,6 +79,31 @@ class ClubSettingsForm(FlaskForm):
     submit      = SubmitField('Save Settings')
 
 
+class ClubCreateForm(FlaskForm):
+    """Multi-step club creation wizard — submitted as a single POST."""
+    name          = StringField('Club Name', validators=[DataRequired(), Length(max=200)])
+    city          = StringField('City', validators=[Optional(), Length(max=100)])
+    state         = StringField('State', validators=[Optional(), Length(max=50)])
+    zip_code      = StringField('Zip Code', validators=[Optional(), Length(max=10)])
+    is_private    = BooleanField('Private Club')
+    # theme_preset is written by JS, validated as a string
+    theme_preset  = StringField('Theme Preset', validators=[Optional(), Length(max=30)])
+    theme_primary = StringField('Primary Color', validators=[
+        Optional(), Length(max=7),
+        Regexp(r'^#[0-9a-fA-F]{6}$', message='Enter a valid hex color (e.g. #3a7bd5).'),
+    ])
+    theme_accent  = StringField('Accent Color', validators=[
+        Optional(), Length(max=7),
+        Regexp(r'^#[0-9a-fA-F]{6}$', message='Enter a valid hex color (e.g. #e76f51).'),
+    ])
+    description   = TextAreaField('Description', validators=[Optional()])
+    contact_email = StringField('Contact Email', validators=[Optional(), Email(), Length(max=255)])
+    website       = StringField('Website URL', validators=[Optional(), URL(), Length(max=500)])
+    logo_url      = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
+    banner_url    = StringField('Banner Image URL', validators=[Optional(), URL(), Length(max=500)])
+    submit        = SubmitField('Create Club')
+
+
 class RideForm(FlaskForm):
     title = StringField('Ride Title', validators=[DataRequired(), Length(max=200)])
     date = DateField('Date', validators=[DataRequired()])

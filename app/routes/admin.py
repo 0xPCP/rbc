@@ -3,7 +3,7 @@ from datetime import date
 from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
 from flask_login import login_required, current_user
 from ..extensions import db
-from ..models import Club, Ride, RideSignup, User, ClubMembership
+from ..models import Club, Ride, RideSignup, User, ClubMembership, ClubAdmin
 from ..forms import RideForm, ClubForm, ClubSettingsForm
 from ..recurrence import generate_instances, delete_future_instances
 from ..geocoding import geocode_zip
@@ -26,6 +26,23 @@ def club_admin_required(f):
         if slug:
             club = _get_club_or_404(slug)
             if not current_user.is_club_admin(club):
+                abort(403)
+        elif not current_user.is_admin:
+            abort(403)
+        return f(*args, **kwargs)
+    return login_required(decorated)
+
+
+def club_ride_admin_required(f):
+    """Decorator: user must be able to manage rides (full admin OR ride_manager)."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated:
+            abort(403)
+        slug = kwargs.get('slug')
+        if slug:
+            club = _get_club_or_404(slug)
+            if not current_user.can_manage_rides(club):
                 abort(403)
         elif not current_user.is_admin:
             abort(403)
@@ -96,7 +113,7 @@ def club_new():
 # ── Club admin ────────────────────────────────────────────────────────────────
 
 @admin_bp.route('/clubs/<slug>/')
-@club_admin_required
+@club_ride_admin_required
 def club_dashboard(slug):
     club = _get_club_or_404(slug)
     today = date.today()
@@ -111,8 +128,10 @@ def club_dashboard(slug):
                            .join(Ride, RideSignup.ride_id == Ride.id)
                            .filter(Ride.club_id == club.id).count()),
     }
+    is_full_admin = current_user.is_club_admin(club)
     return render_template('admin/club_dashboard.html', club=club,
-                           upcoming=upcoming, stats=stats)
+                           upcoming=upcoming, stats=stats,
+                           is_full_admin=is_full_admin)
 
 
 @admin_bp.route('/clubs/<slug>/settings', methods=['GET', 'POST'])
@@ -163,7 +182,7 @@ def club_settings(slug):
 
 
 @admin_bp.route('/clubs/<slug>/rides')
-@club_admin_required
+@club_ride_admin_required
 def club_rides(slug):
     club = _get_club_or_404(slug)
     all_rides = (Ride.query.filter_by(club_id=club.id)
@@ -172,7 +191,7 @@ def club_rides(slug):
 
 
 @admin_bp.route('/clubs/<slug>/rides/new', methods=['GET', 'POST'])
-@club_admin_required
+@club_ride_admin_required
 def ride_new(slug):
     club = _get_club_or_404(slug)
     form = RideForm()
@@ -207,7 +226,7 @@ def ride_new(slug):
 
 
 @admin_bp.route('/clubs/<slug>/rides/<int:ride_id>/edit', methods=['GET', 'POST'])
-@club_admin_required
+@club_ride_admin_required
 def ride_edit(slug, ride_id):
     club = _get_club_or_404(slug)
     ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
@@ -247,7 +266,7 @@ def ride_edit(slug, ride_id):
 
 
 @admin_bp.route('/clubs/<slug>/rides/<int:ride_id>/delete', methods=['POST'])
-@club_admin_required
+@club_ride_admin_required
 def ride_delete(slug, ride_id):
     club = _get_club_or_404(slug)
     ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
@@ -255,3 +274,101 @@ def ride_delete(slug, ride_id):
     db.session.commit()
     flash('Ride deleted.', 'info')
     return redirect(url_for('admin.club_rides', slug=slug))
+
+
+# ── Club team (admin role) management ─────────────────────────────────────────
+
+@admin_bp.route('/clubs/<slug>/team')
+@club_admin_required
+def club_team(slug):
+    club = _get_club_or_404(slug)
+    admins = (ClubAdmin.query.filter_by(club_id=club.id)
+              .join(User, ClubAdmin.user_id == User.id)
+              .add_entity(User).all())
+    members = (ClubMembership.query.filter_by(club_id=club.id)
+               .join(User, ClubMembership.user_id == User.id)
+               .add_entity(User).all())
+    return render_template('admin/club_team.html', club=club,
+                           admins=admins, members=members)
+
+
+@admin_bp.route('/clubs/<slug>/team/add', methods=['POST'])
+@club_admin_required
+def club_team_add(slug):
+    club = _get_club_or_404(slug)
+    identifier = request.form.get('identifier', '').strip()
+    role = request.form.get('role', 'admin')
+    if role not in ('admin', 'ride_manager'):
+        role = 'admin'
+
+    user = (User.query.filter(
+        (User.email == identifier) | (User.username == identifier)
+    ).first())
+    if not user:
+        flash(f'No user found with email or username "{identifier}".', 'danger')
+        return redirect(url_for('admin.club_team', slug=slug))
+
+    existing = ClubAdmin.query.filter_by(user_id=user.id, club_id=club.id).first()
+    if existing:
+        existing.role = role
+        db.session.commit()
+        flash(f'{user.username} role updated to {role}.', 'success')
+    else:
+        db.session.add(ClubAdmin(user_id=user.id, club_id=club.id, role=role))
+        db.session.commit()
+        flash(f'{user.username} added as {role}.', 'success')
+
+    return redirect(url_for('admin.club_team', slug=slug))
+
+
+@admin_bp.route('/clubs/<slug>/team/<int:admin_id>/remove', methods=['POST'])
+@club_admin_required
+def club_team_remove(slug, admin_id):
+    club = _get_club_or_404(slug)
+    row = ClubAdmin.query.filter_by(id=admin_id, club_id=club.id).first_or_404()
+
+    # Prevent removing self if you're the only full admin
+    full_admins = ClubAdmin.query.filter_by(club_id=club.id, role='admin').count()
+    if row.user_id == current_user.id and full_admins <= 1:
+        flash('Cannot remove yourself — you are the only club admin.', 'danger')
+        return redirect(url_for('admin.club_team', slug=slug))
+
+    username = row.user.username
+    db.session.delete(row)
+    db.session.commit()
+    flash(f'{username} removed from club team.', 'info')
+    return redirect(url_for('admin.club_team', slug=slug))
+
+
+@admin_bp.route('/clubs/<slug>/members/add', methods=['POST'])
+@club_admin_required
+def club_member_add(slug):
+    club = _get_club_or_404(slug)
+    identifier = request.form.get('identifier', '').strip()
+    user = User.query.filter(
+        (User.email == identifier) | (User.username == identifier)
+    ).first()
+    if not user:
+        flash(f'No user found with email or username "{identifier}".', 'danger')
+        return redirect(url_for('admin.club_team', slug=slug))
+
+    if ClubMembership.query.filter_by(user_id=user.id, club_id=club.id).first():
+        flash(f'{user.username} is already a member.', 'info')
+    else:
+        db.session.add(ClubMembership(user_id=user.id, club_id=club.id))
+        db.session.commit()
+        flash(f'{user.username} added as a member.', 'success')
+
+    return redirect(url_for('admin.club_team', slug=slug))
+
+
+@admin_bp.route('/clubs/<slug>/members/<int:uid>/remove', methods=['POST'])
+@club_admin_required
+def club_member_remove(slug, uid):
+    club = _get_club_or_404(slug)
+    row = ClubMembership.query.filter_by(user_id=uid, club_id=club.id).first_or_404()
+    username = row.user.username
+    db.session.delete(row)
+    db.session.commit()
+    flash(f'{username} removed from club.', 'info')
+    return redirect(url_for('admin.club_team', slug=slug))
