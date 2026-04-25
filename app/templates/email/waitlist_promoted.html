@@ -1,0 +1,19 @@
+{% extends "email/_base.html" %}
+{% block body %}
+<div class="club-tag">{{ ride.club.name }}</div>
+<h1>You're off the waitlist!</h1>
+
+<div class="alert alert-success">
+  A spot opened up for <strong>{{ ride.title }}</strong> and you're now signed up.
+</div>
+
+<table class="meta-table">
+  <tr><td>Date</td><td>{{ ride.date.strftime('%A, %B %d, %Y') }}</td></tr>
+  <tr><td>Start Time</td><td>{{ ride.time.strftime('%I:%M %p') }}</td></tr>
+  <tr><td>Meeting Point</td><td>{{ ride.meeting_location }}</td></tr>
+  <tr><td>Distance</td><td>{{ ride.distance_miles }} miles{% if ride.elevation_feet %} &bull; {{ ride.elevation_feet }} ft{% endif %}</td></tr>
+  <tr><td>Pace</td><td>{{ ride.pace_label }}</td></tr>
+</table>
+
+<a href="https://cyclingclub.pcp.dev/clubs/{{ ride.club.slug }}/rides/{{ ride.id }}" class="cta">View Ride Details</a>
+{% endblock %}

@@ -1,0 +1,5 @@
+Your membership to {{ club.name }} was approved!
+
+Great news — your request to join {{ club.name }} has been approved. You're now an active member and can sign up for rides, view routes, and access all member content.
+
+Visit the club: https://cyclingclub.pcp.dev/clubs/{{ club.slug }}/

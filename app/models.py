@@ -206,10 +206,12 @@ class Ride(db.Model):
     distance_miles = db.Column(db.Float, nullable=False)
     elevation_feet = db.Column(db.Integer, nullable=True)
     pace_category = db.Column(db.String(2), nullable=False)  # A, B, C, D
+    ride_type = db.Column(db.String(20), nullable=True)  # road, gravel, social, training, event, night
     ride_leader = db.Column(db.String(100), nullable=True)
     route_url = db.Column(db.String(500), nullable=True)
     description = db.Column(db.Text, nullable=True)
     video_url = db.Column(db.String(500), nullable=True)
+    max_riders = db.Column(db.Integer, nullable=True)
     is_cancelled = db.Column(db.Boolean, default=False, nullable=False)
     cancel_reason = db.Column(db.String(500), nullable=True)
     is_recurring = db.Column(db.Boolean, default=False, nullable=False)
@@ -226,7 +228,21 @@ class Ride(db.Model):
 
     @property
     def signup_count(self):
-        return len(self.signups)
+        return sum(1 for s in self.signups if not s.is_waitlist)
+
+    @property
+    def waitlist_count(self):
+        return sum(1 for s in self.signups if s.is_waitlist)
+
+    @property
+    def is_full(self):
+        return self.max_riders is not None and self.signup_count >= self.max_riders
+
+    @property
+    def spots_remaining(self):
+        if self.max_riders is None:
+            return None
+        return max(0, self.max_riders - self.signup_count)
 
     @property
     def ridewithgps_route_id(self):
@@ -278,6 +294,7 @@ class RideSignup(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     ride_id = db.Column(db.Integer, db.ForeignKey('rides.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    is_waitlist = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (db.UniqueConstraint('ride_id', 'user_id', name='uq_ride_user'),)

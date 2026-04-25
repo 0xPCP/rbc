@@ -1,0 +1,5 @@
+Membership request not approved — {{ club.name }}
+
+Your request to join {{ club.name }} was not approved at this time.
+
+If you have questions, please contact the club at {% if club.contact_email %}{{ club.contact_email }}{% else %}their website{% endif %}.

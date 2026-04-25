@@ -204,19 +204,26 @@ def rides(slug):
     return _list_view(club)
 
 
+RIDE_TYPES = ['road', 'gravel', 'social', 'training', 'event', 'night']
+
+
 def _list_view(club):
     today = date.today()
     pace = request.args.get('pace', '')
+    ride_type = request.args.get('type', '')
     query = (Ride.query
              .filter_by(club_id=club.id)
              .filter(Ride.date >= today)
              .order_by(Ride.date.asc(), Ride.time.asc()))
     if pace in ('A', 'B', 'C', 'D'):
         query = query.filter(Ride.pace_category == pace)
+    if ride_type in RIDE_TYPES:
+        query = query.filter(Ride.ride_type == ride_type)
     rides = query.all()
     weather = get_weather_for_rides(rides)
     return render_template('clubs/calendar_list.html', club=club, rides=rides,
-                           active_pace=pace, weather=weather, today=today, view='list')
+                           active_pace=pace, active_type=ride_type,
+                           ride_types=RIDE_TYPES, weather=weather, today=today, view='list')
 
 
 def _month_view(club):
@@ -307,14 +314,20 @@ def ride_detail(slug, ride_id):
     ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
 
     user_signed_up = False
+    user_waitlisted = False
     waiver_required = False
     membership_required = False
     show_route = True
     if current_user.is_authenticated:
         from ..models import RideSignup
-        user_signed_up = RideSignup.query.filter_by(
+        my_signup = RideSignup.query.filter_by(
             ride_id=ride_id, user_id=current_user.id
-        ).first() is not None
+        ).first()
+        if my_signup:
+            if my_signup.is_waitlist:
+                user_waitlisted = True
+            else:
+                user_signed_up = True
         if club.current_waiver and not current_user.has_signed_waiver(club):
             waiver_required = True
         if club.require_membership and not current_user.is_active_member_of(club):
@@ -330,6 +343,7 @@ def ride_detail(slug, ride_id):
     weather = get_weather_for_rides([ride])
     return render_template('clubs/ride_detail.html', club=club, ride=ride,
                            user_signed_up=user_signed_up,
+                           user_waitlisted=user_waitlisted,
                            waiver_required=waiver_required,
                            membership_required=membership_required,
                            show_route=show_route,
@@ -432,10 +446,18 @@ def ride_signup(slug, ride_id):
 
     from ..models import RideSignup
     from sqlalchemy.exc import IntegrityError
-    db.session.add(RideSignup(ride_id=ride_id, user_id=current_user.id))
+    already = RideSignup.query.filter_by(ride_id=ride_id, user_id=current_user.id).first()
+    if already:
+        flash('You are already signed up for this ride.', 'info')
+        return redirect(url_for('clubs.ride_detail', slug=slug, ride_id=ride_id))
+    on_waitlist = ride.is_full
+    db.session.add(RideSignup(ride_id=ride_id, user_id=current_user.id, is_waitlist=on_waitlist))
     try:
         db.session.commit()
-        flash("You're signed up! See you on the road.", 'success')
+        if on_waitlist:
+            flash(f"The ride is full — you've been added to the waitlist (#{ride.waitlist_count}).", 'info')
+        else:
+            flash("You're signed up! See you on the road.", 'success')
     except IntegrityError:
         db.session.rollback()
         flash('You are already signed up for this ride.', 'info')
@@ -445,14 +467,31 @@ def ride_signup(slug, ride_id):
 @clubs_bp.route('/<slug>/rides/<int:ride_id>/unsignup', methods=['POST'])
 @login_required
 def ride_unsignup(slug, ride_id):
+    from ..models import RideSignup
+    from ..email import send_waitlist_promoted
     club = _get_club_or_404(slug)
     ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
-    from ..models import RideSignup
     s = RideSignup.query.filter_by(ride_id=ride_id, user_id=current_user.id).first()
     if s:
+        was_active = not s.is_waitlist
         db.session.delete(s)
-        db.session.commit()
-        flash("You've been removed from this ride.", 'info')
+        db.session.flush()
+        if was_active:
+            next_up = (RideSignup.query
+                       .filter_by(ride_id=ride_id, is_waitlist=True)
+                       .order_by(RideSignup.created_at.asc())
+                       .first())
+            if next_up:
+                next_up.is_waitlist = False
+                db.session.commit()
+                send_waitlist_promoted(next_up)
+                flash("You've been removed. The next person on the waitlist has been notified.", 'info')
+            else:
+                db.session.commit()
+                flash("You've been removed from this ride.", 'info')
+        else:
+            db.session.commit()
+            flash("You've been removed from the waitlist.", 'info')
     return redirect(url_for('clubs.ride_detail', slug=slug, ride_id=ride_id))
 
 

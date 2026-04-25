@@ -160,6 +160,14 @@
 
         <div class="mb-3">
           <div class="form-check form-switch">
+            {{ form.is_private(class="form-check-input", role="switch", id="is_private") }}
+            {{ form.is_private.label(class="form-check-label", for="is_private") }}
+          </div>
+          <div class="form-text">Route URLs, RideWithGPS map embeds, and GPX downloads are hidden from non-members. The club remains publicly discoverable on the map and search.</div>
+        </div>
+
+        <div class="mb-3">
+          <div class="form-check form-switch">
             {{ form.require_membership(class="form-check-input", role="switch", id="require_membership") }}
             {{ form.require_membership.label(class="form-check-label", for="require_membership") }}
           </div>

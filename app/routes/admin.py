@@ -7,7 +7,8 @@ from ..models import Club, Ride, RideSignup, User, ClubMembership, ClubAdmin
 from ..forms import RideForm, ClubForm, ClubSettingsForm
 from ..recurrence import generate_instances, delete_future_instances
 from ..geocoding import geocode_zip
-from ..email import send_cancellation_emails, send_new_ride_notification
+from ..email import (send_cancellation_emails, send_new_ride_notification,
+                     send_membership_approved, send_membership_rejected)
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -175,6 +176,7 @@ def club_settings(slug):
         club.cancel_temp_min_f   = form.cancel_temp_min_f.data if form.cancel_temp_min_f.data is not None else 28
         club.cancel_temp_max_f   = form.cancel_temp_max_f.data if form.cancel_temp_max_f.data is not None else 100
 
+        club.is_private         = form.is_private.data
         club.require_membership = form.require_membership.data
         club.join_approval      = form.join_approval.data if form.join_approval.data in ('auto', 'manual') else 'auto'
 
@@ -209,6 +211,8 @@ def ride_new(slug):
             distance_miles=form.distance_miles.data,
             elevation_feet=form.elevation_feet.data,
             pace_category=form.pace_category.data,
+            ride_type=form.ride_type.data or None,
+            max_riders=form.max_riders.data or None,
             ride_leader=form.ride_leader.data or None,
             route_url=form.route_url.data or None,
             video_url=form.video_url.data or None,
@@ -245,6 +249,8 @@ def ride_edit(slug, ride_id):
         ride.distance_miles = form.distance_miles.data
         ride.elevation_feet = form.elevation_feet.data
         ride.pace_category  = form.pace_category.data
+        ride.ride_type      = form.ride_type.data or None
+        ride.max_riders     = form.max_riders.data or None
         ride.ride_leader    = form.ride_leader.data or None
         ride.route_url      = form.route_url.data or None
         ride.video_url      = form.video_url.data or None
@@ -394,6 +400,7 @@ def club_member_approve(slug, uid):
     row = ClubMembership.query.filter_by(user_id=uid, club_id=club.id, status='pending').first_or_404()
     row.status = 'active'
     db.session.commit()
+    send_membership_approved(row.user, club)
     flash(f'{row.user.username} approved and is now an active member.', 'success')
     return redirect(url_for('admin.club_team', slug=slug))
 
@@ -404,6 +411,7 @@ def club_member_reject(slug, uid):
     club = _get_club_or_404(slug)
     row = ClubMembership.query.filter_by(user_id=uid, club_id=club.id, status='pending').first_or_404()
     username = row.user.username
+    send_membership_rejected(row.user, club)
     db.session.delete(row)
     db.session.commit()
     flash(f'{username}\'s membership request was rejected.', 'info')

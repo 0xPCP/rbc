@@ -1,0 +1,14 @@
+{% extends "email/_base.html" %}
+{% block body %}
+<div class="club-tag">{{ club.name }}</div>
+<h1>Membership request not approved</h1>
+
+<div class="alert alert-danger">
+  Your request to join <strong>{{ club.name }}</strong> was not approved at this time.
+</div>
+
+<p style="font-size:.9rem;color:#495057;margin-bottom:20px">
+  If you have questions, please contact the club directly at
+  {% if club.contact_email %}<a href="mailto:{{ club.contact_email }}">{{ club.contact_email }}</a>{% else %}the club's contact page{% endif %}.
+</p>
+{% endblock %}

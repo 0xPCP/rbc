@@ -23,12 +23,21 @@
       <a href="{{ url_for('clubs.rides', slug=club.slug, view='week') }}" class="view-btn {{ 'active' if view == 'week' else '' }}">Week</a>
       <a href="{{ url_for('clubs.rides', slug=club.slug, view='month') }}" class="view-btn {{ 'active' if view == 'month' else '' }}">Month</a>
     </div>
-    <div class="pace-filter">
-      <span class="filter-label">Pace:</span>
-      <a href="{{ url_for('clubs.rides', slug=club.slug) }}" class="pace-filter-btn {{ 'active' if not active_pace else '' }}">All</a>
-      {% for p in ['A', 'B', 'C', 'D'] %}
-      <a href="{{ url_for('clubs.rides', slug=club.slug, pace=p) }}" class="pace-filter-btn pace-filter-{{ p }} {{ 'active' if active_pace == p else '' }}">{{ p }}</a>
-      {% endfor %}
+    <div class="d-flex flex-wrap gap-3 align-items-center">
+      <div class="pace-filter">
+        <span class="filter-label">Pace:</span>
+        <a href="{{ url_for('clubs.rides', slug=club.slug, **({'type': active_type} if active_type else {})) }}" class="pace-filter-btn {{ 'active' if not active_pace else '' }}">All</a>
+        {% for p in ['A', 'B', 'C', 'D'] %}
+        <a href="{{ url_for('clubs.rides', slug=club.slug, pace=p, **({'type': active_type} if active_type else {})) }}" class="pace-filter-btn pace-filter-{{ p }} {{ 'active' if active_pace == p else '' }}">{{ p }}</a>
+        {% endfor %}
+      </div>
+      <div class="pace-filter">
+        <span class="filter-label">Type:</span>
+        <a href="{{ url_for('clubs.rides', slug=club.slug, **({'pace': active_pace} if active_pace else {})) }}" class="pace-filter-btn {{ 'active' if not active_type else '' }}">All</a>
+        {% for t in ride_types %}
+        <a href="{{ url_for('clubs.rides', slug=club.slug, type=t, **({'pace': active_pace} if active_pace else {})) }}" class="pace-filter-btn {{ 'active' if active_type == t else '' }}">{{ t | capitalize }}</a>
+        {% endfor %}
+      </div>
     </div>
   </div>
 
@@ -50,6 +59,7 @@
         <div class="ride-row-main">
           <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
             <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
+            {% if ride.ride_type %}<span class="badge bg-secondary fw-normal">{{ ride.ride_type | capitalize }}</span>{% endif %}
             {% if ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>{% endif %}
             <span class="ride-row-time">{{ ride.time.strftime('%I:%M %p') }}</span>
             {% if w and w.warning %}<span class="weather-warn-badge">⚠️ Weather Warning</span>{% endif %}
@@ -82,7 +92,7 @@
   </div>
   {% else %}
   <div class="empty-state">
-    <p>No upcoming rides scheduled{% if active_pace %} for pace {{ active_pace }}{% endif %}.</p>
+    <p>No upcoming rides scheduled{% if active_pace %} for pace {{ active_pace }}{% endif %}{% if active_type %} of type {{ active_type }}{% endif %}.</p>
   </div>
   {% endif %}
 </div>

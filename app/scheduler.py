@@ -9,7 +9,7 @@ import logging
 from datetime import date
 
 from .weather import get_weather_for_rides
-from .email import send_cancellation_emails, send_ride_reminder
+from .email import send_cancellation_emails, send_ride_reminder, send_weekly_digest
 
 logger = logging.getLogger(__name__)
 
@@ -90,6 +90,26 @@ def send_reminders(app):
         logger.debug('Reminder job: processed %d ride(s) for %s', len(rides_today), today)
 
 
+def send_weekly_digests(app):
+    """Send the Sunday morning ride preview digest to all active club members."""
+    with app.app_context():
+        from .models import Club, Ride
+        from datetime import timedelta
+        today = date.today()
+        week_end = today + timedelta(days=7)
+        clubs = Club.query.filter_by(is_active=True).all()
+        for club in clubs:
+            upcoming = (
+                Ride.query
+                .filter_by(club_id=club.id, is_cancelled=False)
+                .filter(Ride.date >= today, Ride.date < week_end)
+                .order_by(Ride.date, Ride.time)
+                .all()
+            )
+            send_weekly_digest(club, upcoming)
+        logger.info('Weekly digest job: processed %d club(s)', len(clubs))
+
+
 def init_scheduler(app):
     """Start the APScheduler background scheduler if AUTO_CANCEL_ENABLED config is set."""
     if not app.config.get('AUTO_CANCEL_ENABLED', True):
@@ -119,6 +139,15 @@ def init_scheduler(app):
         args=[app],
         id='ride_reminders',
         name='Morning ride reminders',
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
+    scheduler.add_job(
+        func=send_weekly_digests,
+        trigger=CronTrigger(day_of_week='sun', hour=7, minute=0),
+        args=[app],
+        id='weekly_digest',
+        name='Sunday weekly ride digest',
         replace_existing=True,
         misfire_grace_time=3600,
     )

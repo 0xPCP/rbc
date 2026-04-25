@@ -42,17 +42,22 @@
         </div>
 
         <div class="row g-3 mb-3">
-          <div class="col-sm-4">
+          <div class="col-sm-3">
             {{ form.pace_category.label(class="form-label") }}
             {{ form.pace_category(class="form-select" + (" is-invalid" if form.pace_category.errors else "")) }}
             {% for e in form.pace_category.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
           </div>
-          <div class="col-sm-4">
+          <div class="col-sm-3">
+            {{ form.ride_type.label(class="form-label") }}
+            {{ form.ride_type(class="form-select" + (" is-invalid" if form.ride_type.errors else "")) }}
+            {% for e in form.ride_type.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+          <div class="col-sm-3">
             {{ form.distance_miles.label(class="form-label") }}
             {{ form.distance_miles(class="form-control" + (" is-invalid" if form.distance_miles.errors else ""), placeholder="45.0") }}
             {% for e in form.distance_miles.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
           </div>
-          <div class="col-sm-4">
+          <div class="col-sm-3">
             {{ form.elevation_feet.label(class="form-label") }}
             {{ form.elevation_feet(class="form-control" + (" is-invalid" if form.elevation_feet.errors else ""), placeholder="2500") }}
             {% for e in form.elevation_feet.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
@@ -83,6 +88,13 @@
           {{ form.description.label(class="form-label") }}
           {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=4, placeholder="Route notes, what to bring, etc.") }}
           {% for e in form.description.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.max_riders.label(class="form-label") }}
+          {{ form.max_riders(class="form-control form-control-sm" + (" is-invalid" if form.max_riders.errors else ""), placeholder="e.g. 20", style="max-width:140px") }}
+          <div class="form-text">When the ride is full, additional signups go on a waitlist. Promoted automatically when a spot opens.</div>
+          {% for e in form.max_riders.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
         </div>
 
         <div class="mb-3 form-check">

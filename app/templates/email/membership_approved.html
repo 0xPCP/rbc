@@ -1,0 +1,16 @@
+{% extends "email/_base.html" %}
+{% block body %}
+<div class="club-tag">{{ club.name }}</div>
+<h1>Your membership was approved!</h1>
+
+<div class="alert alert-success">
+  Great news — your request to join <strong>{{ club.name }}</strong> has been approved.
+  You're now an active member.
+</div>
+
+<p style="font-size:.9rem;color:#495057;margin-bottom:20px">
+  You can now sign up for rides, view routes, and access all member content.
+</p>
+
+<a href="https://cyclingclub.pcp.dev/clubs/{{ club.slug }}/" class="cta">Go to {{ club.name }}</a>
+{% endblock %}

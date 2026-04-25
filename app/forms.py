@@ -65,6 +65,7 @@ class ClubSettingsForm(FlaskForm):
     ])
     banner_url    = StringField('Banner Image URL', validators=[Optional(), URL(), Length(max=500)])
     # Membership settings
+    is_private         = BooleanField('Private Club')
     require_membership = BooleanField('Require membership to sign up for rides')
     join_approval = SelectField('Join Approval Mode', choices=[
         ('auto',   'Auto-approve — users join immediately upon request'),
@@ -123,10 +124,20 @@ class RideForm(FlaskForm):
         ('C', 'C — Casual (14–18 mph)'),
         ('D', 'D — Beginner (<14 mph)'),
     ])
+    ride_type = SelectField('Ride Type', choices=[
+        ('', '— Any / Unspecified —'),
+        ('road',     'Road'),
+        ('gravel',   'Gravel'),
+        ('social',   'Social'),
+        ('training', 'Training'),
+        ('event',    'Event'),
+        ('night',    'Night Ride'),
+    ], validators=[Optional()])
     ride_leader = StringField('Ride Leader', validators=[Optional(), Length(max=100)])
     route_url = StringField('Route URL (Strava, RideWithGPS, etc.)', validators=[Optional(), URL(), Length(max=500)])
     video_url = StringField('Video URL (YouTube or Vimeo)', validators=[Optional(), URL(), Length(max=500)])
     description = TextAreaField('Description / Notes', validators=[Optional()])
+    max_riders = IntegerField('Max Riders (leave blank for unlimited)', validators=[Optional(), NumberRange(min=1, max=9999)])
     is_cancelled = BooleanField('Mark as Cancelled')
     is_recurring = BooleanField('Repeat weekly (generates 8 weeks of instances)')
     submit = SubmitField('Save Ride')

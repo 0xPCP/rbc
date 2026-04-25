@@ -61,13 +61,33 @@ def send_ride_reminder(ride):
     logger.info('Reminder emails sent for ride %d to %d recipient(s)', ride.id, len(recipients))
 
 
+def send_membership_approved(user, club):
+    """Notify a user that their membership request was approved."""
+    if not user.email:
+        return
+    html = render_template('email/membership_approved.html', club=club)
+    text = render_template('email/membership_approved.txt', club=club)
+    _send(f'Membership Approved — {club.name}', [user.email], html, text)
+    logger.info('Membership approved email sent to %s for club %d', user.email, club.id)
+
+
+def send_membership_rejected(user, club):
+    """Notify a user that their membership request was rejected."""
+    if not user.email:
+        return
+    html = render_template('email/membership_rejected.html', club=club)
+    text = render_template('email/membership_rejected.txt', club=club)
+    _send(f'Membership Request — {club.name}', [user.email], html, text)
+    logger.info('Membership rejected email sent to %s for club %d', user.email, club.id)
+
+
 def send_new_ride_notification(ride):
     """
     Notify all club members when a new ride is created.
     Called when an admin creates a new (non-recurring-instance) ride.
     """
     from .models import ClubMembership
-    memberships = ClubMembership.query.filter_by(club_id=ride.club_id).all()
+    memberships = ClubMembership.query.filter_by(club_id=ride.club_id, status='active').all()
     recipients = [m.user.email for m in memberships if m.user.email]
     if not recipients:
         return
@@ -76,3 +96,33 @@ def send_new_ride_notification(ride):
     subject = f'New Ride: {ride.title} — {ride.club.name}'
     _send(subject, recipients, html, text)
     logger.info('New ride notification sent for ride %d to %d recipient(s)', ride.id, len(recipients))
+
+
+def send_waitlist_promoted(signup):
+    """Notify a user they've been promoted from the waitlist to confirmed."""
+    ride = signup.ride
+    user = signup.user
+    if not user.email:
+        return
+    html = render_template('email/waitlist_promoted.html', ride=ride)
+    text = render_template('email/waitlist_promoted.txt', ride=ride)
+    subject = f"You're off the waitlist — {ride.title}"
+    _send(subject, [user.email], html, text)
+    logger.info('Waitlist promotion email sent to %s for ride %d', user.email, ride.id)
+
+
+def send_weekly_digest(club, rides):
+    """
+    Send the Sunday weekly digest to all active club members.
+    `rides` is the list of upcoming rides for the next 7 days, pre-queried by the caller.
+    """
+    from .models import ClubMembership
+    memberships = ClubMembership.query.filter_by(club_id=club.id, status='active').all()
+    recipients = [m.user.email for m in memberships if m.user.email]
+    if not recipients:
+        return
+    html = render_template('email/weekly_digest.html', club=club, rides=rides)
+    text = render_template('email/weekly_digest.txt', club=club, rides=rides)
+    subject = f"This week's rides — {club.name}"
+    _send(subject, recipients, html, text)
+    logger.info('Weekly digest sent for club %d (%s) to %d recipient(s)', club.id, club.name, len(recipients))
