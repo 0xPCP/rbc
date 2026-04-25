@@ -168,12 +168,8 @@
 
         <div class="mb-4">
           {{ form.join_approval.label(class="form-label") }}
-          {% for subfield in form.join_approval %}
-          <div class="form-check">
-            {{ subfield(class="form-check-input") }}
-            {{ subfield.label(class="form-check-label") }}
-          </div>
-          {% endfor %}
+          {{ form.join_approval(class="form-select" + (" is-invalid" if form.join_approval.errors else "")) }}
+          {% for e in form.join_approval.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
         </div>
 
         <hr class="my-4" />

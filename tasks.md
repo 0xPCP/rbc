@@ -14,6 +14,31 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done
 - [x] Update seed data to create multiple clubs with realistic data
 - [x] Write tests for all new models and club-scoped routes
 
+## Club creation & permissions (v0.010)
+
+- [x] Club creation wizard (`/clubs/create`) — 5-step: basic info, privacy, theme, media, review
+- [x] 6 preset themes + custom color picker with live preview
+- [x] `ClubAdmin.role`: `'admin'` (full) | `'ride_manager'` (rides only)
+- [x] Team management page — add/remove admin team members, manage members
+- [x] Club dashboard shows full-admin-only buttons (Team, Settings) conditionally
+
+## Membership system (v0.011)
+
+- [x] `Club.require_membership`: gate ride signups behind active club membership
+- [x] `Club.join_approval`: `'auto'` (join immediately) | `'manual'` (admin approves)
+- [x] `ClubMembership.status`: `'active'` | `'pending'`
+- [x] `User.is_active_member_of()` and `is_pending_member_of()` helpers
+- [x] `join()` route respects club approval mode
+- [x] `ride_signup()` blocks non-active-members when `require_membership=True`
+- [x] Private clubs hide route URL, RideWithGPS embed, and GPX from non-members
+- [x] `ride_gpx()` returns 403 for non-members on private clubs
+- [x] Club home shows "Pending Approval" state for pending members
+- [x] Admin team page shows pending requests with approve/reject actions
+- [x] Admin dashboard shows pending member count badge
+- [x] Club settings: Membership section with `require_membership` toggle + `join_approval` dropdown
+- [x] seed.py: `test@pcp.dev` / `password` added as RBC admin; NVCC set to manual-approval private club
+- [x] 25 new tests in `test_membership.py`
+
 ## User home screen
 
 - [x] Build user dashboard (`/`) — shows rides registered across all subscribed clubs

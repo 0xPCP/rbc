@@ -73,9 +73,27 @@ This catches Cloudflare Access intercepts, JS runtime errors, CDN failures, and 
 | File | Purpose |
 |------|---------|
 | `app/__init__.py` | App factory, context processor (injects `version`, `now`) |
-| `app/models.py` | SQLAlchemy models |
-| `app/routes/` | Blueprints: `main`, `auth`, `rides`, `admin`, `strava` |
+| `app/models.py` | SQLAlchemy models — `Club`, `ClubMembership` (status: active/pending), `ClubAdmin` (role: admin/ride_manager), `Ride`, etc. |
+| `app/routes/clubs.py` | Public club routes; join/leave respects `join_approval`; ride_signup gates on `require_membership`; private club route hiding |
+| `app/routes/admin.py` | Club admin routes; `club_admin_required` / `club_ride_admin_required` decorators; team management; membership approve/reject |
+| `app/forms.py` | WTForms: `ClubCreateForm`, `ClubSettingsForm` (includes `require_membership`, `join_approval`) |
 | `app/weather.py` | Weather fetch + WMO condition logic (Open-Meteo) |
 | `app/templates/` | Jinja2 templates; `base.html` is the layout |
-| `seed.py` | Dev seed data — wipe and re-run after schema changes |
+| `app/templates/clubs/create.html` | 5-step club creation wizard with theme picker |
+| `app/templates/admin/club_team.html` | Team management + pending membership approval |
+| `seed.py` | Dev seed data — wipe + re-run after schema changes; `test@pcp.dev`/`password` = RBC admin |
 | `tests/conftest.py` | Pytest fixtures (app, client, db, seeded users/rides) |
+| `tests/test_membership.py` | 25 tests for membership gates, approval flows, private club route hiding |
+
+## Membership model notes
+
+- `ClubMembership.status`: `'active'` (full member) | `'pending'` (awaiting admin approval)
+- `Club.join_approval`: `'auto'` (immediate active) | `'manual'` (pending until approved)
+- `Club.require_membership`: if True, only `status='active'` members can sign up for rides
+- `Club.is_private`: if True, route URL, RideWithGPS embed, and GPX are hidden from non-active-members
+- All clubs are discoverable on the map + Find Clubs regardless of privacy settings
+- `User.is_active_member_of(club)` and `User.is_pending_member_of(club)` are the authoritative checks
+
+## WTForms gotcha
+
+`BooleanField` treats any non-empty string (including `'0'`) as `True`. For boolean form fields driven by JS hidden inputs, read directly: `request.form.get('field') == '1'`.

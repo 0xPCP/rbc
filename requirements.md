@@ -24,10 +24,13 @@ A multi-tenant web platform where any cycling club can host their presence. User
 - Find local clubs and rides by zip code / address
 - Interactive map showing club locations and upcoming rides (Leaflet + OpenStreetMap)
 
-### Club subscription
-- Favorite / subscribe to a club
-- Unsubscribe at any time
-- Subscribed club rides appear automatically on the user's home screen
+### Club subscription & membership
+- Join any club (public listing + map always shows all clubs)
+- Two join approval modes per club: **auto-approve** (immediate active membership) or **manual** (admin must approve)
+- Pending membership state: user sees "Pending Approval" badge until approved
+- Unsubscribe / leave club at any time
+- Club members' rides appear automatically on the user's home screen
+- Club admins can approve or reject pending membership requests from the Team page
 
 ---
 
@@ -36,9 +39,19 @@ A multi-tenant web platform where any cycling club can host their presence. User
 ### Club page
 - Club name, description, logo, contact info
 - Ride calendar (weekly schedule + special events)
-- Club rules / waiver section
-  - Users must accept the waiver once per calendar year before signing up for any ride at that club
-  - If a user has not signed, redirect to waiver acceptance flow before allowing ride registration
+- All clubs are discoverable on the map and Find Clubs page regardless of privacy settings
+- **Private clubs**: route details (RideWithGPS embed, GPX download, route URL) are hidden from non-members
+- **Membership-required clubs**: users must have an active membership to sign up for rides
+
+### Club membership settings (admin-configurable)
+- `require_membership`: toggle whether active membership is required before ride signup
+- `join_approval`: `auto` (user joins immediately) or `manual` (admin approves each request)
+- Team management page shows pending requests with approve/reject actions
+- Pending member count badge on admin dashboard
+
+### Club rules / waiver
+- Users must accept the waiver once per calendar year before signing up for any ride at that club
+- If a user has not signed, redirect to waiver acceptance flow before allowing ride registration
 
 ### Ride management (club admin)
 - Create / edit / cancel rides

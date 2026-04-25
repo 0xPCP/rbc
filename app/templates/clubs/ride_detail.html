@@ -48,9 +48,15 @@
 
           {% if ride.route_url %}
           <dt>Route</dt>
-          <dd><a href="{{ ride.route_url }}" target="_blank" rel="noopener">
-            {% if ride.ridewithgps_route_id %}View on RideWithGPS ↗{% else %}View Route ↗{% endif %}
-          </a></dd>
+          <dd>
+            {% if show_route %}
+            <a href="{{ ride.route_url }}" target="_blank" rel="noopener">
+              {% if ride.ridewithgps_route_id %}View on RideWithGPS ↗{% else %}View Route ↗{% endif %}
+            </a>
+            {% else %}
+            <span class="text-muted small">🔒 Members only</span>
+            {% endif %}
+          </dd>
           {% endif %}
         </dl>
       </div>
