@@ -1,45 +1,155 @@
 {% extends "base.html" %}
-{% block title %}About — Reston Bike Club{% endblock %}
+{% block title %}About — Cycling Clubs{% endblock %}
 
 {% block content %}
 <div class="page-header">
   <div class="container">
-    <h1>About Reston Bike Club</h1>
-    <p>Who we are and how we ride.</p>
+    <h1>About Cycling Clubs</h1>
+    <p class="mb-0" style="color:rgba(255,255,255,.8);font-size:1.1rem">
+      One platform for riders and the clubs that bring them together.
+    </p>
   </div>
 </div>
 
 <div class="container py-5">
-  <div class="row gy-5">
+  <div class="row justify-content-center">
     <div class="col-lg-8">
-      <h2 class="section-heading">Our Story</h2>
-      <p>Reston Bike Club has been bringing cyclists together in Northern Virginia for over two decades. What started as a small group of neighbors heading out on Sunday mornings has grown into a vibrant community of riders who share a passion for cycling and the outdoors.</p>
-      <p>We believe cycling is better together. Whether you're chasing KOMs or just enjoying the view, RBC has a group for you.</p>
 
-      <h2 class="section-heading mt-5">Weekly Rides</h2>
-      <p>We host regular group rides throughout the week. Rides are organized by pace category — A through D — so everyone can find a comfortable group. Routes typically start in the Reston area and explore the back roads of Loudoun, Fairfax, and Fauquier counties, as well as the W&OD Trail corridor.</p>
-      <p>Check the <a href="{{ url_for('rides.calendar') }}">ride calendar</a> for upcoming departures, locations, and details.</p>
+      <h2 class="section-label mb-3">The Problem We're Solving</h2>
+      <p class="section-body">
+        If you've ever tried to find group rides in your area, you know the drill: every club has
+        its own website (or no website at all), ride info lives in old Facebook posts, and half
+        the links are broken. You end up missing rides simply because you didn't know they existed.
+      </p>
+      <p class="section-body">
+        On the club side, the problem is just as real. Most cycling clubs are run by volunteers
+        who want to focus on riding, not maintaining a website. Ride calendars get out of date,
+        signup tracking happens in spreadsheets, and new members have a hard time getting connected.
+      </p>
+      <p class="section-body mb-0">
+        Cycling Clubs exists to fix both of those problems.
+      </p>
 
-      <h2 class="section-heading mt-5">Membership</h2>
-      <p>Membership is free and open to anyone. Create an account to sign up for rides, see who else is coming, and share your ride media with the club.</p>
-      {% if not current_user.is_authenticated %}
-      <a href="{{ url_for('auth.register') }}" class="btn btn-rbc mt-2">Create a Free Account</a>
-      {% endif %}
     </div>
-    <div class="col-lg-4">
-      <div class="about-sidebar">
-        <h5>Pace Groups</h5>
-        <ul class="pace-list">
-          <li><span class="pace-badge pace-A">A</span> Fast — 22+ mph</li>
-          <li><span class="pace-badge pace-B">B</span> Moderate — 18–22 mph</li>
-          <li><span class="pace-badge pace-C">C</span> Casual — 14–18 mph</li>
-          <li><span class="pace-badge pace-D">D</span> Beginner — &lt;14 mph</li>
-        </ul>
-        <hr />
-        <h5>Location</h5>
-        <p>Rides depart from various locations around Reston, VA and the surrounding area. Meeting location is listed in each ride's details.</p>
+  </div>
+</div>
+
+<div class="section-light py-5">
+  <div class="container">
+    <div class="row g-5 align-items-start">
+
+      <div class="col-md-6">
+        <h2 class="section-label mb-4">For Riders</h2>
+        <div class="d-flex flex-column gap-4">
+          <div class="d-flex gap-3">
+            <div style="font-size:2rem;line-height:1;flex-shrink:0">🔍</div>
+            <div>
+              <h5 class="mb-1">Discover local clubs</h5>
+              <p class="text-muted mb-0">Search by city, zip code, or browse the map to find clubs near you —
+              from neighborhood beginner groups to fast race-pace teams.</p>
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+            <div style="font-size:2rem;line-height:1;flex-shrink:0">📅</div>
+            <div>
+              <h5 class="mb-1">One calendar for all your clubs</h5>
+              <p class="text-muted mb-0">Join multiple clubs and see every upcoming ride in a single dashboard.
+              No more checking five different websites.</p>
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+            <div style="font-size:2rem;line-height:1;flex-shrink:0">⛅</div>
+            <div>
+              <h5 class="mb-1">Weather at a glance</h5>
+              <p class="text-muted mb-0">Each ride shows a live weather forecast so you can decide what to
+              pack — or whether to pack it in — before you leave home.</p>
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+            <div style="font-size:2rem;line-height:1;flex-shrink:0">✅</div>
+            <div>
+              <h5 class="mb-1">Simple ride sign-ups</h5>
+              <p class="text-muted mb-0">Sign up for rides in one click and see who else is coming.
+              Add to your calendar or download the GPX route before you head out.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <h2 class="section-label mb-4">For Clubs</h2>
+        <div class="d-flex flex-column gap-4">
+          <div class="d-flex gap-3">
+            <div style="font-size:2rem;line-height:1;flex-shrink:0">🌐</div>
+            <div>
+              <h5 class="mb-1">A real club website, free</h5>
+              <p class="text-muted mb-0">Your club gets a clean, mobile-friendly home page with your branding,
+              description, contact info, and upcoming rides — no web development required.</p>
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+            <div style="font-size:2rem;line-height:1;flex-shrink:0">🗓️</div>
+            <div>
+              <h5 class="mb-1">Easy ride management</h5>
+              <p class="text-muted mb-0">Add recurring or one-off rides in minutes. Set pace, distance, meeting
+              location, and route. Cancel rides with a reason that goes straight to members.</p>
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+            <div style="font-size:2rem;line-height:1;flex-shrink:0">📋</div>
+            <div>
+              <h5 class="mb-1">Waivers and sign-up tracking</h5>
+              <p class="text-muted mb-0">Manage your annual club waiver and see exactly who has signed up
+              for each ride — no separate form tools or spreadsheets needed.</p>
+            </div>
+          </div>
+          <div class="d-flex gap-3">
+            <div style="font-size:2rem;line-height:1;flex-shrink:0">🚴</div>
+            <div>
+              <h5 class="mb-1">Strava club integration</h5>
+              <p class="text-muted mb-0">Link your Strava club and recent group ride activities automatically
+              appear on your club's home page, keeping it fresh without extra effort.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-8 text-center">
+      <h2 class="section-label mb-3">Get Started</h2>
+      <p class="section-body mb-4">
+        Create a free account, find clubs near you, and start signing up for rides.
+        If you run a club and want to get listed,
+        <a href="mailto:hello@cyclingclubs.app">reach out</a> —
+        we'd love to help you get set up.
+      </p>
+      <div class="d-flex gap-3 justify-content-center flex-wrap">
+        <a href="{{ url_for('clubs.index') }}" class="btn btn-rbc btn-lg">Find a Club</a>
+        {% if not current_user.is_authenticated %}
+        <a href="{{ url_for('auth.register') }}" class="btn btn-rbc-outline btn-lg">Create Free Account</a>
+        {% endif %}
       </div>
     </div>
   </div>
 </div>
+
+<div class="section-light py-4">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 text-center">
+        <p class="text-muted mb-0" style="font-size:.9rem">
+          Cycling Clubs is open source.
+          <a href="https://github.com/0xPCP/rbc" target="_blank" rel="noopener">View on GitHub</a>
+          if you'd like to contribute or run your own instance.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
 {% endblock %}
