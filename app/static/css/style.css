@@ -573,12 +573,12 @@ body {
 .cr-warn { flex-shrink: 0; font-size: .65rem; }
 
 /* ── Week grid ───────────────────────────────────────────────────────────── */
+.week-grid-wrap { overflow-x: auto; }
 .week-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: .5rem;
   min-width: 700px;
-  overflow-x: auto;
 }
 .week-col {
   border: 1px solid var(--rbc-border);
@@ -766,3 +766,45 @@ body {
 a { color: var(--rbc-green); }
 a:hover { color: var(--rbc-green-dark); }
 .btn-rbc, .btn-rbc:focus { color: #fff; }
+
+/* ── Mobile / responsive ─────────────────────────────────────────────────── */
+@media (max-width: 575px) {
+  /* Page headers: tighter vertical padding */
+  .page-header { padding: 1.25rem 0; }
+  .page-header h1 { font-size: 1.75rem; }
+
+  /* Calendar toolbar: let nav wrap under view switcher */
+  .cal-toolbar { gap: .6rem; }
+  .cal-nav-title { min-width: 100px; font-size: .82rem; text-align: center; }
+
+  /* Ride list rows: stack weather below main info instead of floating right */
+  .ride-row { flex-wrap: wrap; gap: .5rem .75rem; padding: .75rem 1rem; }
+  .ride-row-right {
+    width: 100%;
+    flex-direction: row;
+    align-items: center;
+    gap: .75rem;
+    justify-content: flex-start;
+  }
+
+  /* Next ride card: tighten gap */
+  .next-ride-card { gap: 1rem; padding: 1rem; }
+  .next-ride-actions { margin-left: 0; width: 100%; }
+  .next-ride-actions .btn-rbc { width: 100%; }
+
+  /* Stats grid: stay 2-col but reduce padding */
+  .stat-card { padding: 1rem; }
+  .stat-num { font-size: 1.6rem; }
+
+  /* Club home header: avoid cramping logo + buttons row */
+  .club-home-header-actions { flex-wrap: wrap; }
+
+  /* Signup card on ride detail: compact the big counter */
+  .signup-count-big { font-size: 2.2rem; }
+
+  /* Admin tables: make them horizontally scrollable */
+  .rbc-table-wrap { overflow-x: auto; }
+
+  /* Auth card: reduce padding on small screens */
+  .auth-card { padding: 1.5rem 1.25rem; }
+}

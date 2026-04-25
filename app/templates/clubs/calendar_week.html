@@ -31,6 +31,7 @@
     </div>
   </div>
 
+  <div class="week-grid-wrap">
   <div class="week-grid">
     {% for day in days %}
     <div class="week-col {{ 'week-col-today' if day.is_today else '' }} {{ 'week-col-empty' if not day.rides else '' }}">
@@ -63,6 +64,7 @@
       </div>
     </div>
     {% endfor %}
+  </div>
   </div>
 
   <div class="weather-legend mt-4">

@@ -42,7 +42,7 @@
     <a href="{{ url_for('admin.club_new') }}" class="btn btn-rbc btn-sm">+ New Club</a>
   </div>
   <div class="table-responsive">
-    <table class="table rbc-table">
+    <div class="rbc-table-wrap"><table class="table rbc-table">
       <thead><tr><th>Club</th><th>Location</th><th>Members</th><th></th></tr></thead>
       <tbody>
         {% for club in clubs %}
@@ -57,7 +57,7 @@
         </tr>
         {% endfor %}
       </tbody>
-    </table>
+    </table></div>
   </div>
 </div>
 {% endblock %}

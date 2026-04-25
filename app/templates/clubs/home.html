@@ -20,7 +20,7 @@
           <p class="mb-0" style="color:rgba(255,255,255,.75)">{{ club.member_count }} member{{ 's' if club.member_count != 1 else '' }}</p>
         </div>
       </div>
-      <div class="d-flex gap-2 align-items-center">
+      <div class="d-flex gap-2 align-items-center club-home-header-actions">
         {% if current_user.is_authenticated %}
           {% if is_member %}
           <form method="post" action="{{ url_for('clubs.leave', slug=club.slug) }}">

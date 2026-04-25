@@ -53,9 +53,9 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done
 - [x] Write tests for waiver gate
 
 ### GPX / route export
-- [ ] Proxy GPX download from RideWithGPS for rides with a route URL
-- [ ] "Download GPX" button on ride detail page (works with Garmin, Wahoo, Hammerhead)
-- [ ] Write tests for GPX proxy
+- [x] Proxy GPX download from RideWithGPS for rides with a route URL
+- [x] "Download GPX" button on ride detail page (works with Garmin, Wahoo, Hammerhead)
+- [x] Write tests for GPX proxy
 
 ## Email notifications
 - [x] Flask-Mail integration (SMTP config via env vars)
@@ -76,7 +76,7 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done
 ### Strava
 - [x] Member OAuth (connect/disconnect Strava account from profile)
 - [x] Club activity feed (recent activities via club refresh token)
-- [ ] Surface Strava activity feed on club page (currently fetched, not displayed)
+- [x] Surface Strava activity feed on club page (per-club strava_club_id, cached feed)
 
 ### Social media photo feeds
 - [ ] Research Facebook Graph API for club album/page photo pull
