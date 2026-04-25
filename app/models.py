@@ -25,6 +25,10 @@ class User(db.Model, UserMixin):
     lat = db.Column(db.Float, nullable=True)
     lng = db.Column(db.Float, nullable=True)
 
+    # Emergency contact — opt-in; visible to club ride admins on ride day
+    emergency_contact_name  = db.Column(db.String(100), nullable=True)
+    emergency_contact_phone = db.Column(db.String(30), nullable=True)
+
     # Gear inventory — list of item IDs from gear.py GEAR_CATALOG
     gear_inventory = db.Column(db.JSON, nullable=True)
 
@@ -207,7 +211,8 @@ class Ride(db.Model):
     elevation_feet = db.Column(db.Integer, nullable=True)
     pace_category = db.Column(db.String(2), nullable=False)  # A, B, C, D
     ride_type = db.Column(db.String(20), nullable=True)  # road, gravel, social, training, event, night
-    ride_leader = db.Column(db.String(100), nullable=True)
+    leader_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    ride_leader = db.Column(db.String(100), nullable=True)  # display name cache; set from leader FK or free text
     route_url = db.Column(db.String(500), nullable=True)
     description = db.Column(db.Text, nullable=True)
     video_url = db.Column(db.String(500), nullable=True)
@@ -220,6 +225,7 @@ class Ride(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
 
     signups = db.relationship('RideSignup', backref='ride', lazy=True, cascade='all, delete-orphan')
+    leader = db.relationship('User', foreign_keys=[leader_id])
     recurrence_instances = db.relationship(
         'Ride', foreign_keys='Ride.recurrence_parent_id',
         backref=db.backref('recurrence_parent', remote_side='Ride.id'),

@@ -85,11 +85,17 @@
     <div class="col-lg-6">
       <div class="card border-0 shadow-sm">
         <div class="card-body">
-          <h5 class="card-title mb-3">Members
-            <span class="badge bg-secondary ms-1">{{ members | length }}</span>
-            {% if pending %}
-            <span class="badge bg-warning text-dark ms-1">{{ pending | length }} pending</span>
-            {% endif %}
+          <h5 class="card-title mb-3 d-flex align-items-center gap-2 flex-wrap">
+            <span>Members
+              <span class="badge bg-secondary ms-1">{{ members | length }}</span>
+              {% if pending %}
+              <span class="badge bg-warning text-dark ms-1">{{ pending | length }} pending</span>
+              {% endif %}
+            </span>
+            <a href="{{ url_for('admin.club_members_export', slug=club.slug) }}"
+               class="btn btn-outline-secondary btn-xs ms-auto">
+              ⬇ Export CSV
+            </a>
           </h5>
 
           {% if club.is_private %}

@@ -36,6 +36,23 @@
             <div class="form-text">Used as the fallback location for the What to Wear widget on your dashboard.</div>
           </div>
 
+          <hr class="my-3">
+          <h6 class="mb-1">Emergency Contact <span class="text-muted fw-normal">(optional)</span></h6>
+          <p class="text-muted small mb-3">Only visible to club ride leaders and admins on ride day.</p>
+
+          <div class="row g-3 mb-3">
+            <div class="col-sm-6">
+              {{ form.emergency_contact_name.label(class="form-label") }}
+              {{ form.emergency_contact_name(class="form-control" + (" is-invalid" if form.emergency_contact_name.errors else ""), placeholder="Jane Smith") }}
+              {% for e in form.emergency_contact_name.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+            <div class="col-sm-6">
+              {{ form.emergency_contact_phone.label(class="form-label") }}
+              {{ form.emergency_contact_phone(class="form-control" + (" is-invalid" if form.emergency_contact_phone.errors else ""), placeholder="(703) 555-1234") }}
+              {% for e in form.emergency_contact_phone.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+          </div>
+
           <div class="d-flex gap-2">
             {{ form.submit(class="btn btn-rbc") }}
             <a href="{{ url_for('main.index') }}" class="btn btn-outline-secondary">Cancel</a>

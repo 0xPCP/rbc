@@ -25,6 +25,8 @@ class ProfileForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(3, 50)])
     email    = StringField('Email Address', validators=[DataRequired(), Email()])
     zip_code = StringField('Zip Code', validators=[Optional(), Length(max=10)])
+    emergency_contact_name  = StringField('Emergency Contact Name', validators=[Optional(), Length(max=100)])
+    emergency_contact_phone = StringField('Emergency Contact Phone', validators=[Optional(), Length(max=30)])
     submit   = SubmitField('Save Changes')
 
 

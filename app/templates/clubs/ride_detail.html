@@ -230,13 +230,16 @@
         {% endif %}
       </div>
 
-      {% if current_user.is_authenticated and current_user.is_club_admin(club) %}
-      <div class="mt-2 d-flex gap-2">
+      {% if current_user.is_authenticated and current_user.can_manage_rides(club) %}
+      <div class="mt-2 d-flex gap-2 flex-wrap">
+        <a href="{{ url_for('admin.ride_roster', slug=club.slug, ride_id=ride.id) }}" class="btn btn-outline-secondary btn-sm">Rider Roster</a>
         <a href="{{ url_for('admin.ride_edit', slug=club.slug, ride_id=ride.id) }}" class="btn btn-outline-secondary btn-sm">Edit Ride</a>
+        {% if current_user.is_club_admin(club) %}
         <form method="post" action="{{ url_for('admin.ride_delete', slug=club.slug, ride_id=ride.id) }}" onsubmit="return confirm('Delete this ride?')">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
           <button type="submit" class="btn btn-outline-danger btn-sm">Delete</button>
         </form>
+        {% endif %}
       </div>
       {% endif %}
     </div>

@@ -65,9 +65,21 @@
         </div>
 
         <div class="mb-3">
-          {{ form.ride_leader.label(class="form-label") }}
-          {{ form.ride_leader(class="form-control" + (" is-invalid" if form.ride_leader.errors else ""), placeholder="Optional") }}
-          {% for e in form.ride_leader.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          <label class="form-label">Ride Leader</label>
+          <select name="leader_id" class="form-select mb-2" id="leader_select">
+            <option value="">— None / enter manually below —</option>
+            {% for m in members %}
+            <option value="{{ m.user.id }}"
+              {{ 'selected' if ride and ride.leader_id == m.user.id else '' }}>
+              {{ m.user.username }}
+            </option>
+            {% endfor %}
+          </select>
+          <input type="text" name="ride_leader_text" id="ride_leader_text"
+                 class="form-control"
+                 placeholder="Non-member name (optional)"
+                 value="{{ (ride.ride_leader or '') if (ride and not ride.leader_id) else '' }}">
+          <div class="form-text">Select a club member, or type a non-member name in the text field.</div>
         </div>
 
         <div class="mb-3">
@@ -119,4 +131,16 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  (function () {
+    const sel = document.getElementById('leader_select');
+    const txt = document.getElementById('ride_leader_text');
+    function toggle() { txt.style.display = sel.value ? 'none' : ''; }
+    sel.addEventListener('change', toggle);
+    toggle();
+  })();
+</script>
 {% endblock %}

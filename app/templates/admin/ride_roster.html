@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% block title %}Ride Roster — {{ ride.title }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('clubs.home', slug=club.slug) }}">{{ club.name }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}">Admin</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.club_rides', slug=club.slug) }}">Rides</a></li>
+        <li class="breadcrumb-item active">Roster</li>
+      </ol>
+    </nav>
+    <h1>Ride Roster</h1>
+    <p>{{ ride.title }} &bull; {{ ride.date.strftime('%A, %B %-d, %Y') }} at {{ ride.time.strftime('%-I:%M %p') }}</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row gy-4">
+    <div class="col-lg-8">
+
+      <div class="detail-card mb-4">
+        <h5 class="detail-card-title">
+          Signed Up
+          <span class="badge bg-success ms-2">{{ active | length }}</span>
+        </h5>
+        {% if active %}
+        <table class="table rbc-table mb-0">
+          <thead>
+            <tr>
+              <th>Rider</th>
+              <th>Email</th>
+              <th>Emergency Contact</th>
+              <th>Phone</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in active %}
+            <tr>
+              <td>{{ s.user.username }}</td>
+              <td><a href="mailto:{{ s.user.email }}">{{ s.user.email }}</a></td>
+              <td>
+                {% if s.user.emergency_contact_name %}
+                  {{ s.user.emergency_contact_name }}
+                {% else %}
+                  <span class="text-muted small">—</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if s.user.emergency_contact_phone %}
+                  <a href="tel:{{ s.user.emergency_contact_phone }}">{{ s.user.emergency_contact_phone }}</a>
+                {% else %}
+                  <span class="text-muted small">—</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <p class="text-muted mb-0">No riders signed up yet.</p>
+        {% endif %}
+      </div>
+
+      {% if waitlist %}
+      <div class="detail-card">
+        <h5 class="detail-card-title">
+          Waitlist
+          <span class="badge bg-secondary ms-2">{{ waitlist | length }}</span>
+        </h5>
+        <table class="table rbc-table mb-0">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Rider</th>
+              <th>Email</th>
+              <th>Emergency Contact</th>
+              <th>Phone</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for s in waitlist %}
+            <tr>
+              <td class="text-muted">{{ loop.index }}</td>
+              <td>{{ s.user.username }}</td>
+              <td><a href="mailto:{{ s.user.email }}">{{ s.user.email }}</a></td>
+              <td>{{ s.user.emergency_contact_name or '—' }}</td>
+              <td>{{ s.user.emergency_contact_phone or '—' }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+
+    </div>
+
+    <div class="col-lg-4">
+      <div class="detail-card">
+        <h5 class="detail-card-title">Actions</h5>
+        <div class="d-grid gap-2">
+          <a href="{{ url_for('clubs.ride_detail', slug=club.slug, ride_id=ride.id) }}" class="btn btn-outline-secondary btn-sm">View Public Ride Page</a>
+          <a href="{{ url_for('admin.ride_edit', slug=club.slug, ride_id=ride.id) }}" class="btn btn-outline-secondary btn-sm">Edit Ride</a>
+        </div>
+        <hr>
+        <p class="text-muted small mb-0">Emergency contact details are provided by riders on their profile page and are only visible to ride leaders and club admins.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

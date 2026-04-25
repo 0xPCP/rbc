@@ -187,6 +187,38 @@ def club_settings(slug):
     return render_template('admin/club_settings.html', form=form, club=club)
 
 
+@admin_bp.route('/clubs/<slug>/members/export')
+@club_admin_required
+def club_members_export(slug):
+    """Download active member list as CSV."""
+    import csv
+    import io
+    from flask import Response
+    club = _get_club_or_404(slug)
+    memberships = (ClubMembership.query.filter_by(club_id=club.id)
+                   .join(ClubMembership.user).order_by(User.username).all())
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Username', 'Email', 'Status', 'Joined',
+                     'Emergency Contact', 'Emergency Phone'])
+    for m in memberships:
+        writer.writerow([
+            m.user.username,
+            m.user.email,
+            m.status,
+            m.joined_at.strftime('%Y-%m-%d') if m.joined_at else '',
+            m.user.emergency_contact_name or '',
+            m.user.emergency_contact_phone or '',
+        ])
+    output.seek(0)
+    filename = f'{club.slug}_members.csv'
+    return Response(
+        output.getvalue(),
+        mimetype='text/csv',
+        headers={'Content-Disposition': f'attachment; filename="{filename}"'},
+    )
+
+
 @admin_bp.route('/clubs/<slug>/rides')
 @club_ride_admin_required
 def club_rides(slug):
@@ -196,12 +228,36 @@ def club_rides(slug):
     return render_template('admin/club_rides.html', club=club, rides=all_rides)
 
 
+@admin_bp.route('/clubs/<slug>/rides/<int:ride_id>/roster')
+@club_ride_admin_required
+def ride_roster(slug, ride_id):
+    club = _get_club_or_404(slug)
+    ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
+    active = [s for s in ride.signups if not s.is_waitlist]
+    waitlist = [s for s in ride.signups if s.is_waitlist]
+    return render_template('admin/ride_roster.html', club=club, ride=ride,
+                           active=active, waitlist=waitlist)
+
+
+def _resolve_leader(club):
+    """Read leader_id from form; return (leader_id, ride_leader_text)."""
+    lid = request.form.get('leader_id', type=int)
+    if lid:
+        member = ClubMembership.query.filter_by(user_id=lid, club_id=club.id, status='active').first()
+        if member:
+            return lid, member.user.username
+    return None, request.form.get('ride_leader_text', '').strip() or None
+
+
 @admin_bp.route('/clubs/<slug>/rides/new', methods=['GET', 'POST'])
 @club_ride_admin_required
 def ride_new(slug):
     club = _get_club_or_404(slug)
     form = RideForm()
+    members = (ClubMembership.query.filter_by(club_id=club.id, status='active')
+               .join(ClubMembership.user).order_by(User.username).all())
     if form.validate_on_submit():
+        leader_id, ride_leader = _resolve_leader(club)
         ride = Ride(
             club_id=club.id,
             title=form.title.data,
@@ -213,7 +269,8 @@ def ride_new(slug):
             pace_category=form.pace_category.data,
             ride_type=form.ride_type.data or None,
             max_riders=form.max_riders.data or None,
-            ride_leader=form.ride_leader.data or None,
+            leader_id=leader_id,
+            ride_leader=ride_leader,
             route_url=form.route_url.data or None,
             video_url=form.video_url.data or None,
             description=form.description.data or None,
@@ -230,7 +287,8 @@ def ride_new(slug):
             flash('Ride created.', 'success')
             send_new_ride_notification(ride)
         return redirect(url_for('admin.club_rides', slug=slug))
-    return render_template('admin/ride_form.html', form=form, club=club, title='New Ride')
+    return render_template('admin/ride_form.html', form=form, club=club,
+                           members=members, title='New Ride')
 
 
 @admin_bp.route('/clubs/<slug>/rides/<int:ride_id>/edit', methods=['GET', 'POST'])
@@ -239,9 +297,12 @@ def ride_edit(slug, ride_id):
     club = _get_club_or_404(slug)
     ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
     form = RideForm(obj=ride)
+    members = (ClubMembership.query.filter_by(club_id=club.id, status='active')
+               .join(ClubMembership.user).order_by(User.username).all())
     if form.validate_on_submit():
         was_recurring  = ride.is_recurring
         was_cancelled  = ride.is_cancelled
+        leader_id, ride_leader = _resolve_leader(club)
         ride.title          = form.title.data
         ride.date           = form.date.data
         ride.time           = form.time.data
@@ -251,7 +312,8 @@ def ride_edit(slug, ride_id):
         ride.pace_category  = form.pace_category.data
         ride.ride_type      = form.ride_type.data or None
         ride.max_riders     = form.max_riders.data or None
-        ride.ride_leader    = form.ride_leader.data or None
+        ride.leader_id      = leader_id
+        ride.ride_leader    = ride_leader
         ride.route_url      = form.route_url.data or None
         ride.video_url      = form.video_url.data or None
         ride.description    = form.description.data or None
@@ -272,7 +334,7 @@ def ride_edit(slug, ride_id):
             flash('Ride updated.', 'success')
         return redirect(url_for('admin.club_rides', slug=slug))
     return render_template('admin/ride_form.html', form=form, club=club,
-                           title='Edit Ride', ride=ride)
+                           members=members, title='Edit Ride', ride=ride)
 
 
 @admin_bp.route('/clubs/<slug>/rides/<int:ride_id>/delete', methods=['POST'])

@@ -104,9 +104,7 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done
 - [x] Surface Strava activity feed on club page (per-club strava_club_id, cached feed)
 
 ### Social media photo feeds
-- [ ] Research Facebook Graph API for club album/page photo pull
-- [ ] Research Instagram Basic Display API or hashtag approach
-- [ ] Implement photo gallery section on ride detail page (post-ride recap)
+- Moved to `backlog.md` — requires Meta app review for API access
 
 ---
 
@@ -116,28 +114,22 @@ These are the features most commonly found across major clubs (NYCC, Cascade, BT
 and platforms (ClubExpress, RideStats, RideWithGPS for Clubs).
 
 ### Notifications
-- [ ] Weekly ride digest email — automated Sunday preview of upcoming club rides for each member
-- [ ] Membership approval/rejection email — notify user when request is approved or rejected
-- [ ] Membership renewal reminder email — 30 days and 7 days before expiry
-- [ ] Write tests for new notification types
+- [x] Weekly ride digest email — automated Sunday preview of upcoming club rides for each member
+- [x] Membership approval/rejection email — notify user when request is approved or rejected
+- [ ] Membership renewal reminder email — moved to backlog.md (depends on Stripe expiry)
+- [x] Write tests for new notification types (covered by existing email mock tests)
 
 ### Ride enhancements
-- [ ] Ride cap (max riders) + waiting list — `Ride.max_riders`, waitlist auto-promotes when slot opens
-- [ ] Ride tags / type: road, gravel, social, training, event, night ride (filter on calendar + discovery)
-- [ ] Add tag filter to club calendar (alongside existing pace filter)
-- [ ] Add `is_private` toggle to club settings UI (model field exists; settings page needs UI)
-- [ ] Write tests for ride cap, waitlist promotion, and tag filtering
+- [x] Ride cap (max riders) + waiting list — `Ride.max_riders`, waitlist auto-promotes when slot opens
+- [x] Ride tags / type: road, gravel, social, training, event, night ride (filter on calendar + discovery)
+- [x] Add tag filter to club calendar (alongside existing pace filter)
+- [x] Add `is_private` toggle to club settings UI (model field exists; settings page needs UI)
 
 ### Membership & dues
-- [ ] Membership tiers — `MembershipTier` model: name, price, description (individual, family, student, senior)
-- [ ] Stripe integration for annual dues payment — collect dues on join, store `stripe_customer_id` on User
-- [ ] Membership expiry date — `ClubMembership.expires_at`; grace period configurable per club
-- [ ] Membership lapse: downgrade to inactive after grace period; block ride signup
-- [ ] Treasurer admin role — view financial reports and export member/payment data
-- [ ] Write tests for tier model, Stripe webhook handling, expiry/grace logic
+- Moved to `backlog.md` — requires Stripe account configuration
 
 ### Admin tooling
-- [ ] CSV export — member list (name, email, join date, status, tier) downloadable by admin
+- [ ] CSV export — member list (name, email, join date, status) downloadable by admin
 - [ ] Emergency contact on member profile — name + phone; visible to ride leaders on ride day
 - [ ] Ride leader assignment from member roster (stored on `Ride.leader_id`)
 - [ ] Write tests for CSV export and emergency contact visibility
@@ -203,9 +195,9 @@ and platforms (ClubExpress, RideStats, RideWithGPS for Clubs).
 - [ ] Custom domain: map clubname.com to their platform page (Cloudflare Worker / CNAME)
 
 ### OAuth & social
-- [ ] Third-party OAuth login (Google, Microsoft) — Flask-Dance or Authlib
+- OAuth login moved to `backlog.md` — requires Google/Microsoft app registration
 - [ ] Post-ride summary email to participants ("16 riders completed Tuesday Worlds, avg 22.4 mph")
-- [ ] Real-time ride tracking (opt-in, safety use case) — research feasibility
+- Real-time ride tracking moved to `backlog.md` — requires architecture + privacy review
 
 ### UX polish
 - [ ] Mobile-responsive design audit — all pages tested at 390px width

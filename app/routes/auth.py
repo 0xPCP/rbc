@@ -90,6 +90,8 @@ def profile():
 
         current_user.username = form.username.data
         current_user.email    = form.email.data.lower()
+        current_user.emergency_contact_name  = (form.emergency_contact_name.data or '').strip() or None
+        current_user.emergency_contact_phone = (form.emergency_contact_phone.data or '').strip() or None
 
         # Gear inventory — list of checked item IDs
         current_user.gear_inventory = request.form.getlist('gear_items') or None
