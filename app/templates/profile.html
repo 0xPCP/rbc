@@ -109,7 +109,7 @@
         </dl>
       </div>
 
-      <div class="detail-card">
+      <div class="detail-card mb-3">
         <h5 class="detail-card-title">Club Memberships</h5>
         {% if current_user.club_memberships %}
         <ul class="list-unstyled mb-0">
@@ -124,6 +124,50 @@
         <p class="text-muted small mb-0">You haven't joined any clubs yet. <a href="{{ url_for('clubs.index') }}">Find one.</a></p>
         {% endif %}
       </div>
+
+      <div class="detail-card mb-3">
+        <h5 class="detail-card-title">{{ now.year }} Stats</h5>
+        {% if ytd_stats.rides > 0 %}
+        <div class="row g-2 text-center">
+          <div class="col-4">
+            <div class="fw-bold" style="font-size:1.4rem">{{ ytd_stats.rides }}</div>
+            <div class="text-muted small">Rides</div>
+          </div>
+          <div class="col-4">
+            <div class="fw-bold" style="font-size:1.4rem">{{ ytd_stats.miles }}</div>
+            <div class="text-muted small">Miles</div>
+          </div>
+          <div class="col-4">
+            <div class="fw-bold" style="font-size:1.4rem">{{ '{:,}'.format(ytd_stats.elevation) }}</div>
+            <div class="text-muted small">Ft Gained</div>
+          </div>
+        </div>
+        {% else %}
+        <p class="text-muted small mb-0">No completed rides yet this year.</p>
+        {% endif %}
+      </div>
+
+      {% if past_signups %}
+      <div class="detail-card">
+        <h5 class="detail-card-title">Ride History</h5>
+        <div style="max-height:320px;overflow-y:auto">
+          <ul class="list-unstyled mb-0">
+            {% for s in past_signups %}
+            <li class="mb-2 pb-2 border-bottom">
+              <a href="{{ url_for('clubs.ride_detail', slug=s.ride.club.slug, ride_id=s.ride.id) }}"
+                 class="fw-semibold small text-decoration-none">{{ s.ride.title }}</a>
+              <div class="text-muted" style="font-size:.8rem">
+                {{ s.ride.date.strftime('%b %d, %Y') }}
+                &bull; {{ s.ride.distance_miles }} mi
+                {% if s.ride.elevation_feet %}&bull; {{ s.ride.elevation_feet }} ft{% endif %}
+                &bull; <a href="{{ url_for('clubs.home', slug=s.ride.club.slug) }}" class="text-muted">{{ s.ride.club.name }}</a>
+              </div>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      {% endif %}
     </div>
 
   </div>

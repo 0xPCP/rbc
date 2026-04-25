@@ -1,7 +1,8 @@
+from datetime import date
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from ..extensions import db, bcrypt
-from ..models import User
+from ..models import User, Ride, RideSignup
 from ..forms import RegisterForm, LoginForm, ProfileForm
 from ..geocoding import geocode_zip
 from ..gear import GEAR_CATALOG
@@ -78,15 +79,11 @@ def profile():
         if form.username.data != current_user.username:
             if User.query.filter_by(username=form.username.data).first():
                 flash('That username is already taken.', 'danger')
-                owned = set(current_user.gear_inventory or [])
-                return render_template('profile.html', form=form,
-                                       gear_catalog=GEAR_CATALOG, owned_gear=owned)
+                return redirect(url_for('auth.profile'))
         if form.email.data.lower() != current_user.email:
             if User.query.filter_by(email=form.email.data.lower()).first():
                 flash('An account with that email already exists.', 'danger')
-                owned = set(current_user.gear_inventory or [])
-                return render_template('profile.html', form=form,
-                                       gear_catalog=GEAR_CATALOG, owned_gear=owned)
+                return redirect(url_for('auth.profile'))
 
         current_user.username = form.username.data
         current_user.email    = form.email.data.lower()
@@ -113,5 +110,19 @@ def profile():
         return redirect(url_for('auth.profile'))
 
     owned = set(current_user.gear_inventory or [])
+    today = date.today()
+    past_signups = (RideSignup.query
+                    .filter_by(user_id=current_user.id, is_waitlist=False)
+                    .join(Ride, RideSignup.ride_id == Ride.id)
+                    .filter(Ride.date < today, Ride.is_cancelled == False)
+                    .order_by(Ride.date.desc())
+                    .all())
+    ytd_signups = [s for s in past_signups if s.ride.date.year == today.year]
+    ytd_stats = {
+        'rides':     len(ytd_signups),
+        'miles':     round(sum(s.ride.distance_miles for s in ytd_signups), 1),
+        'elevation': sum(s.ride.elevation_feet or 0 for s in ytd_signups),
+    }
     return render_template('profile.html', form=form,
-                           gear_catalog=GEAR_CATALOG, owned_gear=owned)
+                           gear_catalog=GEAR_CATALOG, owned_gear=owned,
+                           past_signups=past_signups, ytd_stats=ytd_stats)

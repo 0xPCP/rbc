@@ -113,6 +113,12 @@ class ClubCreateForm(FlaskForm):
     submit        = SubmitField('Create Club')
 
 
+class ClubPostForm(FlaskForm):
+    title = StringField('Title', validators=[DataRequired(), Length(max=200)])
+    body  = TextAreaField('Body', validators=[DataRequired()])
+    submit = SubmitField('Save Post')
+
+
 class RideForm(FlaskForm):
     title = StringField('Ride Title', validators=[DataRequired(), Length(max=200)])
     date = DateField('Date', validators=[DataRequired()])

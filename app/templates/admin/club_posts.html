@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}News — {{ club.name }} Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('clubs.home', slug=club.slug) }}">{{ club.name }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}">Admin</a></li>
+        <li class="breadcrumb-item active">News</li>
+      </ol>
+    </nav>
+    <div class="d-flex justify-content-between align-items-center">
+      <h1>{{ club.name }} — News</h1>
+      <a href="{{ url_for('admin.post_new', slug=club.slug) }}" class="btn btn-rbc">+ New Post</a>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  {% if posts %}
+  <div class="rbc-table-wrap">
+    <table class="table rbc-table">
+      <thead><tr><th>Title</th><th>Published</th><th>Author</th><th></th></tr></thead>
+      <tbody>
+        {% for post in posts %}
+        <tr>
+          <td><strong>{{ post.title }}</strong></td>
+          <td><small class="text-muted">{{ post.published_at.strftime('%b %d, %Y') }}</small></td>
+          <td><small class="text-muted">{{ post.author.username if post.author else '—' }}</small></td>
+          <td class="text-end">
+            <a href="{{ url_for('admin.post_edit', slug=club.slug, post_id=post.id) }}"
+               class="btn btn-outline-secondary btn-xs me-1">Edit</a>
+            <form method="post" action="{{ url_for('admin.post_delete', slug=club.slug, post_id=post.id) }}"
+                  class="d-inline"
+                  onsubmit="return confirm('Delete this post?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-outline-danger btn-xs">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted">No posts yet. <a href="{{ url_for('admin.post_new', slug=club.slug) }}">Create the first one.</a></p>
+  {% endif %}
+</div>
+{% endblock %}

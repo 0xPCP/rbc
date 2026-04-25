@@ -2,7 +2,8 @@
 Tests for authentication: registration, login, logout, first-user admin promotion.
 """
 import pytest
-from app.models import User
+from datetime import date, time, timedelta
+from app.models import User, Ride, RideSignup
 from tests.conftest import login, logout
 
 
@@ -191,3 +192,53 @@ class TestProfile:
             'username': 'rider2', 'email': 'rider@test.com', 'zip_code': '',
         }, follow_redirects=True)
         assert b'already taken' in resp.data
+
+    def test_profile_shows_ytd_stats(self, client, regular_user, sample_club, db):
+        login(client)
+        past_date = date.today() - timedelta(days=10)
+        ride = Ride(
+            club_id=sample_club.id, title='Past Ride', date=past_date,
+            time=time(9, 0), meeting_location='HQ', distance_miles=30.0,
+            elevation_feet=1500, pace_category='B',
+        )
+        db.session.add(ride)
+        db.session.commit()
+        db.session.add(RideSignup(ride_id=ride.id, user_id=regular_user.id, is_waitlist=False))
+        db.session.commit()
+
+        resp = client.get('/auth/profile')
+        assert resp.status_code == 200
+        assert b'Stats' in resp.data
+        assert b'30.0' in resp.data
+
+    def test_profile_shows_ride_history(self, client, regular_user, sample_club, db):
+        login(client)
+        past_date = date.today() - timedelta(days=5)
+        ride = Ride(
+            club_id=sample_club.id, title='History Test Ride', date=past_date,
+            time=time(8, 0), meeting_location='Park', distance_miles=25.0,
+            pace_category='C',
+        )
+        db.session.add(ride)
+        db.session.commit()
+        db.session.add(RideSignup(ride_id=ride.id, user_id=regular_user.id, is_waitlist=False))
+        db.session.commit()
+
+        resp = client.get('/auth/profile')
+        assert b'History Test Ride' in resp.data
+
+    def test_profile_history_excludes_waitlist(self, client, regular_user, sample_club, db):
+        login(client)
+        past_date = date.today() - timedelta(days=3)
+        ride = Ride(
+            club_id=sample_club.id, title='Waitlist Ride', date=past_date,
+            time=time(8, 0), meeting_location='Park', distance_miles=20.0,
+            pace_category='C',
+        )
+        db.session.add(ride)
+        db.session.commit()
+        db.session.add(RideSignup(ride_id=ride.id, user_id=regular_user.id, is_waitlist=True))
+        db.session.commit()
+
+        resp = client.get('/auth/profile')
+        assert b'Waitlist Ride' not in resp.data

@@ -3,8 +3,8 @@ from datetime import date
 from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
 from flask_login import login_required, current_user
 from ..extensions import db
-from ..models import Club, Ride, RideSignup, User, ClubMembership, ClubAdmin
-from ..forms import RideForm, ClubForm, ClubSettingsForm
+from ..models import Club, Ride, RideSignup, User, ClubMembership, ClubAdmin, ClubPost
+from ..forms import RideForm, ClubForm, ClubSettingsForm, ClubPostForm
 from ..recurrence import generate_instances, delete_future_instances
 from ..geocoding import geocode_zip
 from ..email import (send_cancellation_emails, send_new_ride_notification,
@@ -478,3 +478,59 @@ def club_member_reject(slug, uid):
     db.session.commit()
     flash(f'{username}\'s membership request was rejected.', 'info')
     return redirect(url_for('admin.club_team', slug=slug))
+
+
+# ── Club news/announcements ───────────────────────────────────────────────────
+
+@admin_bp.route('/clubs/<slug>/posts')
+@club_admin_required
+def club_posts(slug):
+    club = _get_club_or_404(slug)
+    posts = (ClubPost.query.filter_by(club_id=club.id)
+             .order_by(ClubPost.published_at.desc()).all())
+    return render_template('admin/club_posts.html', club=club, posts=posts)
+
+
+@admin_bp.route('/clubs/<slug>/posts/new', methods=['GET', 'POST'])
+@club_admin_required
+def post_new(slug):
+    club = _get_club_or_404(slug)
+    form = ClubPostForm()
+    if form.validate_on_submit():
+        post = ClubPost(
+            club_id=club.id,
+            author_id=current_user.id,
+            title=form.title.data,
+            body=form.body.data,
+        )
+        db.session.add(post)
+        db.session.commit()
+        flash('Post published.', 'success')
+        return redirect(url_for('admin.club_posts', slug=slug))
+    return render_template('admin/post_form.html', form=form, club=club, title='New Post', post=None)
+
+
+@admin_bp.route('/clubs/<slug>/posts/<int:post_id>/edit', methods=['GET', 'POST'])
+@club_admin_required
+def post_edit(slug, post_id):
+    club = _get_club_or_404(slug)
+    post = ClubPost.query.filter_by(id=post_id, club_id=club.id).first_or_404()
+    form = ClubPostForm(obj=post)
+    if form.validate_on_submit():
+        post.title = form.title.data
+        post.body  = form.body.data
+        db.session.commit()
+        flash('Post updated.', 'success')
+        return redirect(url_for('admin.club_posts', slug=slug))
+    return render_template('admin/post_form.html', form=form, club=club, title='Edit Post', post=post)
+
+
+@admin_bp.route('/clubs/<slug>/posts/<int:post_id>/delete', methods=['POST'])
+@club_admin_required
+def post_delete(slug, post_id):
+    club = _get_club_or_404(slug)
+    post = ClubPost.query.filter_by(id=post_id, club_id=club.id).first_or_404()
+    db.session.delete(post)
+    db.session.commit()
+    flash('Post deleted.', 'info')
+    return redirect(url_for('admin.club_posts', slug=slug))

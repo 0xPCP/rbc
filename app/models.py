@@ -128,6 +128,8 @@ class Club(db.Model):
     memberships = db.relationship('ClubMembership', backref='club', lazy=True, cascade='all, delete-orphan')
     admin_roles = db.relationship('ClubAdmin', backref='club', lazy=True, cascade='all, delete-orphan')
     waivers = db.relationship('ClubWaiver', backref='club', lazy=True, cascade='all, delete-orphan')
+    posts = db.relationship('ClubPost', backref='club', lazy=True,
+                            order_by='ClubPost.published_at.desc()', cascade='all, delete-orphan')
 
     @property
     def member_count(self):
@@ -182,6 +184,21 @@ class ClubWaiver(db.Model):
     signatures = db.relationship('WaiverSignature', backref='waiver', lazy=True)
 
     __table_args__ = (db.UniqueConstraint('club_id', 'year', name='uq_club_waiver_year'),)
+
+
+class ClubPost(db.Model):
+    """Admin-authored news/announcement post for a club."""
+    __tablename__ = 'club_posts'
+
+    id = db.Column(db.Integer, primary_key=True)
+    club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=False)
+    author_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    title = db.Column(db.String(200), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    published_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    author = db.relationship('User', foreign_keys=[author_id])
 
 
 class WaiverSignature(db.Model):
