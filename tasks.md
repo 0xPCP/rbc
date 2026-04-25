@@ -108,9 +108,107 @@ Status: `[ ]` not started · `[~]` in progress · `[x]` done
 - [ ] Research Instagram Basic Display API or hashtag approach
 - [ ] Implement photo gallery section on ride detail page (post-ride recap)
 
-## Future / icebox
+---
 
-- [ ] Third-party OAuth login (Google, Microsoft)
-- [ ] Club admin can invite members via email
-- [ ] Mobile-responsive design audit
-- [ ] Public club pages — already accessible without login; audit completeness
+## Backlog — High Priority
+
+These are the features most commonly found across major clubs (NYCC, Cascade, BTCNJ, DC Velo, etc.)
+and platforms (ClubExpress, RideStats, RideWithGPS for Clubs).
+
+### Notifications
+- [ ] Weekly ride digest email — automated Sunday preview of upcoming club rides for each member
+- [ ] Membership approval/rejection email — notify user when request is approved or rejected
+- [ ] Membership renewal reminder email — 30 days and 7 days before expiry
+- [ ] Write tests for new notification types
+
+### Ride enhancements
+- [ ] Ride cap (max riders) + waiting list — `Ride.max_riders`, waitlist auto-promotes when slot opens
+- [ ] Ride tags / type: road, gravel, social, training, event, night ride (filter on calendar + discovery)
+- [ ] Add tag filter to club calendar (alongside existing pace filter)
+- [ ] Add `is_private` toggle to club settings UI (model field exists; settings page needs UI)
+- [ ] Write tests for ride cap, waitlist promotion, and tag filtering
+
+### Membership & dues
+- [ ] Membership tiers — `MembershipTier` model: name, price, description (individual, family, student, senior)
+- [ ] Stripe integration for annual dues payment — collect dues on join, store `stripe_customer_id` on User
+- [ ] Membership expiry date — `ClubMembership.expires_at`; grace period configurable per club
+- [ ] Membership lapse: downgrade to inactive after grace period; block ride signup
+- [ ] Treasurer admin role — view financial reports and export member/payment data
+- [ ] Write tests for tier model, Stripe webhook handling, expiry/grace logic
+
+### Admin tooling
+- [ ] CSV export — member list (name, email, join date, status, tier) downloadable by admin
+- [ ] Emergency contact on member profile — name + phone; visible to ride leaders on ride day
+- [ ] Ride leader assignment from member roster (stored on `Ride.leader_id`)
+- [ ] Write tests for CSV export and emergency contact visibility
+
+---
+
+## Backlog — Medium Priority
+
+### Club page & content
+- [ ] Club news / announcements — admin-authored posts with title, body, published date; listed on club home
+- [ ] Club stats block on public page: founded year, member count, total rides hosted, total miles
+- [ ] Ride leader roster (public): name, bio, photo per leader
+- [ ] Sponsor / partner logos section on club home page
+- [ ] Write tests for news CRUD and stats rendering
+
+### User profile & history
+- [ ] Emergency contact field on user profile (name + phone) — opt-in; visible to ride leaders
+- [ ] Ride history page — "You've completed 47 rides this year across 3 clubs"
+- [ ] Personal stats: miles and elevation YTD across all joined clubs
+- [ ] Write tests for history aggregation
+
+### Ride discovery (cross-club)
+- [ ] "All rides near my zip this weekend" — discovery page showing rides from all clubs near zip
+- [ ] Filter by pace category, distance, date across all clubs
+- [ ] Write tests for cross-club ride discovery query
+
+### Roles expansion
+- [ ] `content_editor` role — can manage news posts and club description only (no rides or settings)
+- [ ] `treasurer` role — can view/export financial data; cannot edit settings or rides
+- [ ] Write tests for new role access control
+
+### Invite-by-email
+- [ ] Admin sends invite link (time-limited token); recipient gets immediate active membership on click
+- [ ] Write tests for invite token generation, redemption, and expiry
+
+---
+
+## Backlog — Lower Priority / Icebox
+
+### Annual events
+- [ ] Event pages distinct from weekly rides — centuries, gran fondos, crits, clinics
+- [ ] Event registration with optional Stripe payment
+- [ ] Multiple route options per event (25 / 50 / 75 / 100 mi)
+- [ ] Volunteer sign-up for SAG, rest stops, finish line
+- [ ] Early bird / tiered pricing; promo codes
+
+### Member engagement
+- [ ] Club challenge — admin creates a mileage/elevation goal ("5,000 club miles in 2025")
+- [ ] Progress bar + leaderboard for challenge
+- [ ] Attendance history for ride leaders (who showed up, who didn't)
+- [ ] "Most rides" / "Most miles" club awards (annual)
+
+### Safety
+- [ ] QR code check-in at rides — admin generates per-ride QR; scan records attendance
+- [ ] Ride leader first-aid cert field + expiry tracking (admin visible)
+- [ ] Per-event waivers — separate waiver for special events (night rides, crits, gravel)
+- [ ] Minor / youth waiver requiring parent signature (email link flow)
+
+### Platform
+- [ ] Public JSON feed per club — `/api/clubs/<slug>/rides.json` for embedding calendar on external site
+- [ ] Platform-level superadmin dashboard — all clubs, all stats
+- [ ] Webhook: notify external systems on ride create/cancel/update
+- [ ] Custom domain: map clubname.com to their platform page (Cloudflare Worker / CNAME)
+
+### OAuth & social
+- [ ] Third-party OAuth login (Google, Microsoft) — Flask-Dance or Authlib
+- [ ] Post-ride summary email to participants ("16 riders completed Tuesday Worlds, avg 22.4 mph")
+- [ ] Real-time ride tracking (opt-in, safety use case) — research feasibility
+
+### UX polish
+- [ ] Mobile-responsive design audit — all pages tested at 390px width
+- [ ] Multi-group ride card — A + B + C groups on same day shown as one card with expand
+- [ ] Ride comment thread — members ask questions, post updates before/after ride
+- [ ] Direct route send to Garmin / Wahoo (via RideWithGPS API or device API)

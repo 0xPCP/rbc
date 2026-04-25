@@ -97,3 +97,13 @@ This catches Cloudflare Access intercepts, JS runtime errors, CDN failures, and 
 ## WTForms gotcha
 
 `BooleanField` treats any non-empty string (including `'0'`) as `True`. For boolean form fields driven by JS hidden inputs, read directly: `request.form.get('field') == '1'`.
+
+## Feature status tracking
+
+`requirements.md` is the canonical product spec. Every feature has a status marker:
+- ✅ Built — shipped and tested
+- 🔨 In progress
+- 📋 Planned — in the backlog
+- 💡 Icebox — good idea, not yet scheduled
+
+`tasks.md` is the engineering backlog — completed work at the top, then sections: High Priority, Medium Priority, Icebox. When starting a new feature, find it in both files and update status markers as work progresses.
