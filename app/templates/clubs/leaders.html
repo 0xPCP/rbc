@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Ride Leaders — {{ club.name }}{% endblock %}
+{% block head %}{% include 'clubs/_theme.html' %}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('clubs.home', slug=club.slug) }}">{{ club.name }}</a></li>
+        <li class="breadcrumb-item active">Ride Leaders</li>
+      </ol>
+    </nav>
+    <h1>{{ club.name }} — Ride Leaders</h1>
+  </div>
+</div>
+
+<div class="container py-4">
+  {% if leaders %}
+  <div class="row g-4">
+    {% for leader in leaders %}
+    <div class="col-sm-6 col-lg-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body d-flex gap-3 align-items-start">
+          {% if leader.photo_url %}
+          <img src="{{ leader.photo_url }}" alt="{{ leader.name }}"
+               style="width:72px;height:72px;object-fit:cover;border-radius:50%;flex-shrink:0"
+               onerror="this.style.display='none'">
+          {% else %}
+          <div style="width:72px;height:72px;border-radius:50%;background:var(--rbc-green,#2d6a4f);
+                      display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                      color:#fff;font-size:1.6rem;font-weight:600">
+            {{ leader.name[0].upper() }}
+          </div>
+          {% endif %}
+          <div>
+            <h6 class="mb-1">{{ leader.name }}</h6>
+            {% if leader.bio %}
+            <p class="text-muted small mb-0">{{ leader.bio }}</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">No leader roster published yet.</p>
+  {% endif %}
+</div>
+{% endblock %}

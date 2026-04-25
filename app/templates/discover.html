@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% block title %}Discover Rides — Cycling Clubs{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>Discover Rides</h1>
+    <p class="mb-0" style="color:rgba(255,255,255,.75)">Find upcoming rides from clubs in your area.</p>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  <!-- Filters -->
+  <form method="get" class="mb-4">
+    <div class="d-flex flex-wrap gap-2 align-items-end">
+
+      <div>
+        <label class="form-label small mb-1">Date Range</label>
+        <div class="btn-group" role="group">
+          <a href="{{ url_for('main.discover', range='weekend', pace=active_pace, type=active_type, zip=zip_q) }}"
+             class="btn btn-sm {{ 'btn-rbc' if active_range == 'weekend' else 'btn-outline-secondary' }}">This Weekend</a>
+          <a href="{{ url_for('main.discover', range='week', pace=active_pace, type=active_type, zip=zip_q) }}"
+             class="btn btn-sm {{ 'btn-rbc' if active_range == 'week' else 'btn-outline-secondary' }}">Next 7 Days</a>
+          <a href="{{ url_for('main.discover', range='two-weeks', pace=active_pace, type=active_type, zip=zip_q) }}"
+             class="btn btn-sm {{ 'btn-rbc' if active_range == 'two-weeks' else 'btn-outline-secondary' }}">Next 2 Weeks</a>
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label small mb-1">Pace</label>
+        <div class="btn-group" role="group">
+          {% for p in ['A','B','C','D'] %}
+          <a href="{{ url_for('main.discover', range=active_range, pace=('' if active_pace == p else p), type=active_type, zip=zip_q) }}"
+             class="btn btn-sm {{ 'pace-badge pace-' + p if active_pace == p else 'btn-outline-secondary' }}">{{ p }}</a>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div>
+        <label class="form-label small mb-1">Type</label>
+        <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
+          <option value="">All Types</option>
+          {% for t in ride_types %}
+          <option value="{{ t }}" {{ 'selected' if active_type == t else '' }}>{{ t.title() }}</option>
+          {% endfor %}
+        </select>
+        <input type="hidden" name="range" value="{{ active_range }}">
+        <input type="hidden" name="pace" value="{{ active_pace }}">
+        <input type="hidden" name="zip" value="{{ zip_q }}">
+      </div>
+
+      <div>
+        <label class="form-label small mb-1">Near Zip</label>
+        <div class="input-group input-group-sm">
+          <input type="text" name="zip" value="{{ zip_q }}" class="form-control" placeholder="e.g. 20191" style="max-width:100px">
+          <input type="hidden" name="range" value="{{ active_range }}">
+          <input type="hidden" name="pace" value="{{ active_pace }}">
+          <input type="hidden" name="type" value="{{ active_type }}">
+          <button class="btn btn-outline-secondary" type="submit">Go</button>
+        </div>
+      </div>
+
+    </div>
+  </form>
+
+  {% if geo_error %}
+  <div class="alert alert-warning py-2 small">{{ geo_error }}</div>
+  {% endif %}
+
+  {% if rides %}
+  <p class="text-muted small mb-3">{{ rides | length }} ride{{ 's' if rides | length != 1 else '' }} found</p>
+  {% for ride in rides %}
+  {% set w = weather.get(ride.id) %}
+  <div class="ride-card mb-3 {{ 'ride-cancelled' if ride.is_cancelled else '' }}">
+    <div class="d-flex gap-3 align-items-start">
+      <div class="ride-date-block">
+        <div class="rdb-month">{{ ride.date.strftime('%b') }}</div>
+        <div class="rdb-day">{{ ride.date.day }}</div>
+      </div>
+      <div class="flex-grow-1">
+        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+          <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
+          {% if ride.ride_type %}<span class="badge bg-secondary" style="font-size:.7rem">{{ ride.ride_type.title() }}</span>{% endif %}
+          {% if w %}{% include '_weather_chip.html' with context %}{% endif %}
+        </div>
+        <a href="{{ url_for('clubs.ride_detail', slug=ride.club.slug, ride_id=ride.id) }}" class="ride-title">{{ ride.title }}</a>
+        <p class="ride-meta mb-0">
+          {{ ride.time.strftime('%I:%M %p').lstrip('0') }} &bull;
+          {{ ride.distance_miles }} mi
+          {% if ride.elevation_feet %}&bull; {{ ride.elevation_feet }} ft{% endif %}
+          &bull; <a href="{{ url_for('clubs.home', slug=ride.club.slug) }}" class="text-muted">{{ ride.club.name }}</a>
+          &bull; <strong>{{ ride.signup_count }}</strong> signed up
+        </p>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="text-center py-5 text-muted">
+    <p class="mb-1">No rides found for the selected filters.</p>
+    <p class="small">Try expanding the date range or removing a filter.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

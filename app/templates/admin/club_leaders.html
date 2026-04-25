@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Leaders — {{ club.name }} Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('clubs.home', slug=club.slug) }}">{{ club.name }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}">Admin</a></li>
+        <li class="breadcrumb-item active">Leaders</li>
+      </ol>
+    </nav>
+    <div class="d-flex justify-content-between align-items-center">
+      <h1>{{ club.name }} — Ride Leaders</h1>
+      <a href="{{ url_for('admin.leader_new', slug=club.slug) }}" class="btn btn-rbc">+ Add Leader</a>
+    </div>
+  </div>
+</div>
+
+<div class="container py-4">
+  <p class="text-muted small mb-4">Leaders are displayed publicly on the club's Leaders page. Use Display Order to control the sort (lower = earlier).</p>
+  {% if leaders %}
+  <div class="rbc-table-wrap">
+    <table class="table rbc-table">
+      <thead><tr><th>Name</th><th>Bio</th><th>Order</th><th></th></tr></thead>
+      <tbody>
+        {% for leader in leaders %}
+        <tr>
+          <td>
+            {% if leader.photo_url %}
+            <img src="{{ leader.photo_url }}" alt="{{ leader.name }}"
+                 style="width:32px;height:32px;object-fit:cover;border-radius:50%;margin-right:8px"
+                 onerror="this.style.display='none'">
+            {% endif %}
+            <strong>{{ leader.name }}</strong>
+          </td>
+          <td><small class="text-muted">{{ leader.bio[:80] + '…' if leader.bio and leader.bio|length > 80 else (leader.bio or '—') }}</small></td>
+          <td><small>{{ leader.display_order }}</small></td>
+          <td class="text-end">
+            <a href="{{ url_for('admin.leader_edit', slug=club.slug, leader_id=leader.id) }}"
+               class="btn btn-outline-secondary btn-xs me-1">Edit</a>
+            <form method="post" action="{{ url_for('admin.leader_delete', slug=club.slug, leader_id=leader.id) }}"
+                  class="d-inline" onsubmit="return confirm('Remove {{ leader.name }}?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <button class="btn btn-outline-danger btn-xs">Remove</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p class="text-muted">No leaders yet. <a href="{{ url_for('admin.leader_new', slug=club.slug) }}">Add the first one.</a></p>
+  {% endif %}
+</div>
+{% endblock %}

@@ -42,8 +42,14 @@
                   <td>
                     {% if row.role == 'admin' %}
                     <span class="badge" style="background:var(--rbc-green,#2d6a4f)">Admin</span>
-                    {% else %}
+                    {% elif row.role == 'ride_manager' %}
                     <span class="badge bg-secondary">Ride Manager</span>
+                    {% elif row.role == 'content_editor' %}
+                    <span class="badge bg-info text-dark">Content Editor</span>
+                    {% elif row.role == 'treasurer' %}
+                    <span class="badge bg-warning text-dark">Treasurer</span>
+                    {% else %}
+                    <span class="badge bg-secondary">{{ row.role }}</span>
                     {% endif %}
                   </td>
                   <td>
@@ -74,6 +80,8 @@
             <select name="role" class="form-select form-select-sm" style="width:auto">
               <option value="admin">Admin</option>
               <option value="ride_manager">Ride Manager</option>
+              <option value="content_editor">Content Editor</option>
+              <option value="treasurer">Treasurer</option>
             </select>
             <button type="submit" class="btn btn-rbc btn-sm">Add</button>
           </form>

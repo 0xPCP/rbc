@@ -47,8 +47,12 @@
     <div class="d-flex gap-2 flex-wrap">
       <a href="{{ url_for('admin.ride_new', slug=club.slug) }}" class="btn btn-rbc btn-sm">+ New Ride</a>
       <a href="{{ url_for('admin.club_rides', slug=club.slug) }}" class="btn btn-outline-secondary btn-sm">All Rides</a>
-      {% if is_full_admin %}
+      {% if current_user.can_manage_content(club) %}
       <a href="{{ url_for('admin.club_posts', slug=club.slug) }}" class="btn btn-outline-secondary btn-sm">News</a>
+      {% endif %}
+      {% if is_full_admin %}
+      <a href="{{ url_for('admin.club_leaders', slug=club.slug) }}" class="btn btn-outline-secondary btn-sm">Leaders</a>
+      <a href="{{ url_for('admin.club_sponsors', slug=club.slug) }}" class="btn btn-outline-secondary btn-sm">Sponsors</a>
       <a href="{{ url_for('admin.club_team', slug=club.slug) }}" class="btn btn-outline-secondary btn-sm">
         Team{% if stats.pending %} <span class="badge bg-warning text-dark">{{ stats.pending }}</span>{% endif %}
       </a>

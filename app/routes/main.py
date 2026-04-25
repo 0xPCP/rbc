@@ -1,8 +1,9 @@
-from datetime import date
-from flask import Blueprint, render_template
+from datetime import date, timedelta
+from flask import Blueprint, render_template, request
 from flask_login import current_user
 from ..models import Club, Ride, RideSignup, ClubMembership
 from ..weather import get_weather_for_rides
+from ..geocoding import geocode_zip, haversine_miles
 
 main_bp = Blueprint('main', __name__)
 
@@ -72,3 +73,77 @@ def _user_dashboard(today):
 @main_bp.route('/about')
 def about():
     return render_template('about.html')
+
+
+@main_bp.route('/discover/')
+def discover():
+    today = date.today()
+
+    pace      = request.args.get('pace', '')
+    ride_type = request.args.get('type', '')
+    date_range = request.args.get('range', 'week')
+    zip_q     = request.args.get('zip', '').strip()
+    radius    = 50
+
+    # Date window
+    if date_range == 'weekend':
+        days_until_sat = (5 - today.weekday()) % 7
+        if days_until_sat == 0 and today.weekday() == 5:
+            days_until_sat = 0
+        sat = today + timedelta(days=days_until_sat if days_until_sat else 0)
+        if today.weekday() > 5:
+            sat = today + timedelta(days=(5 - today.weekday()) % 7)
+        sat = today + timedelta(days=(5 - today.weekday()) % 7 or 7)
+        end_date = sat + timedelta(days=1)  # Sat + Sun
+        start_date = sat
+    elif date_range == 'two-weeks':
+        start_date = today
+        end_date = today + timedelta(days=14)
+    else:  # 'week' default
+        start_date = today
+        end_date = today + timedelta(days=7)
+
+    # Limit to active clubs
+    active_club_ids = [c.id for c in Club.query.filter_by(is_active=True).with_entities(Club.id).all()]
+
+    query = (Ride.query
+             .filter(Ride.club_id.in_(active_club_ids),
+                     Ride.is_cancelled == False,
+                     Ride.date >= start_date,
+                     Ride.date <= end_date)
+             .order_by(Ride.date.asc(), Ride.time.asc()))
+
+    if pace in ('A', 'B', 'C', 'D'):
+        query = query.filter(Ride.pace_category == pace)
+    if ride_type in ('road', 'gravel', 'social', 'training', 'event', 'night'):
+        query = query.filter(Ride.ride_type == ride_type)
+
+    rides = query.limit(100).all()
+
+    # Optionally filter by zip proximity
+    geo_error = None
+    if zip_q:
+        coords = geocode_zip(zip_q)
+        if coords:
+            user_lat, user_lng = coords
+            club_cache = {}
+            filtered = []
+            for r in rides:
+                club = club_cache.get(r.club_id)
+                if club is None:
+                    club = Club.query.get(r.club_id)
+                    club_cache[r.club_id] = club
+                if club and club.lat and club.lng:
+                    dist = haversine_miles(user_lat, user_lng, club.lat, club.lng)
+                    if dist <= radius:
+                        filtered.append(r)
+            rides = filtered
+        else:
+            geo_error = 'Could not locate that zip code.'
+
+    weather = get_weather_for_rides(rides)
+    ride_types = ['road', 'gravel', 'social', 'training', 'event', 'night']
+    return render_template('discover.html', rides=rides, weather=weather,
+                           active_pace=pace, active_type=ride_type,
+                           active_range=date_range, zip_q=zip_q,
+                           geo_error=geo_error, ride_types=ride_types, today=today)

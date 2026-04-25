@@ -3,8 +3,8 @@ from datetime import date
 from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
 from flask_login import login_required, current_user
 from ..extensions import db
-from ..models import Club, Ride, RideSignup, User, ClubMembership, ClubAdmin, ClubPost
-from ..forms import RideForm, ClubForm, ClubSettingsForm, ClubPostForm
+from ..models import Club, Ride, RideSignup, User, ClubMembership, ClubAdmin, ClubPost, ClubLeader, ClubSponsor
+from ..forms import RideForm, ClubForm, ClubSettingsForm, ClubPostForm, ClubLeaderForm, ClubSponsorForm
 from ..recurrence import generate_instances, delete_future_instances
 from ..geocoding import geocode_zip
 from ..email import (send_cancellation_emails, send_new_ride_notification,
@@ -55,6 +55,40 @@ def superadmin_required(f):
     @wraps(f)
     def decorated(*args, **kwargs):
         if not current_user.is_authenticated or not current_user.is_admin:
+            abort(403)
+        return f(*args, **kwargs)
+    return login_required(decorated)
+
+
+def club_content_required(f):
+    """Decorator: user must be able to manage content (admin OR content_editor)."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated:
+            abort(403)
+        slug = kwargs.get('slug')
+        if slug:
+            club = _get_club_or_404(slug)
+            if not current_user.can_manage_content(club):
+                abort(403)
+        elif not current_user.is_admin:
+            abort(403)
+        return f(*args, **kwargs)
+    return login_required(decorated)
+
+
+def club_member_view_required(f):
+    """Decorator: user must be able to view member data (admin OR treasurer)."""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_authenticated:
+            abort(403)
+        slug = kwargs.get('slug')
+        if slug:
+            club = _get_club_or_404(slug)
+            if not current_user.can_view_members(club):
+                abort(403)
+        elif not current_user.is_admin:
             abort(403)
         return f(*args, **kwargs)
     return login_required(decorated)
@@ -188,7 +222,7 @@ def club_settings(slug):
 
 
 @admin_bp.route('/clubs/<slug>/members/export')
-@club_admin_required
+@club_member_view_required
 def club_members_export(slug):
     """Download active member list as CSV."""
     import csv
@@ -373,7 +407,7 @@ def club_team_add(slug):
     club = _get_club_or_404(slug)
     identifier = request.form.get('identifier', '').strip()
     role = request.form.get('role', 'admin')
-    if role not in ('admin', 'ride_manager'):
+    if role not in ('admin', 'ride_manager', 'content_editor', 'treasurer'):
         role = 'admin'
 
     user = (User.query.filter(
@@ -483,7 +517,7 @@ def club_member_reject(slug, uid):
 # ── Club news/announcements ───────────────────────────────────────────────────
 
 @admin_bp.route('/clubs/<slug>/posts')
-@club_admin_required
+@club_content_required
 def club_posts(slug):
     club = _get_club_or_404(slug)
     posts = (ClubPost.query.filter_by(club_id=club.id)
@@ -492,7 +526,7 @@ def club_posts(slug):
 
 
 @admin_bp.route('/clubs/<slug>/posts/new', methods=['GET', 'POST'])
-@club_admin_required
+@club_content_required
 def post_new(slug):
     club = _get_club_or_404(slug)
     form = ClubPostForm()
@@ -511,7 +545,7 @@ def post_new(slug):
 
 
 @admin_bp.route('/clubs/<slug>/posts/<int:post_id>/edit', methods=['GET', 'POST'])
-@club_admin_required
+@club_content_required
 def post_edit(slug, post_id):
     club = _get_club_or_404(slug)
     post = ClubPost.query.filter_by(id=post_id, club_id=club.id).first_or_404()
@@ -526,7 +560,7 @@ def post_edit(slug, post_id):
 
 
 @admin_bp.route('/clubs/<slug>/posts/<int:post_id>/delete', methods=['POST'])
-@club_admin_required
+@club_content_required
 def post_delete(slug, post_id):
     club = _get_club_or_404(slug)
     post = ClubPost.query.filter_by(id=post_id, club_id=club.id).first_or_404()
@@ -534,3 +568,115 @@ def post_delete(slug, post_id):
     db.session.commit()
     flash('Post deleted.', 'info')
     return redirect(url_for('admin.club_posts', slug=slug))
+
+
+# ── Ride leaders roster ───────────────────────────────────────────────────────
+
+@admin_bp.route('/clubs/<slug>/leaders')
+@club_admin_required
+def club_leaders(slug):
+    club = _get_club_or_404(slug)
+    return render_template('admin/club_leaders.html', club=club, leaders=club.leaders)
+
+
+@admin_bp.route('/clubs/<slug>/leaders/new', methods=['GET', 'POST'])
+@club_admin_required
+def leader_new(slug):
+    club = _get_club_or_404(slug)
+    form = ClubLeaderForm()
+    if form.validate_on_submit():
+        db.session.add(ClubLeader(
+            club_id=club.id,
+            name=form.name.data,
+            bio=form.bio.data or None,
+            photo_url=form.photo_url.data or None,
+            display_order=form.display_order.data or 0,
+        ))
+        db.session.commit()
+        flash('Leader added.', 'success')
+        return redirect(url_for('admin.club_leaders', slug=slug))
+    return render_template('admin/leader_form.html', form=form, club=club, title='Add Leader')
+
+
+@admin_bp.route('/clubs/<slug>/leaders/<int:leader_id>/edit', methods=['GET', 'POST'])
+@club_admin_required
+def leader_edit(slug, leader_id):
+    club = _get_club_or_404(slug)
+    leader = ClubLeader.query.filter_by(id=leader_id, club_id=club.id).first_or_404()
+    form = ClubLeaderForm(obj=leader)
+    if form.validate_on_submit():
+        leader.name          = form.name.data
+        leader.bio           = form.bio.data or None
+        leader.photo_url     = form.photo_url.data or None
+        leader.display_order = form.display_order.data or 0
+        db.session.commit()
+        flash('Leader updated.', 'success')
+        return redirect(url_for('admin.club_leaders', slug=slug))
+    return render_template('admin/leader_form.html', form=form, club=club, title='Edit Leader')
+
+
+@admin_bp.route('/clubs/<slug>/leaders/<int:leader_id>/delete', methods=['POST'])
+@club_admin_required
+def leader_delete(slug, leader_id):
+    club = _get_club_or_404(slug)
+    leader = ClubLeader.query.filter_by(id=leader_id, club_id=club.id).first_or_404()
+    db.session.delete(leader)
+    db.session.commit()
+    flash('Leader removed.', 'info')
+    return redirect(url_for('admin.club_leaders', slug=slug))
+
+
+# ── Sponsors ──────────────────────────────────────────────────────────────────
+
+@admin_bp.route('/clubs/<slug>/sponsors')
+@club_admin_required
+def club_sponsors(slug):
+    club = _get_club_or_404(slug)
+    return render_template('admin/club_sponsors.html', club=club, sponsors=club.sponsors)
+
+
+@admin_bp.route('/clubs/<slug>/sponsors/new', methods=['GET', 'POST'])
+@club_admin_required
+def sponsor_new(slug):
+    club = _get_club_or_404(slug)
+    form = ClubSponsorForm()
+    if form.validate_on_submit():
+        db.session.add(ClubSponsor(
+            club_id=club.id,
+            name=form.name.data,
+            logo_url=form.logo_url.data or None,
+            website=form.website.data or None,
+            display_order=form.display_order.data or 0,
+        ))
+        db.session.commit()
+        flash('Sponsor added.', 'success')
+        return redirect(url_for('admin.club_sponsors', slug=slug))
+    return render_template('admin/sponsor_form.html', form=form, club=club, title='Add Sponsor')
+
+
+@admin_bp.route('/clubs/<slug>/sponsors/<int:sponsor_id>/edit', methods=['GET', 'POST'])
+@club_admin_required
+def sponsor_edit(slug, sponsor_id):
+    club = _get_club_or_404(slug)
+    sponsor = ClubSponsor.query.filter_by(id=sponsor_id, club_id=club.id).first_or_404()
+    form = ClubSponsorForm(obj=sponsor)
+    if form.validate_on_submit():
+        sponsor.name          = form.name.data
+        sponsor.logo_url      = form.logo_url.data or None
+        sponsor.website       = form.website.data or None
+        sponsor.display_order = form.display_order.data or 0
+        db.session.commit()
+        flash('Sponsor updated.', 'success')
+        return redirect(url_for('admin.club_sponsors', slug=slug))
+    return render_template('admin/sponsor_form.html', form=form, club=club, title='Edit Sponsor')
+
+
+@admin_bp.route('/clubs/<slug>/sponsors/<int:sponsor_id>/delete', methods=['POST'])
+@club_admin_required
+def sponsor_delete(slug, sponsor_id):
+    club = _get_club_or_404(slug)
+    sponsor = ClubSponsor.query.filter_by(id=sponsor_id, club_id=club.id).first_or_404()
+    db.session.delete(sponsor)
+    db.session.commit()
+    flash('Sponsor removed.', 'info')
+    return redirect(url_for('admin.club_sponsors', slug=slug))

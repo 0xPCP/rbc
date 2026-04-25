@@ -186,9 +186,30 @@ def home(slug):
     is_member  = current_user.is_authenticated and current_user.is_active_member_of(club)
     is_pending = current_user.is_authenticated and current_user.is_pending_member_of(club)
     strava_activities = get_club_activities(club.strava_club_id)
+
+    from ..extensions import db as _db
+    from sqlalchemy import func
+    total_rides = Ride.query.filter_by(club_id=club.id).count()
+    total_miles = (_db.session.query(func.sum(Ride.distance_miles))
+                   .filter(Ride.club_id == club.id, Ride.is_cancelled == False)
+                   .scalar() or 0)
+    club_stats = {
+        'founded':     club.created_at.year if club.created_at else None,
+        'members':     club.member_count,
+        'total_rides': total_rides,
+        'total_miles': round(total_miles),
+    }
+
     return render_template('clubs/home.html', club=club, upcoming=upcoming,
                            weather=weather, is_member=is_member, is_pending=is_pending,
-                           today=today, strava_activities=strava_activities)
+                           today=today, strava_activities=strava_activities,
+                           club_stats=club_stats)
+
+
+@clubs_bp.route('/<slug>/leaders/')
+def club_leaders_public(slug):
+    club = _get_club_or_404(slug)
+    return render_template('clubs/leaders.html', club=club, leaders=club.leaders)
 
 
 # ── Club calendar ─────────────────────────────────────────────────────────────

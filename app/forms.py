@@ -119,6 +119,22 @@ class ClubPostForm(FlaskForm):
     submit = SubmitField('Save Post')
 
 
+class ClubLeaderForm(FlaskForm):
+    name          = StringField('Display Name', validators=[DataRequired(), Length(max=100)])
+    bio           = TextAreaField('Bio', validators=[Optional()])
+    photo_url     = StringField('Photo URL', validators=[Optional(), URL(), Length(max=500)])
+    display_order = IntegerField('Display Order', validators=[Optional(), NumberRange(min=0)], default=0)
+    submit        = SubmitField('Save Leader')
+
+
+class ClubSponsorForm(FlaskForm):
+    name          = StringField('Sponsor Name', validators=[DataRequired(), Length(max=200)])
+    logo_url      = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
+    website       = StringField('Website', validators=[Optional(), URL(), Length(max=500)])
+    display_order = IntegerField('Display Order', validators=[Optional(), NumberRange(min=0)], default=0)
+    submit        = SubmitField('Save Sponsor')
+
+
 class RideForm(FlaskForm):
     title = StringField('Ride Title', validators=[DataRequired(), Length(max=200)])
     date = DateField('Date', validators=[DataRequired()])

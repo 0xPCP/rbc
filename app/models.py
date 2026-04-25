@@ -72,6 +72,22 @@ class User(db.Model, UserMixin):
         row = ClubMembership.query.filter_by(user_id=self.id, club_id=club.id).first()
         return row is not None and row.status == 'pending'
 
+    def is_content_editor(self, club):
+        """Can manage news posts and club description only."""
+        row = ClubAdmin.query.filter_by(user_id=self.id, club_id=club.id).first()
+        return row is not None and row.role == 'content_editor'
+
+    def is_treasurer(self, club):
+        """Can view/export member data."""
+        row = ClubAdmin.query.filter_by(user_id=self.id, club_id=club.id).first()
+        return row is not None and row.role == 'treasurer'
+
+    def can_manage_content(self, club):
+        return self.is_club_admin(club) or self.is_content_editor(club)
+
+    def can_view_members(self, club):
+        return self.is_club_admin(club) or self.is_treasurer(club)
+
     def has_signed_waiver(self, club, year=None):
         if year is None:
             year = datetime.now(timezone.utc).year
@@ -130,6 +146,10 @@ class Club(db.Model):
     waivers = db.relationship('ClubWaiver', backref='club', lazy=True, cascade='all, delete-orphan')
     posts = db.relationship('ClubPost', backref='club', lazy=True,
                             order_by='ClubPost.published_at.desc()', cascade='all, delete-orphan')
+    leaders = db.relationship('ClubLeader', backref='club', lazy=True,
+                              order_by='ClubLeader.display_order.asc()', cascade='all, delete-orphan')
+    sponsors = db.relationship('ClubSponsor', backref='club', lazy=True,
+                               order_by='ClubSponsor.display_order.asc()', cascade='all, delete-orphan')
 
     @property
     def member_count(self):
@@ -199,6 +219,33 @@ class ClubPost(db.Model):
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     author = db.relationship('User', foreign_keys=[author_id])
+
+
+class ClubLeader(db.Model):
+    """Curated ride leader profile for a club's public roster."""
+    __tablename__ = 'club_leaders'
+
+    id = db.Column(db.Integer, primary_key=True)
+    club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    name = db.Column(db.String(100), nullable=False)
+    bio = db.Column(db.Text, nullable=True)
+    photo_url = db.Column(db.String(500), nullable=True)
+    display_order = db.Column(db.Integer, default=0, nullable=False)
+
+    user = db.relationship('User', foreign_keys=[user_id])
+
+
+class ClubSponsor(db.Model):
+    """Sponsor / partner shown on the club home page."""
+    __tablename__ = 'club_sponsors'
+
+    id = db.Column(db.Integer, primary_key=True)
+    club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=False)
+    name = db.Column(db.String(200), nullable=False)
+    logo_url = db.Column(db.String(500), nullable=True)
+    website = db.Column(db.String(500), nullable=True)
+    display_order = db.Column(db.Integer, default=0, nullable=False)
 
 
 class WaiverSignature(db.Model):
