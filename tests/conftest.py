@@ -181,6 +181,7 @@ def sample_rides(db, sample_club):
             distance_miles=38.0,
             elevation_feet=2100,
             pace_category='A',
+            ride_type='road',
             ride_leader='Dave K.',
         ),
         Ride(
@@ -191,6 +192,7 @@ def sample_rides(db, sample_club):
             meeting_location='The Bike Lane',
             distance_miles=25.0,
             pace_category='B',
+            ride_type='road',
         ),
         Ride(
             club_id=sample_club.id,
@@ -200,6 +202,7 @@ def sample_rides(db, sample_club):
             meeting_location='Lake Newport',
             distance_miles=20.0,
             pace_category='C',
+            ride_type='road',
             is_cancelled=True,
         ),
     ]

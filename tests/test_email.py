@@ -18,6 +18,7 @@ def _make_ride(db, club, title='Test Ride', days_ahead=1):
         meeting_location='Test Location',
         distance_miles=25.0,
         pace_category='B',
+        ride_type='road',
     )
     db.session.add(ride)
     db.session.commit()
@@ -226,6 +227,7 @@ def test_cancellation_email_triggered_on_admin_edit(
                 'meeting_location': ride.meeting_location,
                 'distance_miles': str(ride.distance_miles),
                 'pace_category': ride.pace_category,
+                'ride_type': ride.ride_type or 'road',
                 'is_cancelled': 'y',
             },
             follow_redirects=True,
@@ -255,6 +257,7 @@ def test_cancellation_email_not_resent_if_already_cancelled(
                 'meeting_location': ride.meeting_location,
                 'distance_miles': str(ride.distance_miles),
                 'pace_category': ride.pace_category,
+                'ride_type': ride.ride_type or 'road',
                 'is_cancelled': 'y',
             },
             follow_redirects=True,

@@ -330,7 +330,7 @@ def ride_new(slug):
             distance_miles=form.distance_miles.data,
             elevation_feet=form.elevation_feet.data,
             pace_category=form.pace_category.data,
-            ride_type=form.ride_type.data or None,
+            ride_type=form.ride_type.data,
             max_riders=form.max_riders.data or None,
             leader_id=leader_id,
             ride_leader=ride_leader,

@@ -173,14 +173,13 @@ class RideForm(FlaskForm):
         ('D', 'D — Beginner (<14 mph)'),
     ])
     ride_type = SelectField('Ride Type', choices=[
-        ('', '— Any / Unspecified —'),
         ('road',     'Road'),
         ('gravel',   'Gravel'),
         ('social',   'Social'),
         ('training', 'Training'),
         ('event',    'Event'),
         ('night',    'Night Ride'),
-    ], validators=[Optional()])
+    ], default='road')
     ride_leader = StringField('Ride Leader', validators=[Optional(), Length(max=100)])
     route_url = StringField('Route URL (Strava, RideWithGPS, etc.)', validators=[Optional(), URL(), Length(max=500)])
     video_url = StringField('Video URL (YouTube or Vimeo)', validators=[Optional(), URL(), Length(max=500)])
