@@ -11,9 +11,9 @@ class TestClubStats:
     def test_stats_shown_on_home(self, client, sample_club, sample_rides, mock_weather):
         r = client.get(f'/clubs/{sample_club.slug}/')
         assert r.status_code == 200
-        assert b'Club Stats' in r.data
+        # Stats are now in the stats band (csi-label elements), no longer a "Club Stats" card
         assert b'Members' in r.data
-        assert b'Rides' in r.data
+        assert b'Rides Hosted' in r.data
 
     def test_stats_total_rides_count(self, client, db, sample_club, mock_weather):
         today = date.today()

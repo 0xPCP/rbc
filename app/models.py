@@ -102,6 +102,7 @@ class Club(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     slug = db.Column(db.String(80), unique=True, nullable=False)  # URL-safe identifier
     name = db.Column(db.String(200), nullable=False)
+    tagline = db.Column(db.String(200), nullable=True)
     description = db.Column(db.Text, nullable=True)
     logo_url = db.Column(db.String(500), nullable=True)
     website = db.Column(db.String(500), nullable=True)

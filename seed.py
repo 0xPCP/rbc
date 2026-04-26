@@ -48,6 +48,7 @@ with app.app_context():
     rbc = Club(
         slug='rbc',
         name='Reston Bike Club',
+        tagline="Northern Virginia's premier road cycling community since 1972",
         description=(
             'One of the largest cycling clubs in Northern Virginia. '
             'Weekly rides for all levels — Tuesday Worlds to leisurely Sunday spins. '
@@ -75,6 +76,7 @@ with app.app_context():
     nvcc = Club(
         slug='nvcc',
         name='Northern Virginia Cycling Club',
+        tagline='Fast-paced road and gravel in the DC suburbs — no excuses, no shortcuts',
         description=(
             'Fast-paced road and gravel club based in McLean and the DC suburbs. '
             'Known for challenging Saturday hammerfests and weeknight criterium training.'
@@ -94,6 +96,7 @@ with app.app_context():
     artemis = Club(
         slug='artemis',
         name='Artemis Cycling — Women\'s Club',
+        tagline="Northern Virginia's women's cycling club — every pace, every level, every ride",
         description=(
             'Northern Virginia\'s premier women\'s cycling club. '
             'Supportive, no-drop rides for all fitness levels plus structured training for racers.'

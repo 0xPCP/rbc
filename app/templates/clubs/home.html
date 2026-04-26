@@ -2,18 +2,16 @@
 {% block title %}{{ club.name }}{% endblock %}
 {% block head %}{% include 'clubs/_theme.html' %}{% endblock %}
 
-{# Club name + logo in the transparent nav bar #}
+{# On the home page the club name is in the hero — nav shows only the logo to avoid doubling #}
 {% block club_nav_brand %}
-<a class="navbar-brand d-flex align-items-center gap-2" href="{{ url_for('clubs.home', slug=club.slug) }}"
-   style="text-decoration:none">
+<a href="{{ url_for('clubs.home', slug=club.slug) }}" class="d-flex align-items-center gap-2 text-decoration-none">
   {% if club.logo_url %}
   <img src="{{ club.logo_url }}" alt="{{ club.name }}"
-       style="height:28px;width:28px;object-fit:contain;border-radius:4px;background:rgba(255,255,255,.15);padding:2px"
+       style="height:26px;width:26px;object-fit:contain;border-radius:4px;background:rgba(255,255,255,.2);padding:2px"
        onerror="this.style.display='none'">
+  {% else %}
+  <span style="font-size:1.1rem;color:rgba(255,255,255,.7)">⬡</span>
   {% endif %}
-  <span style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:1.1rem;color:#fff;letter-spacing:.03em">
-    {{ club.name }}
-  </span>
 </a>
 {% endblock %}
 
@@ -25,35 +23,83 @@
   <div class="club-hero-bg" style="background-image:url('{{ club.banner_url }}')"></div>
   <div class="club-hero-overlay"></div>
   {% endif %}
-  <div class="container club-hero-content py-4">
-    <div class="d-flex justify-content-between align-items-end flex-wrap gap-3">
-      <div class="d-flex align-items-center gap-3">
+  <div class="container club-hero-content py-5">
+    <div class="row align-items-end">
+      <div class="col-lg-9">
+
+        {# Logo #}
         {% if club.logo_url %}
         <img src="{{ club.logo_url }}" alt="{{ club.name }} logo" class="club-hero-logo"
              onerror="this.style.display='none'">
         {% endif %}
-        <div>
-          <div class="d-flex align-items-center gap-2 flex-wrap">
-            <h1 class="club-hero-name">{{ club.name }}</h1>
-            {% if club.is_private %}<span class="badge bg-dark" style="font-size:.7rem">🔒 Private</span>{% endif %}
-          </div>
-          <p class="club-hero-meta mb-0">
-            {% if club.city %}{{ club.city }}, {{ club.state }} &bull; {% endif %}
-            {{ club.member_count }} member{{ 's' if club.member_count != 1 else '' }}
-          </p>
+
+        {# Club name — shown exactly once #}
+        <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+          <h1 class="club-hero-name mb-0">{{ club.name }}</h1>
+          {% if club.is_private %}<span class="badge bg-dark" style="font-size:.7rem">🔒 Private</span>{% endif %}
         </div>
+
+        {# Tagline #}
+        {% if club.tagline %}
+        <p class="club-hero-tagline">{{ club.tagline }}</p>
+        {% endif %}
+
+        {# Meta #}
+        <p class="club-hero-meta mb-3">
+          {% if club.city %}📍 {{ club.city }}, {{ club.state }} &bull; {% endif %}
+          {{ club.member_count }} member{{ 's' if club.member_count != 1 else '' }}
+          {% if club_stats.founded %} &bull; Est. {{ club_stats.founded }}{% endif %}
+        </p>
+
+        {# Social links as pills in the hero #}
+        {% set has_social = club.facebook_url or club.instagram_url or club.twitter_url or club.newsletter_url or club.strava_club_id %}
+        {% if has_social %}
+        <div class="hero-social-links mb-0">
+          {% if club.facebook_url %}
+          <a href="{{ club.facebook_url }}" target="_blank" rel="noopener" class="hero-social-pill hero-pill-fb">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.26h3.32l-.53 3.5h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
+            Facebook
+          </a>
+          {% endif %}
+          {% if club.instagram_url %}
+          <a href="{{ club.instagram_url }}" target="_blank" rel="noopener" class="hero-social-pill hero-pill-ig">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+            Instagram
+          </a>
+          {% endif %}
+          {% if club.twitter_url %}
+          <a href="{{ club.twitter_url }}" target="_blank" rel="noopener" class="hero-social-pill hero-pill-tw">
+            <svg width="12" height="12" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            Twitter
+          </a>
+          {% endif %}
+          {% if club.strava_club_id %}
+          <a href="https://www.strava.com/clubs/{{ club.strava_club_id }}" target="_blank" rel="noopener" class="hero-social-pill hero-pill-strava">
+            Strava
+          </a>
+          {% endif %}
+          {% if club.newsletter_url %}
+          <a href="{{ club.newsletter_url }}" target="_blank" rel="noopener" class="hero-social-pill hero-pill-nl">
+            ✉ Newsletter
+          </a>
+          {% endif %}
+        </div>
+        {% endif %}
+
       </div>
-      <div class="d-flex gap-2 align-items-center">
+
+      {# CTAs — right side #}
+      <div class="col-lg-3 text-lg-end mt-4 mt-lg-0 d-flex flex-lg-column gap-2 justify-content-start justify-content-lg-end align-items-start align-items-lg-end">
         {% if current_user.is_authenticated %}
           {% if is_member %}
-          <form method="post" action="{{ url_for('clubs.leave', slug=club.slug) }}">
+          <form method="post" action="{{ url_for('clubs.leave', slug=club.slug) }}" class="d-inline">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <button class="btn btn-outline-light">Leave Club</button>
           </form>
           {% elif is_pending %}
           <span class="btn btn-outline-light disabled">Pending Approval</span>
           {% else %}
-          <form method="post" action="{{ url_for('clubs.join', slug=club.slug) }}">
+          <form method="post" action="{{ url_for('clubs.join', slug=club.slug) }}" class="d-inline">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
             <button class="btn btn-rbc">Join Club</button>
           </form>
@@ -69,301 +115,408 @@
   </div>
 </div>
 
-{# ── Main content ─────────────────────────────────────────────────────────── #}
-<div class="container py-4">
-  <div class="row g-4">
-
-    {# ── Left / main column ─────────────────────────────────────────────────── #}
-    <div class="col-lg-8">
-
-      {# Upcoming Rides #}
-      <div class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h4 class="club-section-title mb-0">Upcoming Rides</h4>
-          <a href="{{ url_for('clubs.rides', slug=club.slug) }}" class="btn btn-rbc-sm">Full Calendar</a>
-        </div>
-        {% if upcoming %}
-          {% for ride in upcoming %}
-          {% set w = weather.get(ride.id) %}
-          <div class="ride-card mb-3 {{ 'ride-cancelled' if ride.is_cancelled else '' }}">
-            <div class="d-flex gap-3 align-items-start">
-              <div class="ride-date-block">
-                <div class="rdb-month">{{ ride.date.strftime('%b') }}</div>
-                <div class="rdb-day">{{ ride.date.day }}</div>
-              </div>
-              <div class="flex-grow-1">
-                <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-                  <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
-                  {% if ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>{% endif %}
-                  {% if w %}{% include '_weather_chip.html' with context %}{% endif %}
-                </div>
-                <a href="{{ url_for('clubs.ride_detail', slug=club.slug, ride_id=ride.id) }}" class="ride-title">{{ ride.title }}</a>
-                <p class="ride-meta mb-0">
-                  {{ ride.time.strftime('%I:%M %p').lstrip('0') }} &bull;
-                  {{ ride.distance_miles }} mi
-                  {% if ride.elevation_feet %}&bull; {{ ride.elevation_feet }} ft{% endif %}
-                  &bull; <strong>{{ ride.signup_count }}</strong> signed up
-                </p>
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-          <a href="{{ url_for('clubs.rides', slug=club.slug) }}" class="text-muted small">View all upcoming rides →</a>
-        {% else %}
-          <p class="text-muted">No upcoming rides scheduled.</p>
-        {% endif %}
+{# ── Next ride strip ──────────────────────────────────────────────────────── #}
+{% if upcoming %}
+{% set nr = upcoming[0] %}
+<div class="next-ride-strip">
+  <div class="container d-flex align-items-center justify-content-between gap-3 flex-wrap">
+    <div class="d-flex align-items-center gap-2">
+      <span class="pace-badge pace-{{ nr.pace_category }}">{{ nr.pace_category }}</span>
+      <div>
+        <span class="nrs-label">Next Ride</span>
+        <span class="nrs-title">{{ nr.title }}</span>
+        <span class="nrs-meta">
+          {{ nr.date.strftime('%a, %b') }} {{ nr.date.day }} &bull;
+          {{ nr.time.strftime('%I:%M %p').lstrip('0') }} &bull;
+          {{ nr.distance_miles }} mi
+        </span>
       </div>
-
-      {# News & Announcements #}
-      {% if club.posts %}
-      <div class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h4 class="club-section-title mb-0">News &amp; Announcements</h4>
-          {% if current_user.is_authenticated and current_user.is_club_admin(club) %}
-          <a href="{{ url_for('admin.club_posts', slug=club.slug) }}" class="btn btn-rbc-sm">Manage Posts</a>
-          {% endif %}
-        </div>
-        {% for post in club.posts[:3] %}
-        <div class="card border-0 shadow-sm mb-3">
-          <div class="card-body">
-            <h6 class="card-title mb-1">{{ post.title }}</h6>
-            <p class="text-muted small mb-2">
-              {{ post.published_at.strftime('%B %d, %Y') }}
-              {% if post.author %}&bull; {{ post.author.username }}{% endif %}
-            </p>
-            <p class="mb-0 small" style="white-space:pre-line">{{ post.body }}</p>
-          </div>
-        </div>
-        {% endfor %}
-      </div>
-      {% endif %}
-
-      {# About the Club / Governance #}
-      {% if club.description or club.bylaws_url %}
-      <div class="mb-4">
-        <h4 class="club-section-title">About the Club</h4>
-        {% if club.description %}
-        <p style="white-space:pre-line">{{ club.description }}</p>
-        {% endif %}
-        {% if club.bylaws_url %}
-        <a href="{{ club.bylaws_url }}" target="_blank" rel="noopener"
-           class="btn btn-outline-secondary btn-sm">
-          📄 Club Bylaws &amp; Rules
-        </a>
-        {% endif %}
-      </div>
-      {% endif %}
-
-      {# Safety & Resources #}
-      {% if club.safety_guidelines or club.sponsors %}
-      <div class="mb-4">
-        <h4 class="club-section-title">Safety &amp; Resources</h4>
-        {% if club.safety_guidelines %}
-        <div class="card border-0 shadow-sm mb-3">
-          <div class="card-body">
-            <h6 class="card-title mb-2">Safety Guidelines</h6>
-            <div class="small" style="white-space:pre-line">{{ club.safety_guidelines }}</div>
-          </div>
-        </div>
-        {% endif %}
-        {% if club.sponsors %}
-        <h6 class="mb-2 text-muted">Local Bike Shop Partners</h6>
-        <div class="d-flex flex-wrap gap-3 align-items-center">
-          {% for sponsor in club.sponsors %}
-            {% if sponsor.website %}
-            <a href="{{ sponsor.website }}" target="_blank" rel="noopener" title="{{ sponsor.name }}" class="d-flex align-items-center gap-2 text-decoration-none text-dark">
-            {% else %}
-            <span class="d-flex align-items-center gap-2">
-            {% endif %}
-              {% if sponsor.logo_url %}
-              <img src="{{ sponsor.logo_url }}" alt="{{ sponsor.name }}"
-                   style="height:44px;object-fit:contain;max-width:110px"
-                   onerror="this.outerHTML='<span class=\'text-muted small\'>'+this.alt+'</span>'">
-              {% else %}
-              <span class="badge bg-light text-dark border">{{ sponsor.name }}</span>
-              {% endif %}
-            {% if sponsor.website %}</a>{% else %}</span>{% endif %}
-          {% endfor %}
-        </div>
-        {% endif %}
-      </div>
-      {% endif %}
-
-      {# Strava / recent club activity #}
-      {% if strava_activities %}
-      <div class="mb-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <h4 class="club-section-title mb-0">Recent Club Activity</h4>
-          {% if club.strava_club_id %}
-          <a href="https://www.strava.com/clubs/{{ club.strava_club_id }}" target="_blank" rel="noopener"
-             class="btn btn-sm" style="background:#fc4c02;color:#fff;border:none;font-size:.8rem;font-weight:600">
-            View on Strava
-          </a>
-          {% endif %}
-        </div>
-        <div class="row g-2">
-          {% for a in strava_activities %}
-          <div class="col-sm-6">
-            <div class="card border-0 shadow-sm h-100">
-              <div class="card-body p-3">
-                <div class="d-flex align-items-center gap-2 mb-1">
-                  <span class="badge rounded-pill" style="background:var(--rbc-green,#2d6a4f);font-size:.7rem">{{ a.type or 'Ride' }}</span>
-                  <small class="text-muted">{{ a.athlete.firstname }} {{ a.athlete.lastname }}</small>
-                </div>
-                <div class="fw-semibold small text-truncate">{{ a.name }}</div>
-                <div class="text-muted" style="font-size:.8rem">
-                  {{ a.distance_miles }} mi
-                  {% if a.elevation_feet %}&bull; {{ a.elevation_feet }} ft{% endif %}
-                  &bull; {{ a.moving_time_fmt }}
-                </div>
-              </div>
-            </div>
-          </div>
-          {% endfor %}
-        </div>
-      </div>
-      {% endif %}
-
     </div>
-
-    {# ── Sidebar ────────────────────────────────────────────────────────────── #}
-    <div class="col-lg-4">
-
-      {# Club stats #}
-      <div class="card border-0 shadow-sm mb-3">
-        <div class="card-body">
-          <h6 class="card-title mb-3">Club Stats</h6>
-          <div class="row g-2 text-center">
-            <div class="col-6">
-              <div class="fw-bold" style="font-size:1.3rem">{{ club_stats.members }}</div>
-              <div class="text-muted small">Members</div>
-            </div>
-            <div class="col-6">
-              <div class="fw-bold" style="font-size:1.3rem">{{ club_stats.total_rides }}</div>
-              <div class="text-muted small">Rides</div>
-            </div>
-            <div class="col-6">
-              <div class="fw-bold" style="font-size:1.3rem">{{ '{:,}'.format(club_stats.total_miles) }}</div>
-              <div class="text-muted small">Miles Hosted</div>
-            </div>
-            {% if club_stats.founded %}
-            <div class="col-6">
-              <div class="fw-bold" style="font-size:1.3rem">{{ club_stats.founded }}</div>
-              <div class="text-muted small">Founded</div>
-            </div>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-
-      {# Social media / newsletter #}
-      {% set has_social = club.facebook_url or club.instagram_url or club.twitter_url or club.newsletter_url or (club.strava_club_id and not strava_activities) %}
-      {% if has_social %}
-      <div class="card border-0 shadow-sm mb-3">
-        <div class="card-body">
-          <h6 class="card-title mb-3">Connect &amp; Follow</h6>
-          <div class="social-links">
-            {% if club.facebook_url %}
-            <a href="{{ club.facebook_url }}" target="_blank" rel="noopener" class="social-link social-link-facebook">
-              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.51c-1.49 0-1.95.93-1.95 1.88v2.26h3.32l-.53 3.5h-2.79V24C19.61 23.1 24 18.1 24 12.07z"/></svg>
-              Facebook
-            </a>
-            {% endif %}
-            {% if club.instagram_url %}
-            <a href="{{ club.instagram_url }}" target="_blank" rel="noopener" class="social-link social-link-instagram">
-              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-              Instagram
-            </a>
-            {% endif %}
-            {% if club.twitter_url %}
-            <a href="{{ club.twitter_url }}" target="_blank" rel="noopener" class="social-link social-link-twitter">
-              <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-              Twitter / X
-            </a>
-            {% endif %}
-            {% if club.strava_club_id and not strava_activities %}
-            <a href="https://www.strava.com/clubs/{{ club.strava_club_id }}" target="_blank" rel="noopener" class="social-link social-link-strava">
-              Strava Club
-            </a>
-            {% endif %}
-            {% if club.newsletter_url %}
-            <a href="{{ club.newsletter_url }}" target="_blank" rel="noopener" class="social-link social-link-newsletter">
-              ✉ Newsletter
-            </a>
-            {% endif %}
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      {# Leadership #}
-      {% if club.leaders %}
-      <div class="card border-0 shadow-sm mb-3">
-        <div class="card-body">
-          <h6 class="card-title d-flex justify-content-between align-items-center">
-            Ride Leaders
-            <a href="{{ url_for('clubs.club_leaders_public', slug=club.slug) }}" class="btn-rbc-sm btn" style="font-size:.75rem">View All</a>
-          </h6>
-          <div class="d-flex flex-column gap-2 mt-2">
-            {% for leader in club.leaders[:4] %}
-            <div class="d-flex align-items-center gap-2">
-              {% if leader.photo_url %}
-              <img src="{{ leader.photo_url }}" alt="{{ leader.name }}"
-                   style="width:36px;height:36px;object-fit:cover;border-radius:50%;flex-shrink:0"
-                   onerror="this.style.display='none'">
-              {% else %}
-              <div style="width:36px;height:36px;border-radius:50%;background:var(--rbc-green,#2d6a4f);
-                          display:flex;align-items:center;justify-content:center;flex-shrink:0;
-                          color:#fff;font-size:.9rem;font-weight:600">
-                {{ leader.name[0].upper() }}
-              </div>
-              {% endif %}
-              <div>
-                <div class="small fw-semibold">{{ leader.name }}</div>
-                {% if leader.bio %}<div class="text-muted" style="font-size:.75rem;line-height:1.3">{{ leader.bio[:60] }}{% if leader.bio|length > 60 %}…{% endif %}</div>{% endif %}
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-      </div>
-      {% endif %}
-
-      {# Contact #}
-      {% if club.contact_email or club.website %}
-      <div class="card border-0 shadow-sm mb-3">
-        <div class="card-body">
-          <h6 class="card-title">Contact</h6>
-          {% if club.contact_email %}
-          <p class="mb-1 small"><a href="mailto:{{ club.contact_email }}">{{ club.contact_email }}</a></p>
-          {% endif %}
-          {% if club.website %}
-          <p class="mb-0 small"><a href="{{ club.website }}" target="_blank" rel="noopener">{{ club.website }}</a></p>
-          {% endif %}
-        </div>
-      </div>
-      {% endif %}
-
-      {# Waiver #}
-      {% if club.current_waiver %}
-      <div class="card border-0 shadow-sm mb-3">
-        <div class="card-body">
-          <h6 class="card-title">Club Waiver</h6>
-          {% if current_user.is_authenticated %}
-            {% if current_user.has_signed_waiver(club) %}
-            <p class="text-success small mb-0">✓ Signed for {{ today.year }}</p>
-            {% else %}
-            <p class="small mb-2">You must accept this club's waiver before signing up for rides.</p>
-            <a href="{{ url_for('clubs.waiver', slug=club.slug) }}" class="btn btn-rbc-sm">Review &amp; Sign</a>
-            {% endif %}
-          {% else %}
-          <p class="small mb-0"><a href="{{ url_for('auth.login') }}">Sign in</a> to accept the waiver.</p>
-          {% endif %}
-        </div>
-      </div>
-      {% endif %}
-
+    <div class="d-flex gap-3 align-items-center flex-shrink-0">
+      <a href="{{ url_for('clubs.ride_detail', slug=club.slug, ride_id=nr.id) }}" class="btn btn-rbc-sm">View Ride</a>
+      <a href="#" class="nrs-more" onclick="switchToTab('tab-rides-btn');return false;">
+        {% if upcoming|length > 1 %}+{{ upcoming|length - 1 }} more upcoming{% else %}Full calendar{% endif %} →
+      </a>
     </div>
   </div>
 </div>
+{% endif %}
+
+{# ── Tab bar ──────────────────────────────────────────────────────────────── #}
+<div class="club-tab-bar" id="clubTabBar">
+  <div class="container">
+    <ul class="club-tabs nav" id="clubTabNav" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="club-tab active" id="tab-overview-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-overview"
+                type="button" role="tab">Overview</button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="club-tab" id="tab-rides-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-rides"
+                type="button" role="tab">
+          Rides
+          {% if upcoming %}<span class="club-tab-count">{{ upcoming|length }}</span>{% endif %}
+        </button>
+      </li>
+      {% if club.safety_guidelines or club.bylaws_url %}
+      <li class="nav-item" role="presentation">
+        <button class="club-tab" id="tab-safety-btn"
+                data-bs-toggle="tab" data-bs-target="#tab-safety"
+                type="button" role="tab">Safety</button>
+      </li>
+      {% endif %}
+    </ul>
+  </div>
+</div>
+
+{# ── Tab content ──────────────────────────────────────────────────────────── #}
+<div class="tab-content">
+
+  {# ── Overview ──────────────────────────────────────────────────────────────#}
+  <div class="tab-pane fade show active" id="tab-overview" role="tabpanel">
+
+    {# Stats band #}
+    <div class="club-stats-band">
+      <div class="container">
+        <div class="row g-0 club-stats-row">
+          <div class="col-6 col-md-3 club-stat-item">
+            <div class="csi-num">{{ club_stats.members }}</div>
+            <div class="csi-label">Members</div>
+          </div>
+          <div class="col-6 col-md-3 club-stat-item">
+            <div class="csi-num">{{ club_stats.total_rides }}</div>
+            <div class="csi-label">Rides Hosted</div>
+          </div>
+          <div class="col-6 col-md-3 club-stat-item">
+            <div class="csi-num">{{ '{:,}'.format(club_stats.total_miles) }}</div>
+            <div class="csi-label">Miles Hosted</div>
+          </div>
+          <div class="col-6 col-md-3 club-stat-item">
+            {% if club_stats.founded %}
+            <div class="csi-num">{{ club_stats.founded }}</div>
+            <div class="csi-label">Founded</div>
+            {% else %}
+            <div class="csi-num text-muted">—</div>
+            <div class="csi-label">&nbsp;</div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container py-4">
+      <div class="row g-4">
+
+        {# Main column: About, News, Strava #}
+        <div class="col-lg-8">
+
+          {# About #}
+          {% if club.description %}
+          <div class="mb-5">
+            <h4 class="club-section-title">About {{ club.name }}</h4>
+            <p class="club-about-text" style="white-space:pre-line">{{ club.description }}</p>
+            {% if club.bylaws_url %}
+            <a href="{{ club.bylaws_url }}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm mt-1">
+              📄 Club Bylaws &amp; Rules
+            </a>
+            {% endif %}
+          </div>
+          {% endif %}
+
+          {# News & Announcements #}
+          {% if club.posts %}
+          <div class="mb-5">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="club-section-title mb-0">News &amp; Announcements</h4>
+              {% if current_user.is_authenticated and current_user.can_manage_content(club) %}
+              <a href="{{ url_for('admin.club_posts', slug=club.slug) }}" class="btn btn-rbc-sm">Manage</a>
+              {% endif %}
+            </div>
+            <div class="row g-3">
+              {% set posts = club.posts[:3] %}
+              {% for post in posts %}
+              <div class="col-md-{% if posts|length == 1 %}12{% elif posts|length == 2 %}6{% else %}4{% endif %}">
+                <div class="card border-0 shadow-sm h-100">
+                  <div class="card-body">
+                    <p class="text-muted small mb-1">{{ post.published_at.strftime('%b %d, %Y') }}</p>
+                    <h6 class="card-title mb-2">{{ post.title }}</h6>
+                    <p class="mb-0 small" style="white-space:pre-line;color:#495057">
+                      {{ post.body[:200] }}{% if post.body|length > 200 %}…{% endif %}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {# Strava / recent club activity #}
+          {% if strava_activities %}
+          <div class="mb-4">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <h4 class="club-section-title mb-0">Recent Club Activity</h4>
+              {% if club.strava_club_id %}
+              <a href="https://www.strava.com/clubs/{{ club.strava_club_id }}" target="_blank" rel="noopener"
+                 class="btn btn-sm" style="background:#fc4c02;color:#fff;border:none;font-size:.8rem;font-weight:600">
+                View on Strava
+              </a>
+              {% endif %}
+            </div>
+            <div class="row g-2">
+              {% for a in strava_activities %}
+              <div class="col-sm-6">
+                <div class="card border-0 shadow-sm h-100">
+                  <div class="card-body p-3">
+                    <div class="d-flex align-items-center gap-2 mb-1">
+                      <span class="badge rounded-pill" style="background:var(--rbc-green,#2d6a4f);font-size:.7rem">{{ a.type or 'Ride' }}</span>
+                      <small class="text-muted">{{ a.athlete.firstname }} {{ a.athlete.lastname }}</small>
+                    </div>
+                    <div class="fw-semibold small text-truncate">{{ a.name }}</div>
+                    <div class="text-muted" style="font-size:.8rem">
+                      {{ a.distance_miles }} mi
+                      {% if a.elevation_feet %}&bull; {{ a.elevation_feet }} ft{% endif %}
+                      &bull; {{ a.moving_time_fmt }}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+          {% endif %}
+
+          {# Empty state #}
+          {% if not club.description and not club.posts and not strava_activities %}
+          <div class="empty-state py-5">
+            <div style="font-size:2.5rem;margin-bottom:.75rem">🚴</div>
+            <h5>Nothing here yet</h5>
+            <p class="text-muted">This club hasn't added content yet.</p>
+            {% if current_user.is_authenticated and current_user.is_club_admin(club) %}
+            <a href="{{ url_for('admin.club_settings', slug=club.slug) }}" class="btn btn-rbc-sm">Add Club Info</a>
+            {% endif %}
+          </div>
+          {% endif %}
+
+        </div>
+
+        {# Sidebar #}
+        <div class="col-lg-4">
+
+          {# Ride Leaders #}
+          {% if club.leaders %}
+          <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+              <h6 class="card-title d-flex justify-content-between align-items-center mb-3">
+                Ride Leaders
+                <a href="{{ url_for('clubs.club_leaders_public', slug=club.slug) }}"
+                   class="btn btn-rbc-sm" style="font-size:.75rem">View All</a>
+              </h6>
+              <div class="d-flex flex-column gap-3">
+                {% for leader in club.leaders[:4] %}
+                <div class="d-flex align-items-center gap-2">
+                  {% if leader.photo_url %}
+                  <img src="{{ leader.photo_url }}" alt="{{ leader.name }}"
+                       style="width:42px;height:42px;object-fit:cover;border-radius:50%;flex-shrink:0"
+                       onerror="this.style.display='none'">
+                  {% else %}
+                  <div style="width:42px;height:42px;border-radius:50%;background:var(--rbc-green,#2d6a4f);
+                              display:flex;align-items:center;justify-content:center;flex-shrink:0;
+                              color:#fff;font-size:1rem;font-weight:700">
+                    {{ leader.name[0].upper() }}
+                  </div>
+                  {% endif %}
+                  <div>
+                    <div class="small fw-semibold">{{ leader.name }}</div>
+                    {% if leader.bio %}
+                    <div class="text-muted" style="font-size:.75rem;line-height:1.3">
+                      {{ leader.bio[:60] }}{% if leader.bio|length > 60 %}…{% endif %}
+                    </div>
+                    {% endif %}
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          {# Sponsors #}
+          {% if club.sponsors %}
+          <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+              <h6 class="card-title mb-3">Partners &amp; Sponsors</h6>
+              <div class="d-flex flex-wrap gap-3 align-items-center">
+                {% for sponsor in club.sponsors %}
+                  {% if sponsor.website %}
+                  <a href="{{ sponsor.website }}" target="_blank" rel="noopener"
+                     title="{{ sponsor.name }}" class="d-flex align-items-center text-decoration-none text-dark">
+                  {% else %}
+                  <span class="d-flex align-items-center">
+                  {% endif %}
+                    {% if sponsor.logo_url %}
+                    <img src="{{ sponsor.logo_url }}" alt="{{ sponsor.name }}"
+                         style="height:44px;object-fit:contain;max-width:110px"
+                         onerror="this.outerHTML='<span class=\'text-muted small\'>'+this.alt+'</span>'">
+                    {% else %}
+                    <span class="badge bg-light text-dark border">{{ sponsor.name }}</span>
+                    {% endif %}
+                  {% if sponsor.website %}</a>{% else %}</span>{% endif %}
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+
+          {# Contact #}
+          {% if club.contact_email %}
+          <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+              <h6 class="card-title mb-2">Contact</h6>
+              <p class="mb-0 small"><a href="mailto:{{ club.contact_email }}">{{ club.contact_email }}</a></p>
+            </div>
+          </div>
+          {% endif %}
+
+          {# Waiver #}
+          {% if club.current_waiver %}
+          <div class="card border-0 shadow-sm mb-3">
+            <div class="card-body">
+              <h6 class="card-title mb-2">Club Waiver</h6>
+              {% if current_user.is_authenticated %}
+                {% if current_user.has_signed_waiver(club) %}
+                <p class="text-success small mb-0">✓ Signed for {{ today.year }}</p>
+                {% else %}
+                <p class="small mb-2">Must be signed before joining rides.</p>
+                <a href="{{ url_for('clubs.waiver', slug=club.slug) }}" class="btn btn-rbc-sm">Review &amp; Sign</a>
+                {% endif %}
+              {% else %}
+              <p class="small mb-0"><a href="{{ url_for('auth.login') }}">Sign in</a> to accept the waiver.</p>
+              {% endif %}
+            </div>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {# ── Rides ────────────────────────────────────────────────────────────────#}
+  <div class="tab-pane fade" id="tab-rides" role="tabpanel">
+    <div class="container py-4">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4 class="club-section-title mb-0">Upcoming Rides</h4>
+        <a href="{{ url_for('clubs.rides', slug=club.slug) }}" class="btn btn-rbc">Full Calendar</a>
+      </div>
+
+      {% if upcoming %}
+        {% for ride in upcoming %}
+        {% set w = weather.get(ride.id) %}
+        <div class="ride-card mb-3 {{ 'ride-cancelled' if ride.is_cancelled else '' }}">
+          <div class="d-flex gap-3 align-items-start">
+            <div class="ride-date-block">
+              <div class="rdb-month">{{ ride.date.strftime('%b') }}</div>
+              <div class="rdb-day">{{ ride.date.day }}</div>
+            </div>
+            <div class="flex-grow-1">
+              <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
+                {% if ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>{% endif %}
+                {% if w %}{% include '_weather_chip.html' with context %}{% endif %}
+              </div>
+              <a href="{{ url_for('clubs.ride_detail', slug=club.slug, ride_id=ride.id) }}"
+                 class="ride-title">{{ ride.title }}</a>
+              <p class="ride-meta mb-0">
+                {{ ride.time.strftime('%I:%M %p').lstrip('0') }} &bull;
+                {{ ride.distance_miles }} mi
+                {% if ride.elevation_feet %}&bull; {{ ride.elevation_feet }} ft{% endif %}
+                &bull; <strong>{{ ride.signup_count }}</strong> signed up
+                {% if ride.is_full %}<span class="badge bg-warning text-dark ms-1">Full</span>{% endif %}
+                {% if ride.waitlist_count %}
+                <span class="text-muted small">(+{{ ride.waitlist_count }} waitlist)</span>
+                {% endif %}
+              </p>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+        <div class="text-center mt-4">
+          <a href="{{ url_for('clubs.rides', slug=club.slug) }}" class="btn btn-outline-secondary">
+            View Full Calendar →
+          </a>
+        </div>
+      {% else %}
+        <div class="empty-state py-5">
+          <div style="font-size:2.5rem;margin-bottom:.75rem">🗓️</div>
+          <h5>No upcoming rides scheduled</h5>
+          <p class="text-muted">Check back soon — rides will appear here when posted.</p>
+          {% if current_user.is_authenticated and current_user.can_manage_rides(club) %}
+          <a href="{{ url_for('admin.club_rides', slug=club.slug) }}" class="btn btn-rbc-sm">Add a Ride</a>
+          {% endif %}
+        </div>
+      {% endif %}
+
+      {# Waiver reminder #}
+      {% if club.current_waiver and current_user.is_authenticated and not current_user.has_signed_waiver(club) %}
+      <div class="alert alert-warning d-flex align-items-center gap-2 mt-4">
+        <span>⚠️</span>
+        <span>You must <a href="{{ url_for('clubs.waiver', slug=club.slug) }}" class="alert-link">sign the club waiver</a> before signing up for rides.</span>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# ── Safety ───────────────────────────────────────────────────────────────#}
+  {% if club.safety_guidelines or club.bylaws_url %}
+  <div class="tab-pane fade" id="tab-safety" role="tabpanel">
+    <div class="container py-4">
+      <div class="row justify-content-center">
+        <div class="col-lg-8">
+          {% if club.safety_guidelines %}
+          <h4 class="club-section-title">Safety Guidelines</h4>
+          <div class="card border-0 shadow-sm mb-4">
+            <div class="card-body" style="white-space:pre-line;line-height:1.85;font-size:.95rem;color:#374151">
+              {{ club.safety_guidelines }}
+            </div>
+          </div>
+          {% endif %}
+          {% if club.bylaws_url %}
+          <a href="{{ club.bylaws_url }}" target="_blank" rel="noopener" class="btn btn-outline-secondary">
+            📄 Club Bylaws &amp; Rules
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+</div>{# end tab-content #}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function switchToTab(btnId) {
+  const btn = document.getElementById(btnId);
+  if (btn) {
+    bootstrap.Tab.getOrCreateInstance(btn).show();
+    document.getElementById('clubTabBar').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+// Sticky sentinel: add shadow to tab bar once hero scrolls out
+(function () {
+  const hero = document.querySelector('.club-hero');
+  const bar  = document.getElementById('clubTabBar');
+  if (!hero || !bar) return;
+  const obs = new IntersectionObserver(
+    ([e]) => bar.classList.toggle('tab-bar-sticky', !e.isIntersecting),
+    { threshold: 0, rootMargin: '-60px 0px 0px 0px' }
+  );
+  obs.observe(hero);
+})();
+</script>
 {% endblock %}

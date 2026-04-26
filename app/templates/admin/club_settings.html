@@ -34,8 +34,15 @@
         </div>
 
         <div class="mb-3">
+          {{ form.tagline.label(class="form-label") }}
+          {{ form.tagline(class="form-control" + (" is-invalid" if form.tagline.errors else ""), placeholder="e.g. Northern Virginia's premier road cycling club since 1972", maxlength=200) }}
+          <div class="form-text">Short tagline shown below the club name in the hero. Keep it punchy — one sentence.</div>
+          {% for e in form.tagline.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
           {{ form.description.label(class="form-label") }}
-          {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=3) }}
+          {{ form.description(class="form-control" + (" is-invalid" if form.description.errors else ""), rows=4) }}
           {% for e in form.description.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
         </div>
 
@@ -148,7 +155,7 @@
         <hr class="my-4" />
         <h5 class="mb-1">Social Media &amp; Communication</h5>
         <p class="text-muted small mb-3">
-          Social links appear in the sidebar of your club home page. Leave blank to hide.
+          Social links appear as pill buttons in the club hero. Leave blank to hide.
         </p>
 
         <div class="mb-3">

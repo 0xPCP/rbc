@@ -60,7 +60,7 @@ body {
 /* ── Club home hero ──────────────────────────────────────────────────────── */
 .club-hero {
   position: relative;
-  min-height: 220px;
+  min-height: 420px;
   background: var(--rbc-green-dark);
   display: flex;
   align-items: flex-end;
@@ -74,7 +74,7 @@ body {
 .club-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,.35) 0%, rgba(0,0,0,.65) 100%);
+  background: linear-gradient(to bottom, rgba(0,0,0,.18) 0%, rgba(0,0,0,.72) 100%);
 }
 .club-hero-content {
   position: relative;
@@ -82,38 +82,160 @@ body {
   width: 100%;
 }
 .club-hero-logo {
-  width: 72px;
-  height: 72px;
+  width: 84px;
+  height: 84px;
   object-fit: contain;
-  border-radius: 10px;
+  border-radius: 12px;
   background: #fff;
-  padding: 5px;
+  padding: 6px;
   flex-shrink: 0;
+  display: block;
+  margin-bottom: .85rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,.3);
 }
 .club-hero-name {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 2.2rem;
+  font-size: clamp(2rem, 5vw, 3rem);
   font-weight: 700;
   color: #fff;
-  line-height: 1.1;
-  margin: 0;
+  line-height: 1.05;
+  margin: 0 0 .2rem;
+}
+.club-hero-tagline {
+  color: rgba(255,255,255,.82);
+  font-size: 1.05rem;
+  font-style: italic;
+  margin-bottom: .55rem;
 }
 .club-hero-meta {
-  color: rgba(255,255,255,.8);
+  color: rgba(255,255,255,.7);
   font-size: .9rem;
+}
+
+/* Social pills inside the hero */
+.hero-social-links { display: flex; flex-wrap: wrap; gap: .4rem; }
+.hero-social-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .28rem .75rem;
+  border-radius: 20px;
+  font-size: .8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.hero-social-pill:hover { opacity: .85; }
+.hero-pill-fb    { background: #1877f2; color: #fff; }
+.hero-pill-ig    { background: #e1306c; color: #fff; }
+.hero-pill-tw    { background: #1da1f2; color: #fff; }
+.hero-pill-strava { background: #fc4c02; color: #fff; }
+.hero-pill-nl    { background: var(--rbc-green); color: #fff; }
+
+/* ── Next ride strip ─────────────────────────────────────────────────────── */
+.next-ride-strip {
+  background: #f0fdf4;
+  border-bottom: 1px solid #bbf7d0;
+  padding: .6rem 0;
+}
+.nrs-label {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--rbc-green);
+  margin-right: .35rem;
+}
+.nrs-title { font-weight: 600; font-size: .9rem; color: var(--rbc-dark); }
+.nrs-meta  { font-size: .82rem; color: var(--rbc-gray); margin-left: .35rem; }
+.nrs-more  { font-size: .82rem; color: var(--rbc-green); font-weight: 600; text-decoration: none; white-space: nowrap; }
+.nrs-more:hover { color: var(--rbc-green-dark); }
+
+/* ── Club tab bar ────────────────────────────────────────────────────────── */
+.club-tab-bar {
+  background: #fff;
+  border-bottom: 2px solid var(--rbc-border);
+  position: sticky;
+  top: 46px;
+  z-index: 100;
+  transition: box-shadow .15s;
+}
+.club-tab-bar.tab-bar-sticky {
+  box-shadow: 0 2px 10px rgba(0,0,0,.09);
+}
+.club-tabs { display: flex; gap: 0; list-style: none; margin: 0; padding: 0; }
+.club-tab {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  padding: .85rem 1.4rem;
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--rbc-gray);
+  transition: color .15s, border-color .15s;
+}
+.club-tab:hover { color: var(--rbc-green); }
+.club-tab.active { color: var(--rbc-green); border-bottom-color: var(--rbc-green); }
+.club-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--rbc-green-pale);
+  color: var(--rbc-green);
+  font-size: .7rem;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 9px;
+  padding: 0 4px;
+  margin-left: .3rem;
+}
+
+/* ── Club stats band ─────────────────────────────────────────────────────── */
+.club-stats-band {
+  background: var(--rbc-green-pale);
+  border-bottom: 1px solid #b7e4c7;
+}
+.club-stats-row { }
+.club-stat-item {
+  padding: 1.25rem 1rem;
+  text-align: center;
+  border-right: 1px solid #b7e4c7;
+}
+.club-stat-item:last-child { border-right: none; }
+.csi-num {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--rbc-green-dark);
+  line-height: 1;
+}
+.csi-label {
+  font-size: .78rem;
+  color: #4b7c63;
+  font-weight: 500;
   margin-top: .25rem;
 }
 
 /* ── Club home sections ──────────────────────────────────────────────────── */
 .club-section-title {
   font-family: 'Barlow Condensed', sans-serif;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: .02em;
   color: var(--rbc-green-dark);
   border-bottom: 2px solid var(--rbc-green-pale);
   padding-bottom: .4rem;
-  margin-bottom: 1rem;
+  margin-bottom: 1.2rem;
+}
+.club-about-text {
+  font-size: 1.02rem;
+  line-height: 1.75;
+  color: #374151;
 }
 
 /* ── Social icon links ───────────────────────────────────────────────────── */
@@ -970,6 +1092,27 @@ a:hover { color: var(--rbc-green-dark); }
 
 /* ── Mobile / responsive ─────────────────────────────────────────────────── */
 @media (max-width: 575px) {
+  /* Club hero: shorter on mobile */
+  .club-hero { min-height: 300px; }
+  .club-hero-logo { width: 60px; height: 60px; }
+  .club-hero-name { font-size: 1.9rem; }
+  .club-hero-tagline { font-size: .92rem; }
+
+  /* Tab bar: tighter tabs */
+  .club-tab { padding: .7rem .9rem; font-size: .95rem; }
+  .club-tab-bar { top: 44px; }
+
+  /* Stats band: 2×2 grid, add border between rows */
+  .club-stat-item { padding: .9rem .5rem; }
+  .club-stat-item:nth-child(2) { border-right: none; }
+  .club-stat-item:nth-child(3),
+  .club-stat-item:nth-child(4) { border-top: 1px solid #b7e4c7; }
+  .csi-num { font-size: 1.6rem; }
+
+  /* Next ride strip: stack on very small screens */
+  .next-ride-strip .container { flex-wrap: wrap; gap: .5rem; }
+  .nrs-meta { display: none; }
+
   /* Page headers: tighter vertical padding */
   .page-header { padding: 1.25rem 0; }
   .page-header h1 { font-size: 1.75rem; }

@@ -190,6 +190,7 @@ def club_settings(slug):
     form = ClubSettingsForm(obj=club)
     if form.validate_on_submit():
         club.name         = form.name.data
+        club.tagline      = form.tagline.data or None
         club.description  = form.description.data or None
         club.city         = form.city.data or None
         club.state        = form.state.data or None

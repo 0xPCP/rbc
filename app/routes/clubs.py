@@ -180,7 +180,7 @@ def home(slug):
                 .filter_by(club_id=club.id, is_cancelled=False)
                 .filter(Ride.date >= today)
                 .order_by(Ride.date.asc(), Ride.time.asc())
-                .limit(5).all())
+                .limit(8).all())
     weather = get_weather_for_rides(upcoming)
     is_member  = current_user.is_authenticated and current_user.is_active_member_of(club)
     is_pending = current_user.is_authenticated and current_user.is_pending_member_of(club)

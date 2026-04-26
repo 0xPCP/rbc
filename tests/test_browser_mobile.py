@@ -114,7 +114,8 @@ def test_club_home_renders_on_mobile(server_info, browser):
 
     assert 'Browser Test Club' in page.locator('h1').inner_text()
     assert page.locator('a.btn-rbc').filter(has_text='Sign In to Join').is_visible()
-    assert page.locator('h4').filter(has_text='Upcoming Rides').is_visible()
+    # Tab bar is present; "Rides" tab button is visible (Upcoming Rides now lives inside it)
+    assert page.locator('.club-tab').filter(has_text='Rides').is_visible()
 
     page.screenshot(path='tests/screenshots/browser_club_home_mobile.png',
                     full_page=True)
@@ -125,6 +126,8 @@ def test_club_home_shows_rides(server_info, browser):
     base, slug, _ = server_info
     page = mobile_page(browser)
     page.goto(f'{base}/clubs/{slug}/')
+    # Switch to the Rides tab so ride cards become visible
+    page.locator('.club-tab').filter(has_text='Rides').click()
     page.wait_for_selector('.ride-card')
 
     cards = page.locator('.ride-card')

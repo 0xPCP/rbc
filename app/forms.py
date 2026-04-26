@@ -48,6 +48,7 @@ class ClubForm(FlaskForm):
 class ClubSettingsForm(FlaskForm):
     """Club admin version — no slug, no is_active."""
     name        = StringField('Club Name', validators=[DataRequired(), Length(max=200)])
+    tagline     = StringField('Club Tagline', validators=[Optional(), Length(max=200)])
     description = TextAreaField('Description', validators=[Optional()])
     city        = StringField('City', validators=[Optional(), Length(max=100)])
     state       = StringField('State', validators=[Optional(), Length(max=50)])
@@ -114,6 +115,7 @@ class ClubCreateForm(FlaskForm):
         Optional(), Length(max=7),
         Regexp(r'^#[0-9a-fA-F]{6}$', message='Enter a valid hex color (e.g. #e76f51).'),
     ])
+    tagline       = StringField('Club Tagline', validators=[Optional(), Length(max=200)])
     description   = TextAreaField('Description', validators=[Optional()])
     contact_email = StringField('Contact Email', validators=[Optional(), Email(), Length(max=255)])
     logo_url      = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
