@@ -44,6 +44,98 @@ body {
 }
 .brand-icon { color: var(--rbc-green-light); }
 
+/* ── Club page nav (used on club home — no platform branding) ─────────────── */
+.club-page-nav {
+  background: var(--rbc-green-dark);
+  padding: 0.5rem 0;
+  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+}
+.club-nav-link {
+  color: rgba(255,255,255,.9) !important;
+  font-size: .9rem;
+}
+.club-nav-link:hover { color: #fff !important; }
+.club-page-nav .dropdown-menu { border: none; box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+
+/* ── Club home hero ──────────────────────────────────────────────────────── */
+.club-hero {
+  position: relative;
+  min-height: 220px;
+  background: var(--rbc-green-dark);
+  display: flex;
+  align-items: flex-end;
+}
+.club-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+}
+.club-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0,0,0,.35) 0%, rgba(0,0,0,.65) 100%);
+}
+.club-hero-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+.club-hero-logo {
+  width: 72px;
+  height: 72px;
+  object-fit: contain;
+  border-radius: 10px;
+  background: #fff;
+  padding: 5px;
+  flex-shrink: 0;
+}
+.club-hero-name {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.1;
+  margin: 0;
+}
+.club-hero-meta {
+  color: rgba(255,255,255,.8);
+  font-size: .9rem;
+  margin-top: .25rem;
+}
+
+/* ── Club home sections ──────────────────────────────────────────────────── */
+.club-section-title {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  color: var(--rbc-green-dark);
+  border-bottom: 2px solid var(--rbc-green-pale);
+  padding-bottom: .4rem;
+  margin-bottom: 1rem;
+}
+
+/* ── Social icon links ───────────────────────────────────────────────────── */
+.social-links { display: flex; flex-wrap: wrap; gap: .5rem; }
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .35rem .75rem;
+  border-radius: 20px;
+  font-size: .85rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: opacity .15s;
+}
+.social-link:hover { opacity: .85; }
+.social-link-facebook  { background: #1877f2; color: #fff; }
+.social-link-instagram { background: #e1306c; color: #fff; }
+.social-link-twitter   { background: #1da1f2; color: #fff; }
+.social-link-strava    { background: #fc4c02; color: #fff; }
+.social-link-newsletter { background: var(--rbc-green); color: #fff; }
+
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
 .btn-rbc {
   background: var(--rbc-orange);

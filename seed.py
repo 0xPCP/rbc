@@ -51,13 +51,26 @@ with app.app_context():
         description=(
             'One of the largest cycling clubs in Northern Virginia. '
             'Weekly rides for all levels — Tuesday Worlds to leisurely Sunday spins. '
-            'Home of the annual Ken Thompson Reston Century.'
+            'Home of the annual Ken Thompson Reston Century.\n\n'
+            'Founded in 1972, RBC welcomes cyclists of all abilities. '
+            'We ride rain or shine and believe cycling is best done together.'
         ),
         website='https://restonbikeclub.org',
         contact_email='info@restonbikeclub.org',
         address='Hunterwoods Shopping Center, 2324 Hunter Mill Rd',
         city='Reston', state='VA', zip_code='20191',
         lat=38.9376, lng=-77.3476,
+        facebook_url='https://facebook.com/restonbikeclub',
+        instagram_url='https://instagram.com/restonbikeclub',
+        newsletter_url='https://restonbikeclub.org/newsletter',
+        safety_guidelines=(
+            'Always wear a properly fitted helmet — no exceptions.\n'
+            'Obey all traffic laws and stop at red lights and stop signs.\n'
+            'Call out hazards: "Car back!", "Car up!", "Hole!", "Stopping!".\n'
+            'No earbuds or headphones while riding in a group.\n'
+            'Carry ID, phone, emergency cash, and a basic repair kit.\n'
+            'Ride predictably: no sudden moves, signal turns, and hold your line.'
+        ),
     )
     nvcc = Club(
         slug='nvcc',

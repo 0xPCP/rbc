@@ -174,7 +174,7 @@ def test_strava_feed_shown_when_activities_present(client, app, sample_club, moc
         resp = client.get(f'/clubs/{sample_club.slug}/')
 
     assert resp.status_code == 200
-    assert b'Recent Club Rides' in resp.data
+    assert b'Recent Club Activity' in resp.data
     assert b'Tuesday Morning Rip' in resp.data
 
 

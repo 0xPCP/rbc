@@ -226,6 +226,13 @@ def club_settings(slug):
         club.require_membership = form.require_membership.data
         club.join_approval      = form.join_approval.data if form.join_approval.data in ('auto', 'manual') else 'auto'
 
+        club.facebook_url      = form.facebook_url.data or None
+        club.instagram_url     = form.instagram_url.data or None
+        club.twitter_url       = form.twitter_url.data or None
+        club.newsletter_url    = form.newsletter_url.data or None
+        club.bylaws_url        = form.bylaws_url.data or None
+        club.safety_guidelines = form.safety_guidelines.data or None
+
         db.session.commit()
         flash('Club settings updated.', 'success')
         return redirect(url_for('admin.club_settings', slug=slug))

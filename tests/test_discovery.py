@@ -184,7 +184,7 @@ class TestSponsors:
         db.session.commit()
         r = client.get(f'/clubs/{sample_club.slug}/')
         assert b'Big Sponsor Co.' in r.data
-        assert b'Sponsors' in r.data
+        assert b'Partners' in r.data
 
 
 # ── Roles expansion ───────────────────────────────────────────────────────────

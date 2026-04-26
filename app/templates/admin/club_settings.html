@@ -146,6 +146,58 @@
         {% endif %}
 
         <hr class="my-4" />
+        <h5 class="mb-1">Social Media &amp; Communication</h5>
+        <p class="text-muted small mb-3">
+          Social links appear in the sidebar of your club home page. Leave blank to hide.
+        </p>
+
+        <div class="mb-3">
+          {{ form.facebook_url.label(class="form-label") }}
+          {{ form.facebook_url(class="form-control" + (" is-invalid" if form.facebook_url.errors else ""), placeholder="https://facebook.com/yourcyclingclub") }}
+          {% for e in form.facebook_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.instagram_url.label(class="form-label") }}
+          {{ form.instagram_url(class="form-control" + (" is-invalid" if form.instagram_url.errors else ""), placeholder="https://instagram.com/yourcyclingclub") }}
+          {% for e in form.instagram_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-3">
+          {{ form.twitter_url.label(class="form-label") }}
+          {{ form.twitter_url(class="form-control" + (" is-invalid" if form.twitter_url.errors else ""), placeholder="https://x.com/yourcyclingclub") }}
+          {% for e in form.twitter_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-4">
+          {{ form.newsletter_url.label(class="form-label") }}
+          {{ form.newsletter_url(class="form-control" + (" is-invalid" if form.newsletter_url.errors else ""), placeholder="https://mailchimp.com/...") }}
+          <div class="form-text">Link to your newsletter sign-up page (Mailchimp, Substack, etc.).</div>
+          {% for e in form.newsletter_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <hr class="my-4" />
+        <h5 class="mb-1">Governance &amp; Resources</h5>
+        <p class="text-muted small mb-3">
+          Shown in the "About the Club" section on your club home page.
+        </p>
+
+        <div class="mb-3">
+          {{ form.bylaws_url.label(class="form-label") }}
+          {{ form.bylaws_url(class="form-control" + (" is-invalid" if form.bylaws_url.errors else ""), placeholder="https://...") }}
+          <div class="form-text">Link to a PDF or page with your club bylaws and rules.</div>
+          {% for e in form.bylaws_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-4">
+          {{ form.safety_guidelines.label(class="form-label") }}
+          {{ form.safety_guidelines(class="form-control" + (" is-invalid" if form.safety_guidelines.errors else ""), rows=5,
+             placeholder="e.g. Always wear a helmet. Obey all traffic laws. Call out hazards. No earbuds while riding.") }}
+          <div class="form-text">Displayed in the Safety &amp; Resources section on the club home page.</div>
+          {% for e in form.safety_guidelines.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <hr class="my-4" />
         <h5 class="mb-1">Membership</h5>
         <p class="text-muted small mb-3">
           Control who can sign up for rides and how new members join the club.

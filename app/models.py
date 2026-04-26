@@ -133,6 +133,16 @@ class Club(db.Model):
     # Theme preset identifier (matches THEME_PRESETS in routes/clubs.py), or 'custom'
     theme_preset = db.Column(db.String(30), nullable=True)
 
+    # Social media / communication
+    facebook_url     = db.Column(db.String(500), nullable=True)
+    instagram_url    = db.Column(db.String(500), nullable=True)
+    twitter_url      = db.Column(db.String(500), nullable=True)
+    newsletter_url   = db.Column(db.String(500), nullable=True)
+
+    # Governance / resources
+    bylaws_url          = db.Column(db.String(500), nullable=True)
+    safety_guidelines   = db.Column(db.Text, nullable=True)
+
     # Weather-based auto-cancel thresholds
     auto_cancel_enabled  = db.Column(db.Boolean, default=False, nullable=False)
     cancel_rain_prob     = db.Column(db.Integer, default=80, nullable=False)   # % precip probability

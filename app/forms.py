@@ -74,6 +74,16 @@ class ClubSettingsForm(FlaskForm):
     ])
     # Strava integration
     strava_club_id = StringField('Strava Club ID', validators=[Optional(), Length(max=20)])
+    # Social media / communication
+    facebook_url   = StringField('Facebook Page URL', validators=[Optional(), URL(), Length(max=500)])
+    instagram_url  = StringField('Instagram URL', validators=[Optional(), URL(), Length(max=500)])
+    twitter_url    = StringField('Twitter / X URL', validators=[Optional(), URL(), Length(max=500)])
+    newsletter_url = StringField('Newsletter Sign-up URL', validators=[Optional(), URL(), Length(max=500)])
+
+    # Governance / resources
+    bylaws_url        = StringField('Club Bylaws URL', validators=[Optional(), URL(), Length(max=500)])
+    safety_guidelines = TextAreaField('Safety Guidelines', validators=[Optional()])
+
     # Weather auto-cancel
     auto_cancel_enabled = BooleanField('Enable weather-based auto-cancel')
     cancel_rain_prob    = IntegerField('Cancel if rain probability ≥ (%)',
