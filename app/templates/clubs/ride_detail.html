@@ -245,6 +245,174 @@
     </div>
   </div>
 
+  <!-- Post-ride media feed (photos + video links; visible only after ride date) -->
+  {% if ride.date <= now.date() %}
+  <div class="col-12 mt-4" id="media">
+    <div class="detail-card">
+      <h5 class="detail-card-title">Ride Photos &amp; Videos</h5>
+
+      {% set photos = ride.media | selectattr('media_type', 'equalto', 'photo') | list %}
+      {% set videos = ride.media | selectattr('media_type', 'equalto', 'video_link') | list %}
+
+      {% if ride.media %}
+      <!-- Photo grid -->
+      {% if photos %}
+      <div class="row g-2 mb-3">
+        {% for item in photos %}
+        <div class="col-6 col-sm-4 col-md-3 position-relative">
+          <a href="{{ url_for('media.serve_photo', ride_id=ride.id, filename=item.file_path.split('/')[-1]) }}"
+             target="_blank" rel="noopener">
+            <img src="{{ url_for('media.serve_photo', ride_id=ride.id, filename=item.file_path.split('/')[-1]) }}"
+                 alt="{{ item.caption or 'Ride photo' }}"
+                 class="img-fluid rounded"
+                 style="width:100%;height:140px;object-fit:cover">
+          </a>
+          {% if item.caption %}
+          <div class="text-muted small mt-1 text-truncate">{{ item.caption }}</div>
+          {% endif %}
+          <div class="small text-muted">{{ item.user.username }}</div>
+          {% if current_user.is_authenticated and (item.user_id == current_user.id or current_user.can_manage_rides(club)) %}
+          <form method="post"
+                action="{{ url_for('media.delete_media', slug=club.slug, ride_id=ride.id, media_id=item.id) }}"
+                class="mt-1" onsubmit="return confirm('Remove this photo?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit" class="btn btn-link btn-sm text-danger p-0" style="font-size:.75rem">Remove</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      <!-- Video links -->
+      {% if videos %}
+      <div class="mb-3">
+        {% for item in videos %}
+        <div class="mb-3">
+          {% if item.embed_url %}
+          <div class="video-wrapper mb-1">
+            <iframe src="{{ item.embed_url }}" allowfullscreen></iframe>
+          </div>
+          {% else %}
+          <a href="{{ item.url }}" target="_blank" rel="noopener" class="btn btn-outline-secondary btn-sm">
+            ▶ Watch Video ↗
+          </a>
+          {% endif %}
+          <div class="small text-muted mt-1">
+            {{ item.user.username }}{% if item.caption %} &bull; {{ item.caption }}{% endif %}
+          </div>
+          {% if current_user.is_authenticated and (item.user_id == current_user.id or current_user.can_manage_rides(club)) %}
+          <form method="post"
+                action="{{ url_for('media.delete_media', slug=club.slug, ride_id=ride.id, media_id=item.id) }}"
+                class="mt-1" onsubmit="return confirm('Remove this video?')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <button type="submit" class="btn btn-link btn-sm text-danger p-0" style="font-size:.75rem">Remove</button>
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+
+      {% else %}
+      <p class="text-muted small mb-3">No photos or videos yet. Be the first to share!</p>
+      {% endif %}
+
+      <!-- Upload forms (only for authenticated users) -->
+      {% if current_user.is_authenticated %}
+      <div class="row g-3 mt-1">
+        <div class="col-md-6">
+          <p class="small fw-semibold mb-2">Share a Photo</p>
+          <form method="post"
+                action="{{ url_for('media.upload_photo', slug=club.slug, ride_id=ride.id) }}"
+                enctype="multipart/form-data">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div class="mb-2">
+              <input type="file" name="photo" accept="image/jpeg,image/png,image/webp"
+                     class="form-control form-control-sm">
+              <div class="form-text">JPEG / PNG / WebP, max 5 MB. Auto-resized to 1200 px.</div>
+            </div>
+            <div class="mb-2">
+              <input type="text" name="caption" placeholder="Caption (optional)" maxlength="300"
+                     class="form-control form-control-sm">
+            </div>
+            <button type="submit" class="btn btn-rbc btn-sm">Upload Photo</button>
+          </form>
+        </div>
+        <div class="col-md-6">
+          <p class="small fw-semibold mb-2">Share a Video Link</p>
+          <form method="post"
+                action="{{ url_for('media.add_video_link', slug=club.slug, ride_id=ride.id) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+            <div class="mb-2">
+              <input type="url" name="url" placeholder="YouTube, Strava, or Vimeo URL"
+                     class="form-control form-control-sm" maxlength="500" required>
+              <div class="form-text">Upload your video to YouTube or Strava first, then paste the link here.</div>
+            </div>
+            <div class="mb-2">
+              <input type="text" name="caption" placeholder="Caption (optional)" maxlength="300"
+                     class="form-control form-control-sm">
+            </div>
+            <button type="submit" class="btn btn-rbc btn-sm">Share Video</button>
+          </form>
+        </div>
+      </div>
+      <p class="text-muted" style="font-size:.75rem;margin-top:.75rem">
+        Photos are automatically removed {{ media_expiry_days }} days after the ride date.
+        Max {{ media_max_per_user }} photos per person per ride.
+      </p>
+      {% else %}
+      <p class="text-muted small mt-2">
+        <a href="{{ url_for('auth.login', next=request.url) }}">Sign in</a> to share photos or videos.
+      </p>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Comment thread -->
+  <div class="col-12 mt-4" id="comments">
+    <div class="detail-card">
+      <h5 class="detail-card-title">Discussion</h5>
+
+      {% if ride.comments %}
+      <div class="comment-thread">
+        {% for c in ride.comments %}
+        <div class="comment-item">
+          <div class="comment-avatar">{{ c.user.username[0].upper() }}</div>
+          <div class="comment-body">
+            <span class="comment-author">{{ c.user.username }}</span>
+            <span class="comment-time">{{ c.created_at.strftime('%b %d, %Y %I:%M %p') }}</span>
+            {% if current_user.is_authenticated and (c.user_id == current_user.id or current_user.can_manage_rides(club)) %}
+            <form method="post" action="{{ url_for('clubs.ride_comment_delete', slug=club.slug, ride_id=ride.id, comment_id=c.id) }}"
+                  class="d-inline ms-2" onsubmit="return confirm('Delete this comment?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button type="submit" class="btn btn-link btn-sm text-danger p-0" style="font-size:.75rem">Delete</button>
+            </form>
+            {% endif %}
+            <div class="comment-text">{{ c.body }}</div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <p class="text-muted small mb-3">No comments yet. Be the first to ask a question or leave a note!</p>
+      {% endif %}
+
+      {% if comment_form %}
+      <form method="post" action="{{ url_for('clubs.ride_comment_post', slug=club.slug, ride_id=ride.id) }}" class="mt-3">
+        {{ comment_form.hidden_tag() }}
+        <div class="mb-2">
+          {{ comment_form.body(class="form-control", rows=2, placeholder="Ask a question or leave a note about this ride…") }}
+        </div>
+        {{ comment_form.submit(class="btn btn-rbc btn-sm") }}
+      </form>
+      {% else %}
+      <p class="text-muted small mt-2"><a href="{{ url_for('auth.login', next=request.url) }}">Sign in</a> to leave a comment.</p>
+      {% endif %}
+    </div>
+  </div>
+
   <div class="mt-4">
     <a href="{{ url_for('clubs.rides', slug=club.slug) }}" class="text-muted">&larr; Back to {{ club.name }} Calendar</a>
   </div>

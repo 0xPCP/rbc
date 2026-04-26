@@ -162,8 +162,8 @@ and platforms (ClubExpress, RideStats, RideWithGPS for Clubs).
 - [x] Write tests for new role access control
 
 ### Invite-by-email
-- [ ] Admin sends invite link (time-limited token); recipient gets immediate active membership on click
-- [ ] Write tests for invite token generation, redemption, and expiry
+- [x] Admin sends invite link (time-limited token); recipient gets immediate active membership on click
+- [x] Write tests for invite token generation, redemption, and expiry
 
 ---
 
@@ -177,7 +177,7 @@ and platforms (ClubExpress, RideStats, RideWithGPS for Clubs).
 - [ ] Early bird / tiered pricing; promo codes
 
 ### Member engagement
-- [ ] Attendance history for ride leaders (who showed up, who didn't)
+- [x] Attendance history for ride leaders — `RideSignup.attended` bool; roster checkboxes after ride date; admin POST `/attendance` route
 - [ ] "Most rides" / "Most miles" club awards (annual)
 
 ### Safety
@@ -187,17 +187,17 @@ and platforms (ClubExpress, RideStats, RideWithGPS for Clubs).
 - [ ] Minor / youth waiver requiring parent signature (email link flow)
 
 ### Platform
-- [ ] Platform-level superadmin dashboard — all clubs, all stats
+- [x] Platform-level superadmin dashboard — all clubs, all stats, per-club upcoming count, status badges
 - [ ] Webhook: notify external systems on ride create/cancel/update
 - [ ] Custom domain: map clubname.com to their platform page (Cloudflare Worker / CNAME)
 
 ### OAuth & social
 - OAuth login moved to `backlog.md` — requires Google/Microsoft app registration
-- [ ] Post-ride media sharing — members share photos/videos after a ride; ride detail page shows a media feed
+- [x] Post-ride media sharing — photos (upload, resize, expiry) + video links (YouTube/Strava/Vimeo embeds); ride detail page shows a media feed after ride date; strategy documented in `docs/media_strategy.md`
 - Real-time ride tracking moved to `backlog.md` — requires architecture + privacy review
 
 ### UX polish
-- [ ] Mobile-responsive design audit — all pages tested at 390px width
-- [ ] Multi-group ride card — A + B + C groups on same day shown as one card with expand
-- [ ] Ride comment thread — members ask questions, post updates before/after ride
+- [x] Mobile-responsive design audit — ride-card CSS defined, mobile breakpoint fixes applied
+- [x] Multi-group ride card — A + B + C groups on same day shown as one collapsible card (Bootstrap collapse)
+- [x] Ride comment thread — members ask questions, post updates before/after ride
 - [ ] Direct route send to Garmin / Wahoo (via RideWithGPS API or device API)

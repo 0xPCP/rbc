@@ -1,6 +1,14 @@
+import sys
 from flask import Flask
 from .config import Config
 from .extensions import db, login_manager, bcrypt, csrf, mail
+
+
+def _strftime_filter(value, fmt):
+    """Cross-platform strftime: replaces %-d/%-I (Linux) with %#d/%#I on Windows."""
+    if sys.platform == 'win32':
+        fmt = fmt.replace('%-', '%#')
+    return value.strftime(fmt)
 
 
 def create_app(config_class=Config):
@@ -19,6 +27,7 @@ def create_app(config_class=Config):
     from .routes.admin import admin_bp
     from .routes.strava import strava_bp
     from .routes.api import api_bp
+    from .routes.media import media_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -26,12 +35,14 @@ def create_app(config_class=Config):
     app.register_blueprint(admin_bp, url_prefix='/admin')
     app.register_blueprint(strava_bp, url_prefix='/strava')
     app.register_blueprint(api_bp, url_prefix='/api')
+    app.register_blueprint(media_bp)
 
     from datetime import datetime
     from .version import __version__
     from .utils import club_theme_vars
 
     app.jinja_env.globals['club_theme_vars'] = club_theme_vars
+    app.jinja_env.filters['strftime'] = _strftime_filter
 
     @app.context_processor
     def inject_globals():

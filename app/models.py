@@ -248,6 +248,67 @@ class ClubSponsor(db.Model):
     display_order = db.Column(db.Integer, default=0, nullable=False)
 
 
+class RideMedia(db.Model):
+    """Photo or video link shared by a member after a ride."""
+    __tablename__ = 'ride_media'
+
+    id = db.Column(db.Integer, primary_key=True)
+    ride_id = db.Column(db.Integer, db.ForeignKey('rides.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    media_type = db.Column(db.String(20), nullable=False)  # 'photo' | 'video_link'
+    file_path = db.Column(db.String(500), nullable=True)   # relative path for photos
+    url = db.Column(db.String(500), nullable=True)          # for video_link type
+    caption = db.Column(db.String(300), nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = db.relationship('User', foreign_keys=[user_id])
+
+    @property
+    def embed_url(self):
+        """Return embeddable iframe URL for YouTube/Vimeo video links."""
+        if self.media_type != 'video_link' or not self.url:
+            return None
+        import re as _re
+        yt = _re.search(r'(?:youtube\.com/watch\?v=|youtu\.be/)([^&\n?#]+)', self.url)
+        if yt:
+            return f'https://www.youtube.com/embed/{yt.group(1)}'
+        vm = _re.search(r'vimeo\.com/(\d+)', self.url)
+        if vm:
+            return f'https://player.vimeo.com/video/{vm.group(1)}'
+        return None
+
+
+class RideComment(db.Model):
+    """Member comment on a ride — pre/post discussion thread."""
+    __tablename__ = 'ride_comments'
+
+    id = db.Column(db.Integer, primary_key=True)
+    ride_id = db.Column(db.Integer, db.ForeignKey('rides.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    body = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    user = db.relationship('User', foreign_keys=[user_id])
+
+
+class ClubInvite(db.Model):
+    """Time-limited invite token sent by an admin; grants immediate active membership on claim."""
+    __tablename__ = 'club_invites'
+
+    id = db.Column(db.Integer, primary_key=True)
+    club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=False)
+    email = db.Column(db.String(255), nullable=False)
+    token = db.Column(db.String(64), unique=True, nullable=False)
+    expires_at = db.Column(db.DateTime, nullable=False)
+    created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    used_at = db.Column(db.DateTime, nullable=True)
+    used_by_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+
+    club = db.relationship('Club', foreign_keys=[club_id])
+    creator = db.relationship('User', foreign_keys=[created_by])
+    used_by = db.relationship('User', foreign_keys=[used_by_user_id])
+
+
 class WaiverSignature(db.Model):
     """Records that a user accepted a club's waiver for a given year."""
     __tablename__ = 'waiver_signatures'
@@ -289,6 +350,10 @@ class Ride(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
 
     signups = db.relationship('RideSignup', backref='ride', lazy=True, cascade='all, delete-orphan')
+    media = db.relationship('RideMedia', backref='ride', lazy=True,
+                            order_by='RideMedia.created_at.asc()', cascade='all, delete-orphan')
+    comments = db.relationship('RideComment', backref='ride', lazy=True,
+                               order_by='RideComment.created_at.asc()', cascade='all, delete-orphan')
     leader = db.relationship('User', foreign_keys=[leader_id])
     recurrence_instances = db.relationship(
         'Ride', foreign_keys='Ride.recurrence_parent_id',
@@ -365,6 +430,7 @@ class RideSignup(db.Model):
     ride_id = db.Column(db.Integer, db.ForeignKey('rides.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     is_waitlist = db.Column(db.Boolean, default=False, nullable=False)
+    attended = db.Column(db.Boolean, nullable=True)  # None=not recorded, True=showed up, False=no-show
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (db.UniqueConstraint('ride_id', 'user_id', name='uq_ride_user'),)

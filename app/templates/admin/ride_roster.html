@@ -13,7 +13,7 @@
       </ol>
     </nav>
     <h1>Ride Roster</h1>
-    <p>{{ ride.title }} &bull; {{ ride.date.strftime('%A, %B %-d, %Y') }} at {{ ride.time.strftime('%-I:%M %p') }}</p>
+    <p>{{ ride.title }} &bull; {{ ride.date | strftime('%A, %B %-d, %Y') }} at {{ ride.time | strftime('%-I:%M %p') }}</p>
   </div>
 </div>
 
@@ -21,15 +21,27 @@
   <div class="row gy-4">
     <div class="col-lg-8">
 
+      {% set past_ride = ride.date < today %}
+
+      {% if active %}
       <div class="detail-card mb-4">
-        <h5 class="detail-card-title">
-          Signed Up
-          <span class="badge bg-success ms-2">{{ active | length }}</span>
-        </h5>
-        {% if active %}
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="detail-card-title mb-0">
+            Signed Up
+            <span class="badge bg-success ms-2">{{ active | length }}</span>
+            {% if past_ride %}
+            <span class="badge bg-primary ms-1">{{ active | selectattr('attended') | list | length }} attended</span>
+            {% endif %}
+          </h5>
+        </div>
+        {% if past_ride %}
+        <form method="post" action="{{ url_for('admin.ride_attendance', slug=club.slug, ride_id=ride.id) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        {% endif %}
         <table class="table rbc-table mb-0">
           <thead>
             <tr>
+              {% if past_ride %}<th style="width:2.5rem;">✓</th>{% endif %}
               <th>Rider</th>
               <th>Email</th>
               <th>Emergency Contact</th>
@@ -38,7 +50,13 @@
           </thead>
           <tbody>
             {% for s in active %}
-            <tr>
+            <tr class="{{ 'table-success' if s.attended == true else ('table-danger' if s.attended == false else '') }}">
+              {% if past_ride %}
+              <td>
+                <input class="form-check-input" type="checkbox" name="attended" value="{{ s.id }}"
+                  {{ 'checked' if s.attended == true else '' }}>
+              </td>
+              {% endif %}
               <td>{{ s.user.username }}</td>
               <td><a href="mailto:{{ s.user.email }}">{{ s.user.email }}</a></td>
               <td>
@@ -59,10 +77,22 @@
             {% endfor %}
           </tbody>
         </table>
-        {% else %}
-        <p class="text-muted mb-0">No riders signed up yet.</p>
+        {% if past_ride %}
+        <div class="mt-3">
+          <button type="submit" class="btn btn-primary btn-sm">Save Attendance</button>
+        </div>
+        </form>
         {% endif %}
       </div>
+      {% else %}
+      <div class="detail-card mb-4">
+        <h5 class="detail-card-title">
+          Signed Up
+          <span class="badge bg-success ms-2">0</span>
+        </h5>
+        <p class="text-muted mb-0">No riders signed up yet.</p>
+      </div>
+      {% endif %}
 
       {% if waitlist %}
       <div class="detail-card">
@@ -104,8 +134,16 @@
           <a href="{{ url_for('clubs.ride_detail', slug=club.slug, ride_id=ride.id) }}" class="btn btn-outline-secondary btn-sm">View Public Ride Page</a>
           <a href="{{ url_for('admin.ride_edit', slug=club.slug, ride_id=ride.id) }}" class="btn btn-outline-secondary btn-sm">Edit Ride</a>
         </div>
+        {% if past_ride %}
+        <hr>
+        <p class="text-muted small mb-0">
+          Check each rider who showed up, then click <strong>Save Attendance</strong>.
+          Attendance is used for member ride history.
+        </p>
+        {% else %}
         <hr>
         <p class="text-muted small mb-0">Emergency contact details are provided by riders on their profile page and are only visible to ride leaders and club admins.</p>
+        {% endif %}
       </div>
     </div>
   </div>

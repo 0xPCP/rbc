@@ -1,0 +1,8 @@
+You've been invited to join {{ invite.club.name }}!
+
+You've been personally invited to join {{ invite.club.name }} on Cycling Clubs.
+Click the link below to accept your invite and get immediate active membership.
+
+{{ claim_url }}
+
+This invite is valid for 7 days and can only be used once.

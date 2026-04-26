@@ -14,13 +14,16 @@
     <div class="col-6 col-lg-3">
       <div class="admin-stat-card">
         <div class="admin-stat-num">{{ stats.total_clubs }}</div>
-        <div class="admin-stat-label">Clubs</div>
+        <div class="admin-stat-label">Active Clubs</div>
       </div>
     </div>
     <div class="col-6 col-lg-3">
       <div class="admin-stat-card">
         <div class="admin-stat-num">{{ stats.total_members }}</div>
-        <div class="admin-stat-label">Users</div>
+        <div class="admin-stat-label">
+          Total Users
+          <div class="text-muted" style="font-size:.75rem;font-weight:400">+{{ stats.new_users_30d }} last 30 days</div>
+        </div>
       </div>
     </div>
     <div class="col-6 col-lg-3">
@@ -31,8 +34,8 @@
     </div>
     <div class="col-6 col-lg-3">
       <div class="admin-stat-card">
-        <div class="admin-stat-num">{{ stats.total_signups }}</div>
-        <div class="admin-stat-label">Total Signups</div>
+        <div class="admin-stat-num">{{ '{:,}'.format(stats.total_miles) }}</div>
+        <div class="admin-stat-label">Total Miles Hosted</div>
       </div>
     </div>
   </div>
@@ -43,13 +46,34 @@
   </div>
   <div class="table-responsive">
     <div class="rbc-table-wrap"><table class="table rbc-table">
-      <thead><tr><th>Club</th><th>Location</th><th>Members</th><th></th></tr></thead>
+      <thead>
+        <tr>
+          <th>Club</th>
+          <th>Location</th>
+          <th>Members</th>
+          <th>Upcoming</th>
+          <th>Status</th>
+          <th>Created</th>
+          <th></th>
+        </tr>
+      </thead>
       <tbody>
-        {% for club in clubs %}
+        {% for row in clubs %}
+        {% set club = row.club %}
         <tr>
           <td><a href="{{ url_for('clubs.home', slug=club.slug) }}">{{ club.name }}</a></td>
-          <td>{{ club.city }}, {{ club.state }}</td>
+          <td class="text-muted small">{{ club.city }}{% if club.city and club.state %}, {% endif %}{{ club.state }}</td>
           <td>{{ club.member_count }}</td>
+          <td>{{ row.upcoming }}</td>
+          <td>
+            {% if club.is_active %}
+            <span class="badge bg-success">Active</span>
+            {% else %}
+            <span class="badge bg-secondary">Inactive</span>
+            {% endif %}
+            {% if club.is_private %}<span class="badge bg-dark ms-1">Private</span>{% endif %}
+          </td>
+          <td class="text-muted small">{{ club.created_at.strftime('%b %Y') if club.created_at else '—' }}</td>
           <td class="d-flex gap-1">
             <a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}" class="btn btn-outline-secondary btn-xs">Manage</a>
             <a href="{{ url_for('admin.club_settings', slug=club.slug) }}" class="btn btn-outline-secondary btn-xs">Settings</a>

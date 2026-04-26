@@ -41,7 +41,8 @@ def register():
             flash('Account created — you have been granted admin access as the first user.', 'success')
         else:
             flash('Account created! You can now sign in.', 'success')
-        return redirect(url_for('auth.login'))
+        next_page = request.args.get('next')
+        return redirect(url_for('auth.login', next=next_page) if next_page else url_for('auth.login'))
 
     return render_template('auth/register.html', form=form)
 

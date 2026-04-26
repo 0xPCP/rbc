@@ -41,53 +41,123 @@
     </div>
   </div>
 
-  {% if rides %}
+  {% if ride_groups %}
   <div class="ride-list">
     {% set current_month = namespace(val='') %}
-    {% for ride in rides %}
-      {% set month = ride.date.strftime('%B %Y') %}
+    {% for day, day_rides in ride_groups.items() %}
+      {% set month = day.strftime('%B %Y') %}
       {% if month != current_month.val %}
         {% set current_month.val = month %}
         <h3 class="month-heading">{{ month }}</h3>
       {% endif %}
-      {% set w = weather.get(ride.id) %}
-      <a href="{{ url_for('clubs.ride_detail', slug=club.slug, ride_id=ride.id) }}" class="ride-row {{ 'ride-row-cancelled' if ride.is_cancelled else '' }} {{ 'ride-row-weather-warn' if w and w.warning else '' }}">
-        <div class="ride-row-date">
-          <div class="rrd-dow">{{ ride.date.strftime('%a') }}</div>
-          <div class="rrd-day">{{ ride.date.day }}</div>
+
+      {% if day_rides | length == 1 %}
+        {# Single ride on this day — render as a normal row #}
+        {% set ride = day_rides[0] %}
+        {% set w = weather.get(ride.id) %}
+        <a href="{{ url_for('clubs.ride_detail', slug=club.slug, ride_id=ride.id) }}" class="ride-row {{ 'ride-row-cancelled' if ride.is_cancelled else '' }} {{ 'ride-row-weather-warn' if w and w.warning else '' }}">
+          <div class="ride-row-date">
+            <div class="rrd-dow">{{ ride.date.strftime('%a') }}</div>
+            <div class="rrd-day">{{ ride.date.day }}</div>
+          </div>
+          <div class="ride-row-main">
+            <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+              <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
+              {% if ride.ride_type %}<span class="badge bg-secondary fw-normal">{{ ride.ride_type | capitalize }}</span>{% endif %}
+              {% if ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>{% endif %}
+              <span class="ride-row-time">{{ ride.time.strftime('%I:%M %p') }}</span>
+              {% if w and w.warning %}<span class="weather-warn-badge">⚠️ Weather Warning</span>{% endif %}
+            </div>
+            <div class="ride-row-title">
+              {{ ride.title }}
+              {% if ride.ridewithgps_route_id %}<span class="rwgps-badge">route</span>{% endif %}
+            </div>
+            <div class="ride-row-meta">
+              {{ ride.meeting_location }} &bull; {{ ride.distance_miles }} mi
+              {% if ride.elevation_feet %}&bull; {{ ride.elevation_feet }} ft{% endif %}
+              {% if ride.ride_leader %}&bull; Leader: {{ ride.ride_leader }}{% endif %}
+            </div>
+          </div>
+          <div class="ride-row-right">
+            {% if w %}
+            <div class="list-weather sev-{{ w.severity }}">
+              <span class="lw-emoji">{{ w.emoji }}</span>
+              <span class="lw-temp">{{ w.temp_f }}°F</span>
+              <span class="lw-wind">{{ w.wind_mph }} mph</span>
+            </div>
+            {% endif %}
+            <div class="ride-row-signups">
+              <div class="signup-count">{{ ride.signup_count }}</div>
+              <div class="signup-label">going</div>
+            </div>
+          </div>
+        </a>
+
+      {% else %}
+        {# Multiple rides on this day — render as a collapsible group card #}
+        {% set group_id = 'group-' ~ day.strftime('%Y%m%d') %}
+        <div class="ride-group-card mb-2">
+          <button class="ride-group-header collapsed" type="button"
+                  data-bs-toggle="collapse" data-bs-target="#{{ group_id }}" aria-expanded="false">
+            <div class="ride-row-date">
+              <div class="rrd-dow">{{ day.strftime('%a') }}</div>
+              <div class="rrd-day">{{ day.day }}</div>
+            </div>
+            <div class="ride-group-summary">
+              <span class="ride-group-label">{{ day_rides | length }} group rides</span>
+              <span class="ride-group-badges">
+                {% for ride in day_rides %}
+                  <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
+                {% endfor %}
+              </span>
+            </div>
+            <div class="ride-group-chevron">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z"/>
+              </svg>
+            </div>
+          </button>
+          <div class="collapse" id="{{ group_id }}">
+            {% for ride in day_rides %}
+              {% set w = weather.get(ride.id) %}
+              <a href="{{ url_for('clubs.ride_detail', slug=club.slug, ride_id=ride.id) }}"
+                 class="ride-group-row {{ 'ride-row-cancelled' if ride.is_cancelled else '' }} {{ 'ride-row-weather-warn' if w and w.warning else '' }}">
+                <div class="ride-row-main">
+                  <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
+                    <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
+                    {% if ride.ride_type %}<span class="badge bg-secondary fw-normal">{{ ride.ride_type | capitalize }}</span>{% endif %}
+                    {% if ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>{% endif %}
+                    <span class="ride-row-time">{{ ride.time.strftime('%I:%M %p') }}</span>
+                    {% if w and w.warning %}<span class="weather-warn-badge">⚠️ Weather Warning</span>{% endif %}
+                  </div>
+                  <div class="ride-row-title">
+                    {{ ride.title }}
+                    {% if ride.ridewithgps_route_id %}<span class="rwgps-badge">route</span>{% endif %}
+                  </div>
+                  <div class="ride-row-meta">
+                    {{ ride.meeting_location }} &bull; {{ ride.distance_miles }} mi
+                    {% if ride.elevation_feet %}&bull; {{ ride.elevation_feet }} ft{% endif %}
+                    {% if ride.ride_leader %}&bull; Leader: {{ ride.ride_leader }}{% endif %}
+                  </div>
+                </div>
+                <div class="ride-row-right">
+                  {% if w %}
+                  <div class="list-weather sev-{{ w.severity }}">
+                    <span class="lw-emoji">{{ w.emoji }}</span>
+                    <span class="lw-temp">{{ w.temp_f }}°F</span>
+                    <span class="lw-wind">{{ w.wind_mph }} mph</span>
+                  </div>
+                  {% endif %}
+                  <div class="ride-row-signups">
+                    <div class="signup-count">{{ ride.signup_count }}</div>
+                    <div class="signup-label">going</div>
+                  </div>
+                </div>
+              </a>
+            {% endfor %}
+          </div>
         </div>
-        <div class="ride-row-main">
-          <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
-            <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
-            {% if ride.ride_type %}<span class="badge bg-secondary fw-normal">{{ ride.ride_type | capitalize }}</span>{% endif %}
-            {% if ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>{% endif %}
-            <span class="ride-row-time">{{ ride.time.strftime('%I:%M %p') }}</span>
-            {% if w and w.warning %}<span class="weather-warn-badge">⚠️ Weather Warning</span>{% endif %}
-          </div>
-          <div class="ride-row-title">
-            {{ ride.title }}
-            {% if ride.ridewithgps_route_id %}<span class="rwgps-badge">route</span>{% endif %}
-          </div>
-          <div class="ride-row-meta">
-            {{ ride.meeting_location }} &bull; {{ ride.distance_miles }} mi
-            {% if ride.elevation_feet %}&bull; {{ ride.elevation_feet }} ft{% endif %}
-            {% if ride.ride_leader %}&bull; Leader: {{ ride.ride_leader }}{% endif %}
-          </div>
-        </div>
-        <div class="ride-row-right">
-          {% if w %}
-          <div class="list-weather sev-{{ w.severity }}">
-            <span class="lw-emoji">{{ w.emoji }}</span>
-            <span class="lw-temp">{{ w.temp_f }}°F</span>
-            <span class="lw-wind">{{ w.wind_mph }} mph</span>
-          </div>
-          {% endif %}
-          <div class="ride-row-signups">
-            <div class="signup-count">{{ ride.signup_count }}</div>
-            <div class="signup-label">going</div>
-          </div>
-        </div>
-      </a>
+      {% endif %}
     {% endfor %}
   </div>
   {% else %}

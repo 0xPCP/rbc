@@ -335,6 +335,45 @@ body {
 .signup-count { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--rbc-green); line-height: 1; }
 .signup-label { font-size: .7rem; color: var(--rbc-gray); }
 
+/* ── Multi-group ride card ───────────────────────────────────────────────── */
+.ride-group-card {
+  border: 1px solid var(--rbc-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+.ride-group-header {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: .85rem 1.25rem;
+  width: 100%;
+  background: #f8fafc;
+  border: none;
+  cursor: pointer;
+  color: inherit;
+  text-align: left;
+  transition: background .12s;
+}
+.ride-group-header:hover { background: #eef4f0; }
+.ride-group-header[aria-expanded="true"] { background: #eef4f0; }
+.ride-group-summary { flex: 1; display: flex; align-items: center; gap: .75rem; }
+.ride-group-label { font-weight: 600; font-size: .95rem; }
+.ride-group-badges { display: flex; gap: .25rem; }
+.ride-group-chevron { transition: transform .2s; }
+.ride-group-header[aria-expanded="true"] .ride-group-chevron { transform: rotate(180deg); }
+.ride-group-row {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: .85rem 1.25rem .85rem 2.25rem;
+  border-top: 1px solid var(--rbc-border);
+  text-decoration: none;
+  color: inherit;
+  transition: background .1s;
+}
+.ride-group-row:hover { background: #f4faf6; }
+
 /* ── Ride detail ─────────────────────────────────────────────────────────── */
 .detail-card {
   background: #fff;
@@ -751,6 +790,76 @@ body {
 .wtw-gear-item { font-size: .85rem; display: flex; align-items: center; gap: .4rem; }
 .wtw-gear-icon { width: 1.3em; text-align: center; flex-shrink: 0; }
 
+/* ── Ride card (club home + discover) ───────────────────────────────────── */
+.ride-card {
+  background: #fff;
+  border: 1px solid var(--rbc-border);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  transition: box-shadow .12s, border-color .12s;
+}
+.ride-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08); border-color: var(--rbc-green-light); }
+.ride-cancelled { opacity: .65; }
+
+.ride-date-block {
+  text-align: center;
+  min-width: 44px;
+  flex-shrink: 0;
+}
+.rdb-month {
+  font-size: .7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--rbc-green);
+}
+.rdb-day {
+  font-family: 'Barlow Condensed', sans-serif;
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--rbc-dark);
+  line-height: 1;
+}
+
+.ride-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--rbc-dark);
+  text-decoration: none;
+  display: block;
+  margin-bottom: .15rem;
+}
+.ride-title:hover { color: var(--rbc-green); }
+
+.ride-meta { font-size: .82rem; color: var(--rbc-gray); }
+
+/* ── Ride comment thread ─────────────────────────────────────────────────── */
+.comment-thread { border-top: 1px solid var(--rbc-border); padding-top: 1rem; margin-top: 1rem; }
+.comment-item {
+  display: flex;
+  gap: .75rem;
+  padding: .6rem 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+.comment-item:last-of-type { border-bottom: none; }
+.comment-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--rbc-green);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: .8rem;
+  flex-shrink: 0;
+}
+.comment-body { flex: 1; min-width: 0; }
+.comment-author { font-weight: 600; font-size: .85rem; }
+.comment-time { font-size: .75rem; color: var(--rbc-gray); margin-left: .4rem; }
+.comment-text { font-size: .9rem; margin-top: .15rem; word-break: break-word; white-space: pre-line; }
+
 /* ── Club banner / theming ───────────────────────────────────────────────── */
 .club-banner { min-height: 160px; }
 .club-banner-overlay {
@@ -807,4 +916,18 @@ a:hover { color: var(--rbc-green-dark); }
 
   /* Auth card: reduce padding on small screens */
   .auth-card { padding: 1.5rem 1.25rem; }
+
+  /* Ride cards: tighter padding, keep date block compact */
+  .ride-card { padding: .75rem 1rem; }
+  .rdb-day { font-size: 1.6rem; }
+
+  /* Discover filter bar: stack vertically */
+  .discover-filters .d-flex { flex-wrap: wrap; gap: .4rem; }
+  .discover-filters .pace-filter { gap: .35rem; }
+
+  /* Ride comment thread: tighter */
+  .comment-avatar { width: 28px; height: 28px; font-size: .75rem; }
+
+  /* Superadmin stats: already 2-col, just reduce font */
+  .admin-stat-num { font-size: 1.8rem; }
 }

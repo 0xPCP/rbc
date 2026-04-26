@@ -1,0 +1,22 @@
+{% extends "email/_base.html" %}
+{% block body %}
+<div class="club-tag">{{ invite.club.name }}</div>
+<h1>You've been invited to join {{ invite.club.name }}!</h1>
+
+<p style="font-size:.9rem;color:#495057;margin-bottom:20px">
+  You've been personally invited to join <strong>{{ invite.club.name }}</strong>
+  on Cycling Clubs. Click the button below to accept your invite and get immediate
+  active membership.
+</p>
+
+<p style="font-size:.85rem;color:#6c757d;margin-bottom:24px">
+  This invite is valid for 7 days and can only be used once.
+</p>
+
+<a href="{{ claim_url }}" class="cta">Accept Invite &amp; Join Club</a>
+
+<p style="font-size:.8rem;color:#aaa;margin-top:24px">
+  If the button doesn't work, copy and paste this link into your browser:<br>
+  <a href="{{ claim_url }}" style="color:#2d6a4f">{{ claim_url }}</a>
+</p>
+{% endblock %}

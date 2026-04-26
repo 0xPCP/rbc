@@ -110,6 +110,39 @@ def send_weekly_digests(app):
         logger.info('Weekly digest job: processed %d club(s)', len(clubs))
 
 
+def purge_expired_media(app):
+    """
+    Delete ride media (photos + video links) for rides older than MEDIA_EXPIRY_DAYS.
+    Runs nightly. Removes both DB records and files from disk.
+    """
+    import os
+    from datetime import timedelta
+    with app.app_context():
+        from .extensions import db
+        from .models import RideMedia, Ride
+        expiry_days = app.config.get('MEDIA_EXPIRY_DAYS', 90)
+        upload_folder = app.config.get('UPLOAD_FOLDER', '')
+        cutoff = date.today() - timedelta(days=expiry_days)
+        expired = (RideMedia.query
+                   .join(Ride, RideMedia.ride_id == Ride.id)
+                   .filter(Ride.date < cutoff)
+                   .all())
+        deleted_files = 0
+        for item in expired:
+            if item.file_path and upload_folder:
+                full = os.path.join(upload_folder, item.file_path)
+                try:
+                    os.remove(full)
+                    deleted_files += 1
+                except OSError:
+                    pass
+            db.session.delete(item)
+        db.session.commit()
+        if expired:
+            logger.info('Media purge: removed %d records (%d files) older than %d days',
+                        len(expired), deleted_files, expiry_days)
+
+
 def init_scheduler(app):
     """Start the APScheduler background scheduler if AUTO_CANCEL_ENABLED config is set."""
     if not app.config.get('AUTO_CANCEL_ENABLED', True):
@@ -148,6 +181,15 @@ def init_scheduler(app):
         args=[app],
         id='weekly_digest',
         name='Sunday weekly ride digest',
+        replace_existing=True,
+        misfire_grace_time=3600,
+    )
+    scheduler.add_job(
+        func=purge_expired_media,
+        trigger=CronTrigger(hour=2, minute=30),
+        args=[app],
+        id='media_purge',
+        name='Purge expired ride media',
         replace_existing=True,
         misfire_grace_time=3600,
     )

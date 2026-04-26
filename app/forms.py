@@ -1,4 +1,5 @@
 from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
 from wtforms import (
     StringField, PasswordField, BooleanField, SubmitField,
     TextAreaField, SelectField, FloatField, IntegerField, DateField, TimeField
@@ -130,6 +131,32 @@ class ClubSponsorForm(FlaskForm):
     website       = StringField('Website', validators=[Optional(), URL(), Length(max=500)])
     display_order = IntegerField('Display Order', validators=[Optional(), NumberRange(min=0)], default=0)
     submit        = SubmitField('Save Sponsor')
+
+
+class RidePhotoUploadForm(FlaskForm):
+    photo = FileField('Photo', validators=[
+        FileAllowed(['jpg', 'jpeg', 'png', 'webp'], 'Images only (JPEG, PNG, WebP)'),
+    ])
+    caption = StringField('Caption', validators=[Optional(), Length(max=300)])
+    submit = SubmitField('Upload Photo')
+
+
+class RideVideoLinkForm(FlaskForm):
+    url = StringField('Video URL (YouTube, Strava, Vimeo)', validators=[
+        DataRequired(), URL(), Length(max=500),
+    ])
+    caption = StringField('Caption', validators=[Optional(), Length(max=300)])
+    submit = SubmitField('Share Video')
+
+
+class RideCommentForm(FlaskForm):
+    body = TextAreaField('Comment', validators=[DataRequired(), Length(max=2000)])
+    submit = SubmitField('Post Comment')
+
+
+class ClubInviteForm(FlaskForm):
+    email = StringField('Email Address', validators=[DataRequired(), Email(), Length(max=255)])
+    submit = SubmitField('Send Invite')
 
 
 class RideForm(FlaskForm):

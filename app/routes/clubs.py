@@ -6,11 +6,11 @@ from flask_login import login_required, current_user
 from sqlalchemy.exc import IntegrityError
 import requests as http_requests
 from ..extensions import db
-from ..models import Club, ClubAdmin, ClubMembership, Ride
+from ..models import Club, ClubAdmin, ClubMembership, Ride, RideComment, ClubInvite
 from ..weather import get_weather_for_rides
 from ..geocoding import clubs_near_zip
 from .strava import get_club_activities
-from ..forms import ClubCreateForm
+from ..forms import ClubCreateForm, RideCommentForm
 from ..geocoding import geocode_zip
 
 clubs_bp = Blueprint('clubs', __name__)
@@ -241,7 +241,13 @@ def _list_view(club):
         query = query.filter(Ride.ride_type == ride_type)
     rides = query.all()
     weather = get_weather_for_rides(rides)
+    # Group by date so same-day rides render as a collapsible multi-group card
+    from collections import OrderedDict
+    ride_groups = OrderedDict()
+    for r in rides:
+        ride_groups.setdefault(r.date, []).append(r)
     return render_template('clubs/calendar_list.html', club=club, rides=rides,
+                           ride_groups=ride_groups,
                            active_pace=pace, active_type=ride_type,
                            ride_types=RIDE_TYPES, weather=weather, today=today, view='list')
 
@@ -361,13 +367,18 @@ def ride_detail(slug, ride_id):
             show_route = False
 
     weather = get_weather_for_rides([ride])
+    comment_form = RideCommentForm() if current_user.is_authenticated else None
+    from flask import current_app
     return render_template('clubs/ride_detail.html', club=club, ride=ride,
                            user_signed_up=user_signed_up,
                            user_waitlisted=user_waitlisted,
                            waiver_required=waiver_required,
                            membership_required=membership_required,
                            show_route=show_route,
-                           ride_weather=weather.get(ride.id))
+                           ride_weather=weather.get(ride.id),
+                           comment_form=comment_form,
+                           media_expiry_days=current_app.config.get('MEDIA_EXPIRY_DAYS', 90),
+                           media_max_per_user=current_app.config.get('MEDIA_MAX_PHOTOS_PER_USER_RIDE', 5))
 
 
 @clubs_bp.route('/<slug>/rides/<int:ride_id>/ics')
@@ -582,3 +593,76 @@ def waiver(slug):
     already_signed = current_user.has_signed_waiver(club)
     return render_template('clubs/waiver.html', club=club, waiver=waiver_obj,
                            already_signed=already_signed, next_url=next_url)
+
+
+# ── Ride comments ─────────────────────────────────────────────────────────────
+
+@clubs_bp.route('/<slug>/rides/<int:ride_id>/comments', methods=['POST'])
+@login_required
+def ride_comment_post(slug, ride_id):
+    club = _get_club_or_404(slug)
+    ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
+    if club.is_private and not current_user.is_active_member_of(club):
+        abort(403)
+    form = RideCommentForm()
+    if form.validate_on_submit():
+        comment = RideComment(
+            ride_id=ride.id,
+            user_id=current_user.id,
+            body=form.body.data.strip(),
+        )
+        db.session.add(comment)
+        db.session.commit()
+        flash('Comment posted.', 'success')
+    return redirect(url_for('clubs.ride_detail', slug=slug, ride_id=ride_id) + '#comments')
+
+
+@clubs_bp.route('/<slug>/rides/<int:ride_id>/comments/<int:comment_id>/delete', methods=['POST'])
+@login_required
+def ride_comment_delete(slug, ride_id, comment_id):
+    club = _get_club_or_404(slug)
+    ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
+    comment = RideComment.query.filter_by(id=comment_id, ride_id=ride.id).first_or_404()
+    if comment.user_id != current_user.id and not current_user.can_manage_rides(club):
+        abort(403)
+    db.session.delete(comment)
+    db.session.commit()
+    flash('Comment deleted.', 'info')
+    return redirect(url_for('clubs.ride_detail', slug=slug, ride_id=ride_id) + '#comments')
+
+
+# ── Invite claim ──────────────────────────────────────────────────────────────
+
+@clubs_bp.route('/invites/<token>')
+def invite_claim(token):
+    from ..models import ClubMembership
+    invite = ClubInvite.query.filter_by(token=token).first_or_404()
+    if invite.used_at:
+        flash('This invite link has already been used.', 'warning')
+        return redirect(url_for('clubs.home', slug=invite.club.slug))
+    if invite.expires_at.replace(tzinfo=None) < datetime.utcnow():
+        flash('This invite link has expired.', 'warning')
+        return redirect(url_for('clubs.home', slug=invite.club.slug))
+
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login', next=url_for('clubs.invite_claim', token=token)))
+
+    club = invite.club
+    existing = ClubMembership.query.filter_by(user_id=current_user.id, club_id=club.id).first()
+    if existing:
+        if existing.status != 'active':
+            existing.status = 'active'
+            db.session.commit()
+        flash(f"You're now an active member of {club.name}!", 'success')
+    else:
+        db.session.add(ClubMembership(
+            user_id=current_user.id,
+            club_id=club.id,
+            status='active',
+        ))
+        invite.used_at = datetime.utcnow()
+        invite.used_by_user_id = current_user.id
+        db.session.commit()
+        flash(f"Welcome to {club.name}! Your membership is active.", 'success')
+
+    return redirect(url_for('clubs.home', slug=club.slug))

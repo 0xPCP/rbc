@@ -1,14 +1,14 @@
 from functools import wraps
-from datetime import date
+from datetime import date, datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
 from flask_login import login_required, current_user
 from ..extensions import db
-from ..models import Club, Ride, RideSignup, User, ClubMembership, ClubAdmin, ClubPost, ClubLeader, ClubSponsor
-from ..forms import RideForm, ClubForm, ClubSettingsForm, ClubPostForm, ClubLeaderForm, ClubSponsorForm
+from ..models import Club, Ride, RideSignup, User, ClubMembership, ClubAdmin, ClubPost, ClubLeader, ClubSponsor, ClubInvite
+from ..forms import RideForm, ClubForm, ClubSettingsForm, ClubPostForm, ClubLeaderForm, ClubSponsorForm, ClubInviteForm
 from ..recurrence import generate_instances, delete_future_instances
 from ..geocoding import geocode_zip
 from ..email import (send_cancellation_emails, send_new_ride_notification,
-                     send_membership_approved, send_membership_rejected)
+                     send_membership_approved, send_membership_rejected, send_invite_email)
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -99,14 +99,28 @@ def club_member_view_required(f):
 @admin_bp.route('/')
 @superadmin_required
 def dashboard():
+    from sqlalchemy import func
     today = date.today()
+    total_miles = (db.session.query(func.sum(Ride.distance_miles))
+                   .filter(Ride.is_cancelled == False).scalar() or 0)
+    new_users_30d = User.query.filter(
+        User.created_at >= datetime.combine(today - timedelta(days=30), datetime.min.time())
+    ).count()
     stats = {
-        'total_clubs':   Club.query.count(),
-        'total_members': User.query.count(),
-        'upcoming_rides': Ride.query.filter(Ride.date >= today).count(),
+        'total_clubs':    Club.query.filter_by(is_active=True).count(),
+        'inactive_clubs': Club.query.filter_by(is_active=False).count(),
+        'total_members':  User.query.count(),
+        'new_users_30d':  new_users_30d,
+        'upcoming_rides': Ride.query.filter(Ride.date >= today, Ride.is_cancelled == False).count(),
         'total_signups':  RideSignup.query.count(),
+        'total_miles':    round(total_miles),
     }
-    clubs = Club.query.order_by(Club.name.asc()).all()
+    # Enrich clubs with upcoming ride count
+    clubs_raw = Club.query.order_by(Club.name.asc()).all()
+    clubs = []
+    for club in clubs_raw:
+        upcoming = Ride.query.filter_by(club_id=club.id, is_cancelled=False).filter(Ride.date >= today).count()
+        clubs.append({'club': club, 'upcoming': upcoming})
     return render_template('admin/dashboard.html', stats=stats, clubs=clubs)
 
 
@@ -268,7 +282,24 @@ def ride_roster(slug, ride_id):
     active = [s for s in ride.signups if not s.is_waitlist]
     waitlist = [s for s in ride.signups if s.is_waitlist]
     return render_template('admin/ride_roster.html', club=club, ride=ride,
-                           active=active, waitlist=waitlist)
+                           active=active, waitlist=waitlist, today=date.today())
+
+
+@admin_bp.route('/clubs/<slug>/rides/<int:ride_id>/attendance', methods=['POST'])
+@club_ride_admin_required
+def ride_attendance(slug, ride_id):
+    club = _get_club_or_404(slug)
+    ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
+    if ride.date >= date.today():
+        flash('Attendance can only be recorded after the ride has taken place.', 'warning')
+        return redirect(url_for('admin.ride_roster', slug=slug, ride_id=ride_id))
+    active = [s for s in ride.signups if not s.is_waitlist]
+    attended_ids = set(request.form.getlist('attended', type=int))
+    for signup in active:
+        signup.attended = signup.id in attended_ids
+    db.session.commit()
+    flash('Attendance saved.', 'success')
+    return redirect(url_for('admin.ride_roster', slug=slug, ride_id=ride_id))
 
 
 def _resolve_leader(club):
@@ -678,3 +709,33 @@ def sponsor_delete(slug, sponsor_id):
     db.session.commit()
     flash('Sponsor removed.', 'info')
     return redirect(url_for('admin.club_sponsors', slug=slug))
+
+
+# ── Invites ───────────────────────────────────────────────────────────────────
+
+@admin_bp.route('/clubs/<slug>/invites', methods=['GET', 'POST'])
+@club_admin_required
+def club_invites(slug):
+    import secrets
+    from datetime import datetime, timezone, timedelta
+    club = _get_club_or_404(slug)
+    form = ClubInviteForm()
+    if form.validate_on_submit():
+        token = secrets.token_urlsafe(32)
+        invite = ClubInvite(
+            club_id=club.id,
+            email=form.email.data.strip().lower(),
+            token=token,
+            expires_at=datetime.utcnow() + timedelta(days=7),
+            created_by=current_user.id,
+        )
+        db.session.add(invite)
+        db.session.commit()
+        send_invite_email(invite)
+        flash(f'Invite sent to {invite.email}.', 'success')
+        return redirect(url_for('admin.club_invites', slug=slug))
+    invites = (ClubInvite.query.filter_by(club_id=club.id)
+               .order_by(ClubInvite.id.desc()).limit(50).all())
+    now = datetime.utcnow()
+    return render_template('admin/club_invites.html', club=club, form=form, invites=invites, now=now)
+

@@ -24,3 +24,14 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD', '')
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@cyclingclubs.app')
     MAIL_SUPPRESS_SEND = not bool(os.environ.get('MAIL_SERVER', ''))
+
+    # Media uploads — see docs/media_strategy.md for rationale and update guidance
+    UPLOAD_FOLDER = os.environ.get(
+        'UPLOAD_FOLDER',
+        os.path.join(os.path.dirname(__file__), '..', 'uploads'),
+    )
+    MAX_CONTENT_LENGTH = 5 * 1024 * 1024          # 5 MB hard Flask limit (pre-Pillow)
+    MEDIA_EXPIRY_DAYS = int(os.environ.get('MEDIA_EXPIRY_DAYS', 90))
+    MEDIA_MAX_PHOTOS_PER_USER_RIDE = int(os.environ.get('MEDIA_MAX_PHOTOS_PER_USER_RIDE', 5))
+    MEDIA_MAX_PHOTOS_PER_RIDE = int(os.environ.get('MEDIA_MAX_PHOTOS_PER_RIDE', 30))
+    MEDIA_MAX_WIDTH_PX = int(os.environ.get('MEDIA_MAX_WIDTH_PX', 1200))

@@ -111,6 +111,17 @@ def send_waitlist_promoted(signup):
     logger.info('Waitlist promotion email sent to %s for ride %d', user.email, ride.id)
 
 
+def send_invite_email(invite):
+    """Send a club membership invite to the specified email address."""
+    from flask import url_for
+    claim_url = url_for('clubs.invite_claim', token=invite.token, _external=True)
+    html = render_template('email/invite.html', invite=invite, claim_url=claim_url)
+    text = render_template('email/invite.txt', invite=invite, claim_url=claim_url)
+    subject = f"You're invited to join {invite.club.name}"
+    _send(subject, [invite.email], html, text)
+    logger.info('Invite email sent to %s for club %d', invite.email, invite.club_id)
+
+
 def send_weekly_digest(club, rides):
     """
     Send the Sunday weekly digest to all active club members.

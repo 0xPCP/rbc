@@ -94,6 +94,20 @@ This catches Cloudflare Access intercepts, JS runtime errors, CDN failures, and 
 - All clubs are discoverable on the map + Find Clubs regardless of privacy settings
 - `User.is_active_member_of(club)` and `User.is_pending_member_of(club)` are the authoritative checks
 
+## Post-ride media sharing
+
+Photos and video links can be shared by members after a ride. Key constraints:
+
+- **Videos:** External links only (YouTube, Strava, Vimeo) — no server-side video storage or transcoding.
+- **Photos:** JPEG/PNG/WebP, ≤5 MB input, Pillow-resized to 1200 px wide, stored at `uploads/ride_media/<ride_id>/`.
+- **Limits:** `MEDIA_MAX_PHOTOS_PER_USER_RIDE` (default 5), `MEDIA_MAX_PHOTOS_PER_RIDE` (default 30).
+- **Expiry:** `MEDIA_EXPIRY_DAYS` (default 90) — scheduler job at 02:30 deletes old files + DB rows.
+- **Visibility:** Upload forms only appear after `ride.date`. Private-club photos require active membership to serve.
+- **Full strategy, storage estimates, and migration guide to Cloudflare R2:** `docs/media_strategy.md`
+
+Blueprint: `app/routes/media.py`. Model: `RideMedia` in `app/models.py`.
+All limits are env-var overridable — edit `.env`, no code change needed.
+
 ## WTForms gotcha
 
 `BooleanField` treats any non-empty string (including `'0'`) as `True`. For boolean form fields driven by JS hidden inputs, read directly: `request.form.get('field') == '1'`.
