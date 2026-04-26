@@ -128,7 +128,6 @@ def club_new():
             state=form.state.data or None,
             zip_code=form.zip_code.data or None,
             address=form.address.data or None,
-            website=form.website.data or None,
             contact_email=form.contact_email.data or None,
             logo_url=form.logo_url.data or None,
             is_active=form.is_active.data,
@@ -181,7 +180,6 @@ def club_settings(slug):
         club.city         = form.city.data or None
         club.state        = form.state.data or None
         club.address      = form.address.data or None
-        club.website      = form.website.data or None
         club.contact_email = form.contact_email.data or None
         club.logo_url     = form.logo_url.data or None
 

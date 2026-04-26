@@ -67,17 +67,10 @@
           {% for e in form.address.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
         </div>
 
-        <div class="row g-3 mb-3">
-          <div class="col-sm-6">
-            {{ form.website.label(class="form-label") }}
-            {{ form.website(class="form-control" + (" is-invalid" if form.website.errors else ""), placeholder="https://example.com") }}
-            {% for e in form.website.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
-          </div>
-          <div class="col-sm-6">
-            {{ form.contact_email.label(class="form-label") }}
-            {{ form.contact_email(class="form-control" + (" is-invalid" if form.contact_email.errors else ""), placeholder="info@club.com") }}
-            {% for e in form.contact_email.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
-          </div>
+        <div class="mb-3">
+          {{ form.contact_email.label(class="form-label") }}
+          {{ form.contact_email(class="form-control" + (" is-invalid" if form.contact_email.errors else ""), placeholder="info@club.com") }}
+          {% for e in form.contact_email.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
         </div>
 
         <div class="mb-3">

@@ -207,16 +207,11 @@
         </div>
       </div>
 
-      {% if club.contact_email or club.website %}
+      {% if club.contact_email %}
       <div class="card border-0 shadow-sm mb-3">
         <div class="card-body">
           <h6 class="card-title">Contact</h6>
-          {% if club.contact_email %}
-          <p class="mb-1 small"><a href="mailto:{{ club.contact_email }}">{{ club.contact_email }}</a></p>
-          {% endif %}
-          {% if club.website %}
-          <p class="mb-0 small"><a href="{{ club.website }}" target="_blank" rel="noopener">{{ club.website }}</a></p>
-          {% endif %}
+          <p class="mb-0 small"><a href="mailto:{{ club.contact_email }}">{{ club.contact_email }}</a></p>
         </div>
       </div>
       {% endif %}

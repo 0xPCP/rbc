@@ -38,7 +38,6 @@ class ClubForm(FlaskForm):
     state       = StringField('State', validators=[Optional(), Length(max=50)])
     zip_code    = StringField('Zip Code', validators=[Optional(), Length(max=10)])
     address     = StringField('Address', validators=[Optional(), Length(max=500)])
-    website     = StringField('Website', validators=[Optional(), URL(), Length(max=500)])
     contact_email = StringField('Contact Email', validators=[Optional(), Email(), Length(max=255)])
     logo_url    = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
     is_active   = BooleanField('Active (visible to users)', default=True)
@@ -53,7 +52,6 @@ class ClubSettingsForm(FlaskForm):
     state       = StringField('State', validators=[Optional(), Length(max=50)])
     zip_code    = StringField('Zip Code', validators=[Optional(), Length(max=10)])
     address     = StringField('Address', validators=[Optional(), Length(max=500)])
-    website     = StringField('Website', validators=[Optional(), URL(), Length(max=500)])
     contact_email = StringField('Contact Email', validators=[Optional(), Email(), Length(max=255)])
     logo_url    = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
     # Appearance / theming
@@ -107,7 +105,6 @@ class ClubCreateForm(FlaskForm):
     ])
     description   = TextAreaField('Description', validators=[Optional()])
     contact_email = StringField('Contact Email', validators=[Optional(), Email(), Length(max=255)])
-    website       = StringField('Website URL', validators=[Optional(), URL(), Length(max=500)])
     logo_url      = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
     banner_url    = StringField('Banner Image URL', validators=[Optional(), URL(), Length(max=500)])
     submit        = SubmitField('Create Club')

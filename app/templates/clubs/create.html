@@ -288,11 +288,6 @@
               <input type="email" name="contact_email" class="form-control"
                      placeholder="rides@yourclub.org" value="{{ form.contact_email.data or '' }}">
             </div>
-            <div class="col-md-6">
-              <label class="form-label fw-semibold">Website</label>
-              <input type="url" name="website" class="form-control"
-                     placeholder="https://yourclub.org" value="{{ form.website.data or '' }}">
-            </div>
           </div>
           <div class="row g-3">
             <div class="col-md-6">
@@ -451,7 +446,6 @@
     const accent      = document.getElementById('f-theme-accent').value;
     const desc        = document.querySelector('[name=description]').value.trim();
     const email       = document.querySelector('[name=contact_email]').value.trim();
-    const website     = document.querySelector('[name=website]').value.trim();
 
     const presetLabel = presetId === 'custom'
       ? 'Custom'
@@ -469,7 +463,6 @@
       ['Theme',      `${presetLabel} ${swatchHtml}`],
       ['Description', desc || '<em class="text-muted">None</em>'],
       ['Contact',    email || '<em class="text-muted">None</em>'],
-      ['Website',    website || '<em class="text-muted">None</em>'],
     ];
 
     document.getElementById('review-content').innerHTML = rows.map(([label, value]) => `

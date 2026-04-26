@@ -129,37 +129,37 @@ and platforms (ClubExpress, RideStats, RideWithGPS for Clubs).
 - Moved to `backlog.md` — requires Stripe account configuration
 
 ### Admin tooling
-- [ ] CSV export — member list (name, email, join date, status) downloadable by admin
-- [ ] Emergency contact on member profile — name + phone; visible to ride leaders on ride day
-- [ ] Ride leader assignment from member roster (stored on `Ride.leader_id`)
-- [ ] Write tests for CSV export and emergency contact visibility
+- [x] CSV export — member list (name, email, join date, status) downloadable by admin
+- [x] Emergency contact on member profile — name + phone; visible to ride leaders on ride day
+- [x] Ride leader assignment from member roster (stored on `Ride.leader_id`)
+- [x] Write tests for CSV export and emergency contact visibility
 
 ---
 
 ## Backlog — Medium Priority
 
 ### Club page & content
-- [ ] Club news / announcements — admin-authored posts with title, body, published date; listed on club home
-- [ ] Club stats block on public page: founded year, member count, total rides hosted, total miles
-- [ ] Ride leader roster (public): name, bio, photo per leader
-- [ ] Sponsor / partner logos section on club home page
-- [ ] Write tests for news CRUD and stats rendering
+- [x] Club news / announcements — admin-authored posts with title, body, published date; listed on club home
+- [x] Club stats block on public page: founded year, member count, total rides hosted, total miles
+- [x] Ride leader roster (public): name, bio, photo per leader
+- [x] Sponsor / partner logos section on club home page
+- [x] Write tests for news CRUD and stats rendering
 
 ### User profile & history
-- [ ] Emergency contact field on user profile (name + phone) — opt-in; visible to ride leaders
-- [ ] Ride history page — "You've completed 47 rides this year across 3 clubs"
-- [ ] Personal stats: miles and elevation YTD across all joined clubs
-- [ ] Write tests for history aggregation
+- [x] Emergency contact field on user profile (name + phone) — opt-in; visible to ride leaders
+- [x] Ride history page — "You've completed 47 rides this year across 3 clubs"
+- [x] Personal stats: miles and elevation YTD across all joined clubs
+- [x] Write tests for history aggregation
 
 ### Ride discovery (cross-club)
-- [ ] "All rides near my zip this weekend" — discovery page showing rides from all clubs near zip
-- [ ] Filter by pace category, distance, date across all clubs
-- [ ] Write tests for cross-club ride discovery query
+- [x] "All rides near my zip this weekend" — discovery page showing rides from all clubs near zip
+- [x] Filter by pace category, distance, date across all clubs
+- [x] Write tests for cross-club ride discovery query
 
 ### Roles expansion
-- [ ] `content_editor` role — can manage news posts and club description only (no rides or settings)
-- [ ] `treasurer` role — can view/export financial data; cannot edit settings or rides
-- [ ] Write tests for new role access control
+- [x] `content_editor` role — can manage news posts and club description only (no rides or settings)
+- [x] `treasurer` role — can view/export financial data; cannot edit settings or rides
+- [x] Write tests for new role access control
 
 ### Invite-by-email
 - [ ] Admin sends invite link (time-limited token); recipient gets immediate active membership on click
@@ -177,8 +177,6 @@ and platforms (ClubExpress, RideStats, RideWithGPS for Clubs).
 - [ ] Early bird / tiered pricing; promo codes
 
 ### Member engagement
-- [ ] Club challenge — admin creates a mileage/elevation goal ("5,000 club miles in 2025")
-- [ ] Progress bar + leaderboard for challenge
 - [ ] Attendance history for ride leaders (who showed up, who didn't)
 - [ ] "Most rides" / "Most miles" club awards (annual)
 
@@ -189,14 +187,13 @@ and platforms (ClubExpress, RideStats, RideWithGPS for Clubs).
 - [ ] Minor / youth waiver requiring parent signature (email link flow)
 
 ### Platform
-- [ ] Public JSON feed per club — `/api/clubs/<slug>/rides.json` for embedding calendar on external site
 - [ ] Platform-level superadmin dashboard — all clubs, all stats
 - [ ] Webhook: notify external systems on ride create/cancel/update
 - [ ] Custom domain: map clubname.com to their platform page (Cloudflare Worker / CNAME)
 
 ### OAuth & social
 - OAuth login moved to `backlog.md` — requires Google/Microsoft app registration
-- [ ] Post-ride summary email to participants ("16 riders completed Tuesday Worlds, avg 22.4 mph")
+- [ ] Post-ride media sharing — members share photos/videos after a ride; ride detail page shows a media feed
 - Real-time ride tracking moved to `backlog.md` — requires architecture + privacy review
 
 ### UX polish

@@ -148,7 +148,6 @@ def create():
             theme_accent  = accent,
             description   = form.description.data or None,
             contact_email = form.contact_email.data or None,
-            website       = form.website.data or None,
             logo_url      = form.logo_url.data or None,
             banner_url    = form.banner_url.data or None,
         )
