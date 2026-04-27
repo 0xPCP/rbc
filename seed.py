@@ -58,6 +58,7 @@ with app.app_context():
         ),
         website='https://restonbikeclub.org',
         contact_email='info@restonbikeclub.org',
+        banner_url='https://images.unsplash.com/photo-1541625602330-2277a4c46182?w=1400&q=80',
         address='Hunterwoods Shopping Center, 2324 Hunter Mill Rd',
         city='Reston', state='VA', zip_code='20191',
         lat=38.9376, lng=-77.3476,
@@ -82,6 +83,7 @@ with app.app_context():
             'Known for challenging Saturday hammerfests and weeknight criterium training.'
         ),
         website='https://example.com/nvcc',
+        banner_url='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1400&q=80',
         contact_email='info@nvcc.dev',
         address='McLean Community Center, 1234 Ingleside Ave',
         city='McLean', state='VA', zip_code='22101',
@@ -102,6 +104,7 @@ with app.app_context():
             'Supportive, no-drop rides for all fitness levels plus structured training for racers.'
         ),
         website='https://example.com/artemis',
+        banner_url='https://images.unsplash.com/photo-1571188654248-7a89213915f7?w=1400&q=80',
         contact_email='info@artemis.dev',
         address='Ballston Common, 4238 Wilson Blvd',
         city='Arlington', state='VA', zip_code='22203',

@@ -156,7 +156,7 @@ body {
   background: #fff;
   border-bottom: 2px solid var(--rbc-border);
   position: sticky;
-  top: 46px;
+  top: 0;
   z-index: 100;
   transition: box-shadow .15s;
 }
@@ -1100,7 +1100,7 @@ a:hover { color: var(--rbc-green-dark); }
 
   /* Tab bar: tighter tabs */
   .club-tab { padding: .7rem .9rem; font-size: .95rem; }
-  .club-tab-bar { top: 44px; }
+  .club-tab-bar { top: 0; }
 
   /* Stats band: 2×2 grid, add border between rows */
   .club-stat-item { padding: .9rem .5rem; }
