@@ -1,5 +1,7 @@
 """Tests for the Leaflet club map page and /api/clubs/map-data endpoint."""
+import json
 import pytest
+from datetime import date, time, timedelta
 from tests.conftest import login
 
 
@@ -93,3 +95,119 @@ def test_map_data_upcoming_count(client, sample_club, sample_rides):
     assert len(data) == 1
     # sample_rides has 2 non-cancelled future rides
     assert data[0]['upcoming'] == 2
+
+
+# ── Rides-this-week layer ─────────────────────────────────────────────────────
+
+def _make_club_ride(db, club, days_ahead=2, cancelled=False, title='Test Ride'):
+    """Create a club ride N days from today."""
+    from app.models import Ride
+    ride = Ride(
+        club_id=club.id,
+        title=title,
+        date=date.today() + timedelta(days=days_ahead),
+        time=time(7, 0),
+        meeting_location='Secret Parking Lot',
+        distance_miles=30.0,
+        pace_category='B',
+        ride_type='road',
+        is_cancelled=cancelled,
+    )
+    db.session.add(ride)
+    db.session.commit()
+    return ride
+
+
+def test_map_rides_hidden_from_anonymous(client, db, sample_club):
+    """Unauthenticated visitors get an empty rides array."""
+    _make_club_ride(db, sample_club)
+    resp = client.get('/clubs/map/')
+    assert resp.status_code == 200
+    # The rides JSON embedded in the page should be an empty list
+    assert b'"rides": []' in resp.data or b'const rides = []' in resp.data
+
+
+def test_map_rides_visible_for_authenticated(client, db, sample_club, regular_user):
+    """Logged-in users see upcoming club rides embedded in the map page."""
+    ride = _make_club_ride(db, sample_club, title='Morning B Ride')
+    login(client)
+    resp = client.get('/clubs/map/')
+    assert resp.status_code == 200
+    assert b'Morning B Ride' in resp.data
+
+
+def test_map_rides_excludes_personal_rides(client, db, sample_club, regular_user):
+    """User-owned (non-club) rides are not included in the rides layer."""
+    from app.models import Ride
+    personal = Ride(
+        owner_id=regular_user.id,
+        title='My Personal Ride',
+        date=date.today() + timedelta(days=1),
+        time=time(8, 0),
+        meeting_location='My House',
+        distance_miles=20.0,
+        pace_category='B',
+        ride_type='road',
+    )
+    db.session.add(personal)
+    db.session.commit()
+    login(client)
+    resp = client.get('/clubs/map/')
+    assert resp.status_code == 200
+    assert b'My Personal Ride' not in resp.data
+
+
+def test_map_rides_excludes_cancelled(client, db, sample_club, regular_user):
+    """Cancelled club rides are not shown."""
+    _make_club_ride(db, sample_club, title='Cancelled Ride', cancelled=True)
+    login(client)
+    resp = client.get('/clubs/map/')
+    assert resp.status_code == 200
+    assert b'Cancelled Ride' not in resp.data
+
+
+def test_map_rides_excludes_past_rides(client, db, sample_club, regular_user):
+    """Rides that already happened are not shown."""
+    _make_club_ride(db, sample_club, days_ahead=-1, title='Yesterday Ride')
+    login(client)
+    resp = client.get('/clubs/map/')
+    assert resp.status_code == 200
+    assert b'Yesterday Ride' not in resp.data
+
+
+def test_map_rides_excludes_beyond_week(client, db, sample_club, regular_user):
+    """Rides more than 7 days out are not shown."""
+    _make_club_ride(db, sample_club, days_ahead=8, title='Future Ride')
+    login(client)
+    resp = client.get('/clubs/map/')
+    assert resp.status_code == 200
+    assert b'Future Ride' not in resp.data
+
+
+def test_map_rides_excludes_ungeocoded_club(client, db, sample_club, regular_user):
+    """Rides whose club has no lat/lng are omitted (no map pin possible)."""
+    sample_club.lat = None
+    sample_club.lng = None
+    db.session.commit()
+    _make_club_ride(db, sample_club, title='No Coords Ride')
+    login(client)
+    resp = client.get('/clubs/map/')
+    assert resp.status_code == 200
+    assert b'No Coords Ride' not in resp.data
+
+
+def test_map_rides_meeting_location_not_exposed(client, db, sample_club, regular_user):
+    """The specific meeting address is never embedded in the page data."""
+    _make_club_ride(db, sample_club)  # meeting_location='Secret Parking Lot'
+    login(client)
+    resp = client.get('/clubs/map/')
+    assert resp.status_code == 200
+    assert b'Secret Parking Lot' not in resp.data
+
+
+def test_map_rides_sign_in_prompt_for_anonymous(client, db, sample_club):
+    """Anonymous visitors see a sign-in link instead of a rides toggle button."""
+    resp = client.get('/clubs/map/')
+    assert resp.status_code == 200
+    assert b'auth/login' in resp.data
+    assert b'Rides This Week' in resp.data

@@ -74,9 +74,14 @@ def index():
 @clubs_bp.route('/map/')
 def club_map():
     today = date.today()
-    clubs = Club.query.filter_by(is_active=True).order_by(Club.name.asc()).all()
-    features = []
-    for club in clubs:
+    week_end = today + timedelta(days=7)
+
+    clubs_qs = Club.query.filter_by(is_active=True).order_by(Club.name.asc()).all()
+
+    # Build club feature list and an id→geo lookup for ride anchoring
+    geocoded = {}
+    club_features = []
+    for club in clubs_qs:
         if club.lat is None or club.lng is None:
             continue
         upcoming_count = (Ride.query
@@ -84,7 +89,7 @@ def club_map():
                           .filter(Ride.date >= today).count())
         is_member = (current_user.is_authenticated and
                      current_user.is_member_of(club))
-        features.append({
+        club_features.append({
             'id':        club.id,
             'name':      club.name,
             'slug':      club.slug,
@@ -97,7 +102,45 @@ def club_map():
             'is_member': is_member,
             'url':       f'/clubs/{club.slug}/',
         })
-    return render_template('clubs/map.html', clubs=features)
+        geocoded[club.id] = {'lat': club.lat, 'lng': club.lng,
+                              'name': club.name, 'slug': club.slug}
+
+    # Rides layer — only for authenticated users; anchored at club location (no address)
+    ride_features = []
+    if current_user.is_authenticated:
+        rides_qs = (Ride.query
+                    .filter(
+                        Ride.club_id.isnot(None),
+                        Ride.owner_id.is_(None),
+                        Ride.is_cancelled == False,
+                        Ride.date >= today,
+                        Ride.date <= week_end,
+                    )
+                    .order_by(Ride.date.asc(), Ride.time.asc())
+                    .all())
+        for ride in rides_qs:
+            geo = geocoded.get(ride.club_id)
+            if not geo:
+                continue
+            ride_features.append({
+                'id':         ride.id,
+                'title':      ride.title,
+                'date':       ride.date.isoformat(),
+                'time':       ride.time.strftime('%H:%M') if ride.time else None,
+                'pace':       ride.pace_category,
+                'ride_type':  ride.ride_type or 'road',
+                'distance':   ride.distance_miles,
+                'club_name':  geo['name'],
+                'club_slug':  geo['slug'],
+                'lat':        geo['lat'],
+                'lng':        geo['lng'],
+                'url':        f'/clubs/{geo["slug"]}/rides/{ride.id}',
+            })
+
+    return render_template('clubs/map.html',
+                           clubs=club_features,
+                           rides=ride_features,
+                           user_authenticated=current_user.is_authenticated)
 
 
 # ── Club creation wizard ──────────────────────────────────────────────────────
