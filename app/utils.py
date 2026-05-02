@@ -1,5 +1,21 @@
 """Shared utility helpers."""
 import re
+from urllib.parse import urlparse, urljoin
+from flask import request as flask_request
+
+
+def is_safe_url(target):
+    """Return True if *target* is a same-host relative URL, False otherwise.
+
+    Prevents open-redirect attacks on `next` parameters and Referer-based
+    redirects by ensuring the destination shares the request's host.
+    """
+    if not target:
+        return False
+    ref_url = urlparse(flask_request.host_url)
+    test_url = urlparse(urljoin(flask_request.host_url, target))
+    return (test_url.scheme in ('http', 'https') and
+            ref_url.netloc == test_url.netloc)
 
 _HEX_RE = re.compile(r'^#[0-9a-fA-F]{6}$')
 

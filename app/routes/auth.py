@@ -7,6 +7,7 @@ from ..models import User, Ride, RideSignup
 from ..forms import RegisterForm, LoginForm, ProfileForm
 from ..geocoding import geocode_zip
 from ..gear import GEAR_CATALOG
+from ..utils import is_safe_url
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -43,7 +44,9 @@ def register():
         else:
             flash(_('Account created! You can now sign in.'), 'success')
         next_page = request.args.get('next')
-        return redirect(url_for('auth.login', next=next_page) if next_page else url_for('auth.login'))
+        if next_page and is_safe_url(next_page):
+            return redirect(url_for('auth.login', next=next_page))
+        return redirect(url_for('auth.login'))
 
     return render_template('auth/register.html', form=form)
 
@@ -62,7 +65,9 @@ def login():
                 return render_template('auth/login.html', form=form)
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
-            return redirect(next_page or url_for('main.index'))
+            if next_page and is_safe_url(next_page):
+                return redirect(next_page)
+            return redirect(url_for('main.index'))
         flash(_('Invalid email or password.'), 'danger')
 
     return render_template('auth/login.html', form=form)
@@ -98,8 +103,10 @@ def profile():
         current_user.emergency_contact_name  = (form.emergency_contact_name.data or '').strip() or None
         current_user.emergency_contact_phone = (form.emergency_contact_phone.data or '').strip() or None
 
-        # Gear inventory — list of checked item IDs
-        current_user.gear_inventory = request.form.getlist('gear_items') or None
+        # Gear inventory — validate each submitted ID against the known catalog
+        valid_gear_ids = {item['id'] for items in GEAR_CATALOG.values() for item in items}
+        submitted_gear = [g for g in request.form.getlist('gear_items') if g in valid_gear_ids]
+        current_user.gear_inventory = submitted_gear or None
 
         new_zip = (form.zip_code.data or '').strip()
         if new_zip != (current_user.zip_code or ''):

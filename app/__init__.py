@@ -80,6 +80,24 @@ def create_app(config_class=Config):
             'languages': LANGUAGE_NAMES,
         }
 
+    @app.after_request
+    def set_security_headers(response):
+        response.headers['X-Content-Type-Options'] = 'nosniff'
+        response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+        response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
+        response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+        # CSP: allow same-origin + Bootstrap/Google Fonts CDNs already in use
+        response.headers['Content-Security-Policy'] = (
+            "default-src 'self'; "
+            "script-src 'self' https://cdn.jsdelivr.net; "
+            "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
+            "img-src 'self' data: https:; "
+            "frame-src https://ridewithgps.com https://www.youtube.com https://player.vimeo.com; "
+            "connect-src 'self';"
+        )
+        return response
+
     # Start weather auto-cancel scheduler (skipped in testing)
     if not app.config.get('TESTING'):
         from .scheduler import init_scheduler

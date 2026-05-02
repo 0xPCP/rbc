@@ -1,14 +1,29 @@
+from urllib.parse import urlparse
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import (
     StringField, PasswordField, BooleanField, SubmitField,
     TextAreaField, SelectField, FloatField, IntegerField, DateField, TimeField
 )
-from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, URL, NumberRange, Regexp
+from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, URL, NumberRange, Regexp, ValidationError
+
+
+class SafeURL(URL):
+    """URL validator that rejects javascript:, data:, vbscript: and any other non-http(s) scheme."""
+
+    def __call__(self, form, field):
+        if field.data:
+            super().__call__(form, field)
+            scheme = urlparse(field.data).scheme.lower()
+            if scheme not in ('http', 'https'):
+                raise ValidationError('Only http:// and https:// URLs are accepted.')
 
 
 class RegisterForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(3, 50)])
+    username = StringField('Username', validators=[
+        DataRequired(), Length(3, 50),
+        Regexp(r'^[a-zA-Z0-9_.-]+$', message='Username may only contain letters, numbers, underscores, hyphens, and dots.'),
+    ])
     email = StringField('Email Address', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired(), Length(min=8)])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
@@ -23,7 +38,10 @@ class LoginForm(FlaskForm):
 
 
 class ProfileForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(3, 50)])
+    username = StringField('Username', validators=[
+        DataRequired(), Length(3, 50),
+        Regexp(r'^[a-zA-Z0-9_.-]+$', message='Username may only contain letters, numbers, underscores, hyphens, and dots.'),
+    ])
     email    = StringField('Email Address', validators=[DataRequired(), Email()])
     zip_code = StringField('Zip Code', validators=[Optional(), Length(max=10)])
     gender   = SelectField('Gender', choices=[
@@ -57,7 +75,7 @@ class ClubForm(FlaskForm):
     zip_code    = StringField('Zip Code', validators=[Optional(), Length(max=10)])
     address     = StringField('Address', validators=[Optional(), Length(max=500)])
     contact_email = StringField('Contact Email', validators=[Optional(), Email(), Length(max=255)])
-    logo_url    = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
+    logo_url    = StringField('Logo URL', validators=[Optional(), SafeURL(), Length(max=500)])
     is_active   = BooleanField('Active (visible to users)', default=True)
     submit      = SubmitField('Save Club')
 
@@ -72,7 +90,7 @@ class ClubSettingsForm(FlaskForm):
     zip_code    = StringField('Zip Code', validators=[Optional(), Length(max=10)])
     address     = StringField('Address', validators=[Optional(), Length(max=500)])
     contact_email = StringField('Contact Email', validators=[Optional(), Email(), Length(max=255)])
-    logo_url    = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
+    logo_url    = StringField('Logo URL', validators=[Optional(), SafeURL(), Length(max=500)])
     # Appearance / theming
     theme_primary = StringField('Primary Color', validators=[
         Optional(), Length(max=7),
@@ -82,7 +100,7 @@ class ClubSettingsForm(FlaskForm):
         Optional(), Length(max=7),
         Regexp(r'^#[0-9a-fA-F]{6}$', message='Enter a valid hex color (e.g. #e76f51).'),
     ])
-    banner_url    = StringField('Banner Image URL', validators=[Optional(), URL(), Length(max=500)])
+    banner_url    = StringField('Banner Image URL', validators=[Optional(), SafeURL(), Length(max=500)])
     # Membership settings
     is_private         = BooleanField('Private Club')
     require_membership = BooleanField('Require membership to sign up for rides')
@@ -93,13 +111,13 @@ class ClubSettingsForm(FlaskForm):
     # Strava integration
     strava_club_id = StringField('Strava Club ID', validators=[Optional(), Length(max=20)])
     # Social media / communication
-    facebook_url   = StringField('Facebook Page URL', validators=[Optional(), URL(), Length(max=500)])
-    instagram_url  = StringField('Instagram URL', validators=[Optional(), URL(), Length(max=500)])
-    twitter_url    = StringField('Twitter / X URL', validators=[Optional(), URL(), Length(max=500)])
-    newsletter_url = StringField('Newsletter Sign-up URL', validators=[Optional(), URL(), Length(max=500)])
+    facebook_url   = StringField('Facebook Page URL', validators=[Optional(), SafeURL(), Length(max=500)])
+    instagram_url  = StringField('Instagram URL', validators=[Optional(), SafeURL(), Length(max=500)])
+    twitter_url    = StringField('Twitter / X URL', validators=[Optional(), SafeURL(), Length(max=500)])
+    newsletter_url = StringField('Newsletter Sign-up URL', validators=[Optional(), SafeURL(), Length(max=500)])
 
     # Governance / resources
-    bylaws_url        = StringField('Club Bylaws URL', validators=[Optional(), URL(), Length(max=500)])
+    bylaws_url        = StringField('Club Bylaws URL', validators=[Optional(), SafeURL(), Length(max=500)])
     safety_guidelines = TextAreaField('Safety Guidelines', validators=[Optional()])
 
     # Weather auto-cancel
@@ -135,8 +153,8 @@ class ClubCreateForm(FlaskForm):
     tagline       = StringField('Club Tagline', validators=[Optional(), Length(max=200)])
     description   = TextAreaField('Description', validators=[Optional()])
     contact_email = StringField('Contact Email', validators=[Optional(), Email(), Length(max=255)])
-    logo_url      = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
-    banner_url    = StringField('Banner Image URL', validators=[Optional(), URL(), Length(max=500)])
+    logo_url      = StringField('Logo URL', validators=[Optional(), SafeURL(), Length(max=500)])
+    banner_url    = StringField('Banner Image URL', validators=[Optional(), SafeURL(), Length(max=500)])
     submit        = SubmitField('Create Club')
 
 
@@ -149,15 +167,15 @@ class ClubPostForm(FlaskForm):
 class ClubLeaderForm(FlaskForm):
     name          = StringField('Display Name', validators=[DataRequired(), Length(max=100)])
     bio           = TextAreaField('Bio', validators=[Optional()])
-    photo_url     = StringField('Photo URL', validators=[Optional(), URL(), Length(max=500)])
+    photo_url     = StringField('Photo URL', validators=[Optional(), SafeURL(), Length(max=500)])
     display_order = IntegerField('Display Order', validators=[Optional(), NumberRange(min=0)], default=0)
     submit        = SubmitField('Save Leader')
 
 
 class ClubSponsorForm(FlaskForm):
     name          = StringField('Sponsor Name', validators=[DataRequired(), Length(max=200)])
-    logo_url      = StringField('Logo URL', validators=[Optional(), URL(), Length(max=500)])
-    website       = StringField('Website', validators=[Optional(), URL(), Length(max=500)])
+    logo_url      = StringField('Logo URL', validators=[Optional(), SafeURL(), Length(max=500)])
+    website       = StringField('Website', validators=[Optional(), SafeURL(), Length(max=500)])
     display_order = IntegerField('Display Order', validators=[Optional(), NumberRange(min=0)], default=0)
     submit        = SubmitField('Save Sponsor')
 
@@ -172,7 +190,7 @@ class RidePhotoUploadForm(FlaskForm):
 
 class RideVideoLinkForm(FlaskForm):
     url = StringField('Video URL (YouTube, Strava, Vimeo)', validators=[
-        DataRequired(), URL(), Length(max=500),
+        DataRequired(), SafeURL(), Length(max=500),
     ])
     caption = StringField('Caption', validators=[Optional(), Length(max=300)])
     submit = SubmitField('Share Video')
@@ -210,8 +228,8 @@ class RideForm(FlaskForm):
         ('night',    'Night Ride'),
     ], default='road')
     ride_leader = StringField('Ride Leader', validators=[Optional(), Length(max=100)])
-    route_url = StringField('Route URL (Strava, RideWithGPS, etc.)', validators=[Optional(), URL(), Length(max=500)])
-    video_url = StringField('Video URL (YouTube or Vimeo)', validators=[Optional(), URL(), Length(max=500)])
+    route_url = StringField('Route URL (Strava, RideWithGPS, etc.)', validators=[Optional(), SafeURL(), Length(max=500)])
+    video_url = StringField('Video URL (YouTube or Vimeo)', validators=[Optional(), SafeURL(), Length(max=500)])
     description = TextAreaField('Description / Notes', validators=[Optional()])
     max_riders = IntegerField('Max Riders (leave blank for unlimited)', validators=[Optional(), NumberRange(min=1, max=9999)])
     is_cancelled = BooleanField('Mark as Cancelled')
@@ -242,8 +260,8 @@ class UserRideForm(FlaskForm):
         ('night',    'Night Ride'),
     ], default='road')
     ride_leader      = StringField('Ride Leader', validators=[Optional(), Length(max=100)])
-    route_url        = StringField('Route URL', validators=[Optional(), URL(), Length(max=500)])
-    video_url        = StringField('Video URL (YouTube or Vimeo)', validators=[Optional(), URL(), Length(max=500)])
+    route_url        = StringField('Route URL', validators=[Optional(), SafeURL(), Length(max=500)])
+    video_url        = StringField('Video URL (YouTube or Vimeo)', validators=[Optional(), SafeURL(), Length(max=500)])
     description      = TextAreaField('Description / Notes', validators=[Optional()])
     max_riders       = IntegerField('Max Riders (leave blank for unlimited)', validators=[Optional(), NumberRange(min=1, max=9999)])
     is_private       = BooleanField('Private ride — only invited riders can see details')

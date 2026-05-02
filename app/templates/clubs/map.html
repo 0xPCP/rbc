@@ -140,7 +140,7 @@
       </div>`;
   }
 
-  const clubs = {{ clubs_json | safe }};
+  const clubs = {{ clubs | tojson }};
   const subtitle = document.getElementById('map-subtitle');
   if (clubs.length === 0) {
     subtitle.textContent = 'No geocoded clubs yet.';

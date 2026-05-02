@@ -12,6 +12,7 @@ from ..geocoding import clubs_near_zip
 from .strava import get_club_activities
 from ..forms import ClubCreateForm, RideCommentForm
 from ..geocoding import geocode_zip
+from ..utils import is_safe_url
 
 clubs_bp = Blueprint('clubs', __name__)
 
@@ -72,7 +73,6 @@ def index():
 
 @clubs_bp.route('/map/')
 def club_map():
-    import json
     today = date.today()
     clubs = Club.query.filter_by(is_active=True).order_by(Club.name.asc()).all()
     features = []
@@ -97,18 +97,23 @@ def club_map():
             'is_member': is_member,
             'url':       f'/clubs/{club.slug}/',
         })
-    clubs_json = json.dumps(features)
-    return render_template('clubs/map.html', clubs_json=clubs_json)
+    return render_template('clubs/map.html', clubs=features)
 
 
 # ── Club creation wizard ──────────────────────────────────────────────────────
 
+_RESERVED_SLUGS = frozenset({
+    'create', 'map', 'admin', 'auth', 'api', 'static', 'media',
+    'my-rides', 'discover', 'about', 'invites', 'set-language',
+})
+
+
 def _generate_slug(name):
-    """Turn a club name into a URL-safe slug, disambiguating if taken."""
+    """Turn a club name into a URL-safe slug, disambiguating if taken or reserved."""
     base = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')[:70]
     slug = base
     n = 2
-    while Club.query.filter_by(slug=slug).first():
+    while Club.query.filter_by(slug=slug).first() or slug in _RESERVED_SLUGS:
         slug = f'{base}-{n}'
         n += 1
     return slug
@@ -386,6 +391,10 @@ def ride_ics(slug, ride_id):
     club = _get_club_or_404(slug)
     ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
 
+    def _ics_safe(value):
+        """Strip CR/LF from a value so it can't inject extra iCalendar properties."""
+        return re.sub(r'[\r\n]+', ' ', str(value or ''))
+
     dt_start = datetime.combine(ride.date, ride.time)
     dt_end   = dt_start + timedelta(hours=2)
     dt_stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
@@ -394,9 +403,9 @@ def ride_ics(slug, ride_id):
     if ride.elevation_feet:
         desc_parts.append(f'Elevation: {ride.elevation_feet} ft')
     if ride.ride_leader:
-        desc_parts.append(f'Leader: {ride.ride_leader}')
+        desc_parts.append(f'Leader: {_ics_safe(ride.ride_leader)}')
     if ride.description:
-        desc_parts.append(ride.description)
+        desc_parts.append(_ics_safe(ride.description))
     description = '\\n'.join(desc_parts)
 
     ics = (
@@ -410,9 +419,9 @@ def ride_ics(slug, ride_id):
         f'DTSTAMP:{dt_stamp}\r\n'
         f'DTSTART:{dt_start.strftime("%Y%m%dT%H%M%S")}\r\n'
         f'DTEND:{dt_end.strftime("%Y%m%dT%H%M%S")}\r\n'
-        f'SUMMARY:{ride.title} — {club.name}\r\n'
+        f'SUMMARY:{_ics_safe(ride.title)} — {_ics_safe(club.name)}\r\n'
         f'DESCRIPTION:{description}\r\n'
-        f'LOCATION:{ride.meeting_location}\r\n'
+        f'LOCATION:{_ics_safe(ride.meeting_location)}\r\n'
         'END:VEVENT\r\n'
         'END:VCALENDAR\r\n'
     )
@@ -575,7 +584,8 @@ def waiver(slug):
         flash('This club has no waiver on file.', 'info')
         return redirect(url_for('clubs.home', slug=slug))
 
-    next_url = request.args.get('next') or url_for('clubs.rides', slug=slug)
+    next_raw = request.args.get('next', '')
+    next_url = next_raw if (next_raw and is_safe_url(next_raw)) else url_for('clubs.rides', slug=slug)
 
     if request.method == 'POST':
         if request.form.get('agree') == '1':

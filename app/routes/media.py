@@ -11,6 +11,7 @@ Strategy summary — see docs/media_strategy.md for full details.
               requires active membership to serve.
 """
 import os
+import re
 import uuid
 import logging
 from datetime import date
@@ -27,6 +28,10 @@ logger = logging.getLogger(__name__)
 media_bp = Blueprint('media', __name__)
 
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
+
+_ALLOWED_VIDEO_RE = re.compile(
+    r'^https://(www\.)?(youtube\.com/watch|youtu\.be/|vimeo\.com/|strava\.com/activities/)'
+)
 
 
 def _get_club_or_404(slug):
@@ -163,6 +168,9 @@ def add_video_link(slug, ride_id):
     url = request.form.get('url', '').strip()
     if not url:
         flash('Please provide a video URL.', 'danger')
+        return redirect(url_for('clubs.ride_detail', slug=slug, ride_id=ride_id) + '#media')
+    if not _ALLOWED_VIDEO_RE.match(url):
+        flash('Only YouTube, Vimeo, and Strava activity links are accepted.', 'danger')
         return redirect(url_for('clubs.ride_detail', slug=slug, ride_id=ride_id) + '#media')
 
     caption = request.form.get('caption', '').strip()[:300] or None

@@ -4,7 +4,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, abort, r
 from flask_login import login_required, current_user
 import secrets
 import string
-from markupsafe import Markup
+from markupsafe import Markup, escape as html_escape
 from sqlalchemy import or_, func
 from ..extensions import db, bcrypt
 from ..models import Club, Ride, RideSignup, User, ClubMembership, ClubAdmin, ClubPost, ClubLeader, ClubSponsor, ClubInvite
@@ -189,7 +189,7 @@ def reset_user_password(user_id):
     user.password_hash = bcrypt.generate_password_hash(tmp_pw).decode('utf-8')
     db.session.commit()
     flash(Markup(
-        f'Password reset for <strong>{user.username}</strong>. '
+        f'Password reset for <strong>{html_escape(user.username)}</strong>. '
         f'Temporary password: <code class="user-select-all fw-bold">{tmp_pw}</code> '
         f'— share this with the user immediately.'
     ), 'warning')
@@ -229,9 +229,10 @@ def toggle_active(user_id):
 def club_new():
     form = ClubForm()
     if form.validate_on_submit():
+        from app.routes.clubs import _RESERVED_SLUGS
         slug = form.slug.data.strip().lower()
-        if Club.query.filter_by(slug=slug).first():
-            flash('That slug is already taken.', 'danger')
+        if Club.query.filter_by(slug=slug).first() or slug in _RESERVED_SLUGS:
+            flash('That slug is already taken or reserved.', 'danger')
             return render_template('admin/club_form.html', form=form, title='New Club', club=None)
 
         club = Club(
@@ -545,7 +546,7 @@ def club_team_add(slug):
     identifier = request.form.get('identifier', '').strip()
     role = request.form.get('role', 'admin')
     if role not in ('admin', 'ride_manager', 'content_editor', 'treasurer'):
-        role = 'admin'
+        abort(400)
 
     user = (User.query.filter(
         (User.email == identifier) | (User.username == identifier)

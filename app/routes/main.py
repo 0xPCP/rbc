@@ -6,6 +6,7 @@ from ..models import Club, Ride, RideSignup, ClubMembership, User
 from ..extensions import db
 from ..weather import get_weather_for_rides
 from ..geocoding import geocode_zip, haversine_miles
+from ..utils import is_safe_url
 
 main_bp = Blueprint('main', __name__)
 
@@ -80,7 +81,8 @@ def set_language(lang):
         if current_user.is_authenticated:
             current_user.language = lang
             db.session.commit()
-    return redirect(request.referrer or url_for('main.index'))
+    referrer = request.referrer
+    return redirect(referrer if (referrer and is_safe_url(referrer)) else url_for('main.index'))
 
 
 @main_bp.route('/about')
