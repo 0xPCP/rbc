@@ -26,6 +26,23 @@ class ProfileForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(3, 50)])
     email    = StringField('Email Address', validators=[DataRequired(), Email()])
     zip_code = StringField('Zip Code', validators=[Optional(), Length(max=10)])
+    gender   = SelectField('Gender', choices=[
+        ('',          '— Not specified —'),
+        ('male',      'Male'),
+        ('female',    'Female'),
+        ('nonbinary', 'Non-binary'),
+    ], validators=[Optional()])
+    bio      = TextAreaField('Bio', validators=[Optional(), Length(max=500)])
+    language = SelectField('Language', choices=[
+        ('',   '— Auto-detect —'),
+        ('en', 'English'),
+        ('fr', 'Français'),
+        ('es', 'Español'),
+        ('it', 'Italiano'),
+        ('nl', 'Nederlands'),
+        ('de', 'Deutsch'),
+        ('pt', 'Português'),
+    ], validators=[Optional()])
     emergency_contact_name  = StringField('Emergency Contact Name', validators=[Optional(), Length(max=100)])
     emergency_contact_phone = StringField('Emergency Contact Phone', validators=[Optional(), Length(max=30)])
     submit   = SubmitField('Save Changes')
@@ -200,3 +217,39 @@ class RideForm(FlaskForm):
     is_cancelled = BooleanField('Mark as Cancelled')
     is_recurring = BooleanField('Repeat weekly (generates 8 weeks of instances)')
     submit = SubmitField('Save Ride')
+
+
+class UserRideForm(FlaskForm):
+    """Form for creating/editing a user-owned (non-club) ride."""
+    title            = StringField('Ride Title', validators=[DataRequired(), Length(max=200)])
+    date             = DateField('Date', validators=[DataRequired()])
+    time             = TimeField('Start Time', validators=[DataRequired()])
+    meeting_location = StringField('Meeting Location', validators=[DataRequired(), Length(max=500)])
+    distance_miles   = FloatField('Distance (miles)', validators=[DataRequired(), NumberRange(min=0.1)])
+    elevation_feet   = IntegerField('Elevation Gain (feet)', validators=[Optional()])
+    pace_category    = SelectField('Pace Category', choices=[
+        ('A', 'A — Fast (22+ mph)'),
+        ('B', 'B — Moderate (18–22 mph)'),
+        ('C', 'C — Casual (14–18 mph)'),
+        ('D', 'D — Beginner (<14 mph)'),
+    ])
+    ride_type = SelectField('Ride Type', choices=[
+        ('road',     'Road'),
+        ('gravel',   'Gravel'),
+        ('social',   'Social'),
+        ('training', 'Training'),
+        ('event',    'Event'),
+        ('night',    'Night Ride'),
+    ], default='road')
+    ride_leader      = StringField('Ride Leader', validators=[Optional(), Length(max=100)])
+    route_url        = StringField('Route URL', validators=[Optional(), URL(), Length(max=500)])
+    video_url        = StringField('Video URL (YouTube or Vimeo)', validators=[Optional(), URL(), Length(max=500)])
+    description      = TextAreaField('Description / Notes', validators=[Optional()])
+    max_riders       = IntegerField('Max Riders (leave blank for unlimited)', validators=[Optional(), NumberRange(min=1, max=9999)])
+    is_private       = BooleanField('Private ride — only invited riders can see details')
+    submit           = SubmitField('Save Ride')
+
+
+class UserRideInviteForm(FlaskForm):
+    identifier = StringField('Username or Email', validators=[DataRequired(), Length(max=255)])
+    submit = SubmitField('Invite')

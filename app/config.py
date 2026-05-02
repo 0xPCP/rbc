@@ -25,6 +25,10 @@ class Config:
     MAIL_DEFAULT_SENDER = os.environ.get('MAIL_DEFAULT_SENDER', 'noreply@cyclingclubs.app')
     MAIL_SUPPRESS_SEND = not bool(os.environ.get('MAIL_SERVER', ''))
 
+    # Internationalisation
+    BABEL_DEFAULT_LOCALE = 'en'
+    BABEL_DEFAULT_TIMEZONE = 'UTC'
+
     # Media uploads — see docs/media_strategy.md for rationale and update guidance
     UPLOAD_FOLDER = os.environ.get(
         'UPLOAD_FOLDER',

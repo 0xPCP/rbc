@@ -482,7 +482,9 @@ def ride_signup(slug, ride_id):
         flash('You are already signed up for this ride.', 'info')
         return redirect(url_for('clubs.ride_detail', slug=slug, ride_id=ride_id))
     on_waitlist = ride.is_full
-    db.session.add(RideSignup(ride_id=ride_id, user_id=current_user.id, is_waitlist=on_waitlist))
+    is_anon = request.form.get('is_anonymous') == '1'
+    db.session.add(RideSignup(ride_id=ride_id, user_id=current_user.id,
+                              is_waitlist=on_waitlist, is_anonymous=is_anon))
     try:
         db.session.commit()
         if on_waitlist:

@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% block title %}User Management — Superadmin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Superadmin</a></li>
+        <li class="breadcrumb-item active">Users</li>
+      </ol>
+    </nav>
+    <h1>User Management</h1>
+    <p class="mb-0">{{ pagination.total }} total accounts</p>
+  </div>
+</div>
+
+<div class="container py-4">
+
+  {# Search + filter bar #}
+  <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
+    <form class="d-flex gap-2" method="get">
+      <input class="form-control form-control-sm" style="min-width:220px"
+             name="q" value="{{ q }}" placeholder="Search username or email…">
+      <input type="hidden" name="filter" value="{{ filter_type }}">
+      <button class="btn btn-outline-secondary btn-sm">Search</button>
+    </form>
+
+    <div class="btn-group btn-group-sm ms-auto">
+      <a href="{{ url_for('admin.users', filter='all',      q=q) }}"
+         class="btn btn-outline-secondary{{ ' active' if filter_type == 'all' }}">All</a>
+      <a href="{{ url_for('admin.users', filter='admins',   q=q) }}"
+         class="btn btn-outline-secondary{{ ' active' if filter_type == 'admins' }}">Super Admins</a>
+      <a href="{{ url_for('admin.users', filter='inactive', q=q) }}"
+         class="btn btn-outline-secondary{{ ' active' if filter_type == 'inactive' }}">Inactive</a>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <div class="rbc-table-wrap">
+      <table class="table rbc-table mb-0">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Joined</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in pagination.items %}
+          <tr class="{{ 'table-secondary' if not user.is_active }}">
+            <td>
+              {{ user.username }}
+              {% if user.is_admin %}
+              <span class="badge bg-danger ms-1" style="font-size:.65rem">super admin</span>
+              {% endif %}
+            </td>
+            <td class="text-muted small">{{ user.email }}</td>
+            <td class="text-muted small">{{ user.created_at | strftime('%b %-d, %Y') if user.created_at else '—' }}</td>
+            <td>
+              {% if user.is_active %}
+              <span class="badge bg-success">Active</span>
+              {% else %}
+              <span class="badge bg-secondary">Inactive</span>
+              {% endif %}
+            </td>
+            <td>
+              <a href="{{ url_for('admin.user_detail', user_id=user.id) }}"
+                 class="btn btn-outline-secondary btn-xs">View</a>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5" class="text-muted text-center py-4">No users found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {# Pagination #}
+  {% if pagination.pages > 1 %}
+  <nav class="mt-3">
+    <ul class="pagination pagination-sm">
+      <li class="page-item{{ ' disabled' if not pagination.has_prev }}">
+        <a class="page-link" href="{{ url_for('admin.users', page=pagination.prev_num, q=q, filter=filter_type) }}">‹</a>
+      </li>
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+        <li class="page-item{{ ' active' if p == pagination.page }}">
+          <a class="page-link" href="{{ url_for('admin.users', page=p, q=q, filter=filter_type) }}">{{ p }}</a>
+        </li>
+        {% else %}
+        <li class="page-item disabled"><span class="page-link">…</span></li>
+        {% endif %}
+      {% endfor %}
+      <li class="page-item{{ ' disabled' if not pagination.has_next }}">
+        <a class="page-link" href="{{ url_for('admin.users', page=pagination.next_num, q=q, filter=filter_type) }}">›</a>
+      </li>
+    </ul>
+  </nav>
+  {% endif %}
+
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{#
+  signup_name(s, can_see_real)
+  Renders a signup's display name respecting anonymous preferences.
+
+  s            — RideSignup object
+  can_see_real — True when the viewer is the ride leader / club admin / ride owner;
+                 they see the real username even for anonymous signups.
+#}
+{% macro signup_name(s, can_see_real=False) -%}
+  {%- if s.is_anonymous and not can_see_real -%}
+    <span class="text-muted fst-italic">
+      Anonymous
+      {%- if s.user.gender == 'female' %} Female
+      {%- elif s.user.gender == 'male' %} Male
+      {%- elif s.user.gender == 'nonbinary' %} Non-binary
+      {%- endif %} Rider
+    </span>
+  {%- elif s.is_anonymous -%}
+    <a href="{{ url_for('main.public_profile', username=s.user.username) }}" class="text-decoration-none">{{ s.user.username }}</a>
+    <span class="badge bg-secondary ms-1" style="font-size:.65rem">anon</span>
+  {%- else -%}
+    <a href="{{ url_for('main.public_profile', username=s.user.username) }}" class="text-decoration-none">{{ s.user.username }}</a>
+  {%- endif -%}
+{%- endmacro %}

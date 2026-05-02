@@ -1,7 +1,9 @@
 from datetime import date, timedelta
-from flask import Blueprint, render_template, request
-from flask_login import current_user
-from ..models import Club, Ride, RideSignup, ClubMembership
+from flask import Blueprint, render_template, request, redirect, url_for, session, current_app
+from flask_login import current_user, login_required
+from sqlalchemy import or_, and_
+from ..models import Club, Ride, RideSignup, ClubMembership, User
+from ..extensions import db
 from ..weather import get_weather_for_rides
 from ..geocoding import geocode_zip, haversine_miles
 
@@ -70,9 +72,37 @@ def _user_dashboard(today):
                            signed_up_ride_ids=signed_up_ride_ids)
 
 
+@main_bp.route('/set-language/<lang>')
+def set_language(lang):
+    from app import SUPPORTED_LANGUAGES
+    if lang in SUPPORTED_LANGUAGES:
+        session['language'] = lang
+        if current_user.is_authenticated:
+            current_user.language = lang
+            db.session.commit()
+    return redirect(request.referrer or url_for('main.index'))
+
+
 @main_bp.route('/about')
 def about():
     return render_template('about.html')
+
+
+@main_bp.route('/users/<username>')
+@login_required
+def public_profile(username):
+    profile_user = User.query.filter_by(username=username).first_or_404()
+    today = date.today()
+    public_signups = (RideSignup.query
+                      .filter_by(user_id=profile_user.id, is_waitlist=False, is_anonymous=False)
+                      .join(Ride, RideSignup.ride_id == Ride.id)
+                      .filter(Ride.date < today, Ride.is_cancelled == False)
+                      .order_by(Ride.date.desc())
+                      .limit(20)
+                      .all())
+    return render_template('public_profile.html',
+                           profile_user=profile_user,
+                           public_signups=public_signups)
 
 
 @main_bp.route('/discover/')
@@ -107,10 +137,15 @@ def discover():
     active_club_ids = [c.id for c in Club.query.filter_by(is_active=True).with_entities(Club.id).all()]
 
     query = (Ride.query
-             .filter(Ride.club_id.in_(active_club_ids),
-                     Ride.is_cancelled == False,
-                     Ride.date >= start_date,
-                     Ride.date <= end_date)
+             .filter(
+                 or_(
+                     Ride.club_id.in_(active_club_ids),
+                     and_(Ride.owner_id.isnot(None), Ride.is_private == False),
+                 ),
+                 Ride.is_cancelled == False,
+                 Ride.date >= start_date,
+                 Ride.date <= end_date,
+             )
              .order_by(Ride.date.asc(), Ride.time.asc()))
 
     if pace in ('A', 'B', 'C', 'D'):
@@ -129,6 +164,10 @@ def discover():
             club_cache = {}
             filtered = []
             for r in rides:
+                if r.owner_id and not r.club_id:
+                    # User-owned rides have no location anchor — include without filtering
+                    filtered.append(r)
+                    continue
                 club = club_cache.get(r.club_id)
                 if club is None:
                     club = Club.query.get(r.club_id)

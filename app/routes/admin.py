@@ -2,7 +2,11 @@ from functools import wraps
 from datetime import date, datetime, timedelta
 from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
 from flask_login import login_required, current_user
-from ..extensions import db
+import secrets
+import string
+from markupsafe import Markup
+from sqlalchemy import or_, func
+from ..extensions import db, bcrypt
 from ..models import Club, Ride, RideSignup, User, ClubMembership, ClubAdmin, ClubPost, ClubLeader, ClubSponsor, ClubInvite
 from ..forms import RideForm, ClubForm, ClubSettingsForm, ClubPostForm, ClubLeaderForm, ClubSponsorForm, ClubInviteForm
 from ..recurrence import generate_instances, delete_future_instances
@@ -115,13 +119,109 @@ def dashboard():
         'total_signups':  RideSignup.query.count(),
         'total_miles':    round(total_miles),
     }
+    stats['inactive_users'] = User.query.filter_by(is_active=False).count()
+    stats['total_signups']  = RideSignup.query.count()
+
+    # Popular clubs by active member count
+    popular = (db.session.query(Club, func.count(ClubMembership.id).label('mc'))
+               .outerjoin(ClubMembership,
+                          (Club.id == ClubMembership.club_id) & (ClubMembership.status == 'active'))
+               .group_by(Club.id)
+               .order_by(func.count(ClubMembership.id).desc())
+               .limit(5).all())
+
     # Enrich clubs with upcoming ride count
     clubs_raw = Club.query.order_by(Club.name.asc()).all()
     clubs = []
     for club in clubs_raw:
         upcoming = Ride.query.filter_by(club_id=club.id, is_cancelled=False).filter(Ride.date >= today).count()
         clubs.append({'club': club, 'upcoming': upcoming})
-    return render_template('admin/dashboard.html', stats=stats, clubs=clubs)
+
+    super_admins = User.query.filter_by(is_admin=True).order_by(User.username.asc()).all()
+    return render_template('admin/dashboard.html', stats=stats, clubs=clubs,
+                           super_admins=super_admins, popular=popular)
+
+
+# ── User management ───────────────────────────────────────────────────────────
+
+@admin_bp.route('/users/')
+@superadmin_required
+def users():
+    q           = request.args.get('q', '').strip()
+    page        = request.args.get('page', 1, type=int)
+    filter_type = request.args.get('filter', 'all')
+
+    query = User.query
+    if q:
+        query = query.filter(
+            or_(User.username.ilike(f'%{q}%'), User.email.ilike(f'%{q}%'))
+        )
+    if filter_type == 'admins':
+        query = query.filter_by(is_admin=True)
+    elif filter_type == 'inactive':
+        query = query.filter_by(is_active=False)
+
+    pagination = (query.order_by(User.created_at.desc())
+                  .paginate(page=page, per_page=25, error_out=False))
+    return render_template('admin/users.html', pagination=pagination,
+                           q=q, filter_type=filter_type)
+
+
+@admin_bp.route('/users/<int:user_id>')
+@superadmin_required
+def user_detail(user_id):
+    profile_user   = User.query.get_or_404(user_id)
+    recent_signups = (RideSignup.query
+                      .filter_by(user_id=user_id)
+                      .order_by(RideSignup.id.desc())
+                      .limit(10).all())
+    return render_template('admin/user_detail.html',
+                           profile_user=profile_user,
+                           recent_signups=recent_signups)
+
+
+@admin_bp.route('/users/<int:user_id>/reset-password', methods=['POST'])
+@superadmin_required
+def reset_user_password(user_id):
+    user   = User.query.get_or_404(user_id)
+    alpha  = string.ascii_letters + string.digits
+    tmp_pw = ''.join(secrets.choice(alpha) for _ in range(12))
+    user.password_hash = bcrypt.generate_password_hash(tmp_pw).decode('utf-8')
+    db.session.commit()
+    flash(Markup(
+        f'Password reset for <strong>{user.username}</strong>. '
+        f'Temporary password: <code class="user-select-all fw-bold">{tmp_pw}</code> '
+        f'— share this with the user immediately.'
+    ), 'warning')
+    return redirect(url_for('admin.user_detail', user_id=user_id))
+
+
+@admin_bp.route('/users/<int:user_id>/toggle-admin', methods=['POST'])
+@superadmin_required
+def toggle_admin(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('You cannot change your own super admin status.', 'danger')
+        return redirect(url_for('admin.user_detail', user_id=user_id))
+    user.is_admin = not user.is_admin
+    db.session.commit()
+    action = 'granted' if user.is_admin else 'revoked'
+    flash(f'Super admin access {action} for {user.username}.', 'success')
+    return redirect(url_for('admin.user_detail', user_id=user_id))
+
+
+@admin_bp.route('/users/<int:user_id>/toggle-active', methods=['POST'])
+@superadmin_required
+def toggle_active(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('You cannot deactivate your own account.', 'danger')
+        return redirect(url_for('admin.user_detail', user_id=user_id))
+    user.is_active = not user.is_active
+    db.session.commit()
+    action = 'reactivated' if user.is_active else 'deactivated'
+    flash(f'Account {action} for {user.username}.', 'success')
+    return redirect(url_for('admin.user_detail', user_id=user_id))
 
 
 @admin_bp.route('/clubs/new', methods=['GET', 'POST'])

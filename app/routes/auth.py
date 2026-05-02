@@ -1,6 +1,7 @@
 from datetime import date
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
+from flask_babel import gettext as _
 from ..extensions import db, bcrypt
 from ..models import User, Ride, RideSignup
 from ..forms import RegisterForm, LoginForm, ProfileForm
@@ -19,10 +20,10 @@ def register():
     if form.validate_on_submit():
         # Check for existing email or username
         if User.query.filter_by(email=form.email.data.lower()).first():
-            flash('An account with that email already exists.', 'danger')
+            flash(_('An account with that email already exists.'), 'danger')
             return render_template('auth/register.html', form=form)
         if User.query.filter_by(username=form.username.data).first():
-            flash('That username is already taken.', 'danger')
+            flash(_('That username is already taken.'), 'danger')
             return render_template('auth/register.html', form=form)
 
         hashed = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
@@ -38,9 +39,9 @@ def register():
         db.session.commit()
 
         if is_first_user:
-            flash('Account created — you have been granted admin access as the first user.', 'success')
+            flash(_('Account created — you have been granted admin access as the first user.'), 'success')
         else:
-            flash('Account created! You can now sign in.', 'success')
+            flash(_('Account created! You can now sign in.'), 'success')
         next_page = request.args.get('next')
         return redirect(url_for('auth.login', next=next_page) if next_page else url_for('auth.login'))
 
@@ -56,10 +57,13 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data.lower()).first()
         if user and bcrypt.check_password_hash(user.password_hash, form.password.data):
+            if not user.is_active:
+                flash(_('This account has been deactivated. Please contact support.'), 'danger')
+                return render_template('auth/login.html', form=form)
             login_user(user, remember=form.remember.data)
             next_page = request.args.get('next')
             return redirect(next_page or url_for('main.index'))
-        flash('Invalid email or password.', 'danger')
+        flash(_('Invalid email or password.'), 'danger')
 
     return render_template('auth/login.html', form=form)
 
@@ -79,15 +83,18 @@ def profile():
         # Check uniqueness for changed fields
         if form.username.data != current_user.username:
             if User.query.filter_by(username=form.username.data).first():
-                flash('That username is already taken.', 'danger')
+                flash(_('That username is already taken.'), 'danger')
                 return redirect(url_for('auth.profile'))
         if form.email.data.lower() != current_user.email:
             if User.query.filter_by(email=form.email.data.lower()).first():
-                flash('An account with that email already exists.', 'danger')
+                flash(_('An account with that email already exists.'), 'danger')
                 return redirect(url_for('auth.profile'))
 
-        current_user.username = form.username.data
-        current_user.email    = form.email.data.lower()
+        current_user.username  = form.username.data
+        current_user.email     = form.email.data.lower()
+        current_user.gender    = form.gender.data or None
+        current_user.bio       = (form.bio.data or '').strip() or None
+        current_user.language  = form.language.data or None
         current_user.emergency_contact_name  = (form.emergency_contact_name.data or '').strip() or None
         current_user.emergency_contact_phone = (form.emergency_contact_phone.data or '').strip() or None
 
@@ -104,10 +111,10 @@ def profile():
                 if coords:
                     current_user.lat, current_user.lng = coords
                 else:
-                    flash('Zip code saved but could not be geocoded.', 'warning')
+                    flash(_('Zip code saved but could not be geocoded.'), 'warning')
 
         db.session.commit()
-        flash('Profile updated.', 'success')
+        flash(_('Profile updated.'), 'success')
         return redirect(url_for('auth.profile'))
 
     owned = set(current_user.gear_inventory or [])

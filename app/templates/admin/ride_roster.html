@@ -57,7 +57,10 @@
                   {{ 'checked' if s.attended == true else '' }}>
               </td>
               {% endif %}
-              <td>{{ s.user.username }}</td>
+              <td>
+                {{ s.user.username }}
+                {% if s.is_anonymous %}<span class="badge bg-secondary ms-1" style="font-size:.65rem">anon</span>{% endif %}
+              </td>
               <td><a href="mailto:{{ s.user.email }}">{{ s.user.email }}</a></td>
               <td>
                 {% if s.user.emergency_contact_name %}

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+{% block title %}{% if ride %}Edit Ride{% else %}Create a Ride{% endif %} — Cycling Clubs{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:720px">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="{{ url_for('user_rides.list_rides') }}">My Rides</a></li>
+      <li class="breadcrumb-item active">{% if ride %}Edit{% else %}Create{% endif %}</li>
+    </ol>
+  </nav>
+
+  <div class="d-flex justify-content-between align-items-start mb-4">
+    <h1 class="mb-0">{% if ride %}Edit Ride{% else %}Create a Ride{% endif %}</h1>
+    <span class="text-muted small pt-2">{{ rides_used }} / {{ max_rides }} rides this week</span>
+  </div>
+
+  <form method="post"
+        action="{{ url_for('user_rides.edit', ride_id=ride.id) if ride else url_for('user_rides.create') }}">
+    {{ form.hidden_tag() }}
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+      <h5 class="mb-3">Ride Details</h5>
+
+      <div class="mb-3">
+        {{ form.title.label(class="form-label fw-semibold") }}
+        {{ form.title(class="form-control" + (" is-invalid" if form.title.errors else "")) }}
+        {% for e in form.title.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          {{ form.date.label(class="form-label fw-semibold") }}
+          {{ form.date(class="form-control" + (" is-invalid" if form.date.errors else ""),
+                       type="date") }}
+          {% for e in form.date.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="col-md-6">
+          {{ form.time.label(class="form-label fw-semibold") }}
+          {{ form.time(class="form-control" + (" is-invalid" if form.time.errors else ""),
+                       type="time") }}
+          {% for e in form.time.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        {{ form.meeting_location.label(class="form-label fw-semibold") }}
+        {{ form.meeting_location(class="form-control" + (" is-invalid" if form.meeting_location.errors else "")) }}
+        {% for e in form.meeting_location.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          {{ form.distance_miles.label(class="form-label fw-semibold") }}
+          {{ form.distance_miles(class="form-control" + (" is-invalid" if form.distance_miles.errors else ""),
+                                  step="0.1") }}
+          {% for e in form.distance_miles.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+        <div class="col-md-4">
+          {{ form.elevation_feet.label(class="form-label fw-semibold") }}
+          {{ form.elevation_feet(class="form-control") }}
+        </div>
+        <div class="col-md-4">
+          {{ form.max_riders.label(class="form-label fw-semibold") }}
+          {{ form.max_riders(class="form-control", placeholder="No limit") }}
+        </div>
+      </div>
+
+      <div class="row g-3 mb-3">
+        <div class="col-md-6">
+          {{ form.pace_category.label(class="form-label fw-semibold") }}
+          {{ form.pace_category(class="form-select") }}
+        </div>
+        <div class="col-md-6">
+          {{ form.ride_type.label(class="form-label fw-semibold") }}
+          {{ form.ride_type(class="form-select") }}
+        </div>
+      </div>
+
+      <div class="mb-3">
+        {{ form.ride_leader.label(class="form-label fw-semibold") }}
+        {{ form.ride_leader(class="form-control", placeholder="Your name or leave blank") }}
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+      <h5 class="mb-3">Route &amp; Media</h5>
+
+      <div class="mb-3">
+        {{ form.route_url.label(class="form-label fw-semibold") }}
+        {{ form.route_url(class="form-control" + (" is-invalid" if form.route_url.errors else ""),
+                          placeholder="https://ridewithgps.com/routes/...") }}
+        {% for e in form.route_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.video_url.label(class="form-label fw-semibold") }}
+        {{ form.video_url(class="form-control" + (" is-invalid" if form.video_url.errors else ""),
+                          placeholder="https://youtube.com/watch?v=...") }}
+        {% for e in form.video_url.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="mb-3">
+        {{ form.description.label(class="form-label fw-semibold") }}
+        {{ form.description(class="form-control", rows=4) }}
+      </div>
+    </div>
+
+    <div class="card border-0 shadow-sm p-4 mb-4">
+      <h5 class="mb-3">Privacy</h5>
+      <div class="form-check form-switch">
+        {{ form.is_private(class="form-check-input", role="switch") }}
+        {{ form.is_private.label(class="form-check-label fw-semibold") }}
+      </div>
+      <div class="text-muted small mt-2">
+        <strong>Private:</strong> Only people you invite (or approve) can see the ride details.
+        The URL can be shared but the details stay hidden until access is granted.<br>
+        <strong>Public:</strong> The ride appears on the discover map and anyone can join.
+      </div>
+    </div>
+
+    <div class="d-flex gap-2">
+      {{ form.submit(class="btn btn-rbc px-4") }}
+      <a href="{{ url_for('user_rides.detail', ride_id=ride.id) if ride else url_for('user_rides.list_rides') }}"
+         class="btn btn-outline-secondary">Cancel</a>
+    </div>
+  </form>
+</div>
+{% endblock %}

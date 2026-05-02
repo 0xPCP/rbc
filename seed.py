@@ -8,7 +8,7 @@ from datetime import date, time, datetime, timezone
 from app import create_app
 from app.extensions import db, bcrypt
 from app.models import (User, Club, ClubMembership, ClubAdmin, ClubWaiver,
-                         WaiverSignature, Ride, RideSignup)
+                         WaiverSignature, Ride, RideSignup, UserRideInvite)
 
 app = create_app()
 
@@ -448,13 +448,81 @@ with app.app_context():
     db.session.commit()
     print("Created signups")
 
+    # ── User-owned rides ──────────────────────────────────────────────────────
+    from datetime import timedelta
+    today = date.today()
+    next_sat = today + timedelta(days=(5 - today.weekday()) % 7 or 7)
+    next_sun = next_sat + timedelta(days=1)
+    next_fri = next_sat - timedelta(days=1)
+
+    # Phil's public ride — anyone can join
+    phil_public = Ride(
+        owner_id=phil.id, club_id=None, is_private=False,
+        title='Saturday Gravel Grinder w/ Phil',
+        date=next_sat, time=time(8, 0),
+        meeting_location='Algonkian Regional Park, 47001 Fairway Dr, Sterling, VA',
+        distance_miles=42, elevation_feet=2200,
+        pace_category='B', ride_type='gravel',
+        ride_leader='phil',
+        route_url='https://ridewithgps.com/routes/31799369',
+        description='Dirt roads and W&OD connector. Gravel bikes recommended but hybrid OK.',
+    )
+
+    # Phil's private ride — invite-only
+    phil_private = Ride(
+        owner_id=phil.id, club_id=None, is_private=True,
+        title='Phil\'s Secret Hammerfest (private)',
+        date=next_sun, time=time(7, 30),
+        meeting_location='Starbucks on Broad St, Ashburn, VA',
+        distance_miles=65, elevation_feet=4000,
+        pace_category='A', ride_type='road',
+        ride_leader='phil',
+        description='Private fast group. Invite only.',
+    )
+
+    # jsmith's public ride
+    jsmith_ride = Ride(
+        owner_id=jsmith.id, club_id=None, is_private=False,
+        title='Friday Evening Spin',
+        date=next_fri, time=time(18, 0),
+        meeting_location='Lake Fairfax Park, 1400 Lake Fairfax Dr, Reston, VA',
+        distance_miles=22, elevation_feet=700,
+        pace_category='C', ride_type='social',
+        ride_leader='jsmith',
+        description='Easy end-of-week ride. All paces welcome.',
+    )
+
+    db.session.add_all([phil_public, phil_private, jsmith_ride])
+    db.session.flush()
+
+    # Auto-signup owners
+    db.session.add_all([
+        RideSignup(ride_id=phil_public.id,  user_id=phil.id),
+        RideSignup(ride_id=phil_private.id, user_id=phil.id),
+        RideSignup(ride_id=jsmith_ride.id,  user_id=jsmith.id),
+    ])
+
+    # mbaker has accepted an invitation to Phil's private ride
+    mb_invite = UserRideInvite(ride_id=phil_private.id, user_id=mbaker.id, status='accepted')
+    db.session.add(mb_invite)
+    db.session.add(RideSignup(ride_id=phil_private.id, user_id=mbaker.id))
+
+    # kroller has requested access to Phil's private ride (pending)
+    db.session.add(UserRideInvite(ride_id=phil_private.id, user_id=kroller.id, status='requested'))
+
+    # twheels is signed up for Phil's public ride
+    db.session.add(RideSignup(ride_id=phil_public.id, user_id=twheels.id))
+
+    db.session.commit()
+    print("Created 3 user-owned rides (2 for phil, 1 for jsmith)")
+
     print("\nSeed complete!")
     print("\nLogin credentials (all use password: password123 unless noted):")
     print("  superadmin@cyclingclub.dev  — global superadmin")
     print("  test@pcp.dev / password     — RBC club admin (testing account)")
-    print("  phil@pcp.dev                — RBC member + NVCC pending")
+    print("  phil@pcp.dev                — RBC member + NVCC pending + 2 personal rides")
     print("  dave.keller@...             — RBC club admin")
     print("  admin@nvcc.dev              — NVCC club admin (manual-approval)")
     print("  admin@artemis.dev           — Artemis club admin")
-    print("  john.smith@...              — RBC member")
-    print("  mary.baker@...              — RBC + Artemis member")
+    print("  john.smith@...              — RBC member + 1 personal ride")
+    print("  mary.baker@...              — RBC + Artemis member, invited to Phil's private ride")

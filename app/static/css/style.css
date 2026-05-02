@@ -665,6 +665,8 @@ body {
 }
 .admin-stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 2.2rem; font-weight: 700; color: var(--rbc-green-dark); }
 .admin-stat-label { font-size: .85rem; color: var(--rbc-gray); }
+.admin-stat-card--link { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.admin-stat-card--link:hover { border-color: var(--rbc-green); box-shadow: 0 2px 10px rgba(0,0,0,.08); }
 
 .rbc-table thead th { background: var(--rbc-green-pale); font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--rbc-green-dark); border-color: var(--rbc-border); }
 .rbc-table td { vertical-align: middle; }

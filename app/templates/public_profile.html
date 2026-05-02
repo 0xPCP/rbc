@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}{{ profile_user.username }} — Cycling Clubs{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>{{ profile_user.username }}</h1>
+    {% if profile_user.bio %}
+    <p class="mb-0" style="color:rgba(255,255,255,.85)">{{ profile_user.bio }}</p>
+    {% endif %}
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row gy-4">
+
+    <div class="col-lg-4">
+      <div class="detail-card mb-3">
+        <h5 class="detail-card-title">About</h5>
+        <dl class="detail-dl mb-0">
+          <dt>Member since</dt>
+          <dd>{{ profile_user.created_at.strftime('%B %Y') }}</dd>
+          {% if profile_user.gender %}
+          <dt>Gender</dt>
+          <dd>{{ profile_user.gender | capitalize }}</dd>
+          {% endif %}
+        </dl>
+        {% if profile_user.strava_id %}
+        <div class="mt-3">
+          <a href="https://www.strava.com/athletes/{{ profile_user.strava_id }}"
+             target="_blank" rel="noopener"
+             class="btn btn-sm btn-outline-secondary w-100">
+            View on Strava ↗
+          </a>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="detail-card">
+        <h5 class="detail-card-title">Clubs</h5>
+        {% set public_memberships = profile_user.club_memberships
+             | selectattr('club.is_private', 'equalto', false)
+             | selectattr('status', 'equalto', 'active')
+             | list %}
+        {% if public_memberships %}
+        <ul class="list-unstyled mb-0">
+          {% for m in public_memberships %}
+          <li class="mb-1">
+            <a href="{{ url_for('clubs.home', slug=m.club.slug) }}">{{ m.club.name }}</a>
+            {% if m.club.city %}<span class="text-muted small">— {{ m.club.city }}, {{ m.club.state }}</span>{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted small mb-0">No public club memberships.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="detail-card">
+        <h5 class="detail-card-title">Recent Rides</h5>
+        {% if public_signups %}
+        <ul class="list-unstyled mb-0">
+          {% for s in public_signups %}
+          <li class="mb-2 pb-2 border-bottom">
+            {% if s.ride.owner_id %}
+              <a href="{{ url_for('user_rides.detail', ride_id=s.ride.id) }}"
+                 class="fw-semibold small text-decoration-none">{{ s.ride.title }}</a>
+            {% else %}
+              <a href="{{ url_for('clubs.ride_detail', slug=s.ride.club.slug, ride_id=s.ride.id) }}"
+                 class="fw-semibold small text-decoration-none">{{ s.ride.title }}</a>
+            {% endif %}
+            <div class="text-muted" style="font-size:.8rem">
+              {{ s.ride.date | strftime('%b %-d, %Y') }}
+              &bull; {{ s.ride.distance_miles }} mi
+              {% if s.ride.elevation_feet %}&bull; {{ s.ride.elevation_feet }} ft{% endif %}
+              {% if s.ride.club %}
+              &bull; <a href="{{ url_for('clubs.home', slug=s.ride.club.slug) }}" class="text-muted">{{ s.ride.club.name }}</a>
+              {% endif %}
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted small mb-0">No public ride history yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

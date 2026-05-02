@@ -1,0 +1,93 @@
+# French translations for Cycling Clubs
+msgid ""
+msgstr ""
+"Project-Id-Version: CyclingClubs 1.0\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Find Clubs"
+msgstr "Trouver des clubs"
+
+msgid "Discover Rides"
+msgstr "Découvrir des sorties"
+
+msgid "Map"
+msgstr "Carte"
+
+msgid "About"
+msgstr "À propos"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "Profile"
+msgstr "Profil"
+
+msgid "My Rides"
+msgstr "Mes sorties"
+
+msgid "Sign Out"
+msgstr "Se déconnecter"
+
+msgid "Sign In"
+msgstr "Se connecter"
+
+msgid "Join"
+msgstr "Rejoindre"
+
+msgid "Your local cycling community"
+msgstr "Votre communauté cycliste locale"
+
+msgid "Quick Links"
+msgstr "Liens rapides"
+
+msgid "Find a Club"
+msgstr "Trouver un club"
+
+msgid "Create Account"
+msgstr "Créer un compte"
+
+msgid "Open Source"
+msgstr "Open Source"
+
+msgid "Language"
+msgstr "Langue"
+
+msgid "Don't have an account?"
+msgstr "Pas encore de compte ?"
+
+msgid "Join for free"
+msgstr "Rejoindre gratuitement"
+
+msgid "Already have an account?"
+msgstr "Vous avez déjà un compte ?"
+
+msgid "Sign in"
+msgstr "Se connecter"
+
+msgid "Profile updated."
+msgstr "Profil mis à jour."
+
+msgid "That username is already taken."
+msgstr "Ce nom d'utilisateur est déjà pris."
+
+msgid "An account with that email already exists."
+msgstr "Un compte avec cet e-mail existe déjà."
+
+msgid "Zip code saved but could not be geocoded."
+msgstr "Code postal enregistré mais non géocodé."
+
+msgid "Invalid email or password."
+msgstr "E-mail ou mot de passe invalide."
+
+msgid "Account created — you have been granted admin access as the first user."
+msgstr "Compte créé — vous avez obtenu l'accès administrateur en tant que premier utilisateur."
+
+msgid "Account created! You can now sign in."
+msgstr "Compte créé ! Vous pouvez maintenant vous connecter."
+
+msgid "This account has been deactivated. Please contact support."
+msgstr "Ce compte a été désactivé. Veuillez contacter le support."

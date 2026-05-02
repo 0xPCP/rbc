@@ -1,0 +1,93 @@
+# Spanish translations for Cycling Clubs
+msgid ""
+msgstr ""
+"Project-Id-Version: CyclingClubs 1.0\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Find Clubs"
+msgstr "Buscar clubes"
+
+msgid "Discover Rides"
+msgstr "Descubrir rutas"
+
+msgid "Map"
+msgstr "Mapa"
+
+msgid "About"
+msgstr "Acerca de"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "Profile"
+msgstr "Perfil"
+
+msgid "My Rides"
+msgstr "Mis rutas"
+
+msgid "Sign Out"
+msgstr "Cerrar sesión"
+
+msgid "Sign In"
+msgstr "Iniciar sesión"
+
+msgid "Join"
+msgstr "Unirse"
+
+msgid "Your local cycling community"
+msgstr "Tu comunidad ciclista local"
+
+msgid "Quick Links"
+msgstr "Enlaces rápidos"
+
+msgid "Find a Club"
+msgstr "Buscar un club"
+
+msgid "Create Account"
+msgstr "Crear cuenta"
+
+msgid "Open Source"
+msgstr "Open Source"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Don't have an account?"
+msgstr "¿No tienes cuenta?"
+
+msgid "Join for free"
+msgstr "Únete gratis"
+
+msgid "Already have an account?"
+msgstr "¿Ya tienes cuenta?"
+
+msgid "Sign in"
+msgstr "Iniciar sesión"
+
+msgid "Profile updated."
+msgstr "Perfil actualizado."
+
+msgid "That username is already taken."
+msgstr "Ese nombre de usuario ya está en uso."
+
+msgid "An account with that email already exists."
+msgstr "Ya existe una cuenta con ese correo electrónico."
+
+msgid "Zip code saved but could not be geocoded."
+msgstr "Código postal guardado pero no geocodificado."
+
+msgid "Invalid email or password."
+msgstr "Correo electrónico o contraseña inválidos."
+
+msgid "Account created — you have been granted admin access as the first user."
+msgstr "Cuenta creada — se le ha otorgado acceso de administrador como primer usuario."
+
+msgid "Account created! You can now sign in."
+msgstr "¡Cuenta creada! Ahora puede iniciar sesión."
+
+msgid "This account has been deactivated. Please contact support."
+msgstr "Esta cuenta ha sido desactivada. Por favor contacte al soporte."

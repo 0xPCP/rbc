@@ -3,6 +3,7 @@ from flask_login import LoginManager
 from flask_bcrypt import Bcrypt
 from flask_wtf.csrf import CSRFProtect
 from flask_mail import Mail
+from flask_babel import Babel
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -11,3 +12,4 @@ login_manager.login_view = 'auth.login'
 login_manager.login_message_category = 'info'
 csrf = CSRFProtect()
 mail = Mail()
+babel = Babel()

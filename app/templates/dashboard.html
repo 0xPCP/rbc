@@ -27,11 +27,19 @@
             <div class="flex-grow-1">
               <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                 <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
-                <span class="text-muted small">{{ ride.club.name }}</span>
+                {% if ride.owner_id %}
+                  <span class="badge bg-primary">Your Ride</span>
+                {% else %}
+                  <span class="text-muted small">{{ ride.club.name }}</span>
+                {% endif %}
                 {% if ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>{% endif %}
                 {% if w %}{% include '_weather_chip.html' with context %}{% endif %}
               </div>
-              <a href="{{ url_for('clubs.ride_detail', slug=ride.club.slug, ride_id=ride.id) }}" class="ride-title">{{ ride.title }}</a>
+              {% if ride.owner_id %}
+                <a href="{{ url_for('user_rides.detail', ride_id=ride.id) }}" class="ride-title">{{ ride.title }}</a>
+              {% else %}
+                <a href="{{ url_for('clubs.ride_detail', slug=ride.club.slug, ride_id=ride.id) }}" class="ride-title">{{ ride.title }}</a>
+              {% endif %}
               <p class="ride-meta mb-0">
                 {{ ride.time.strftime('%I:%M %p').lstrip('0') }} &bull;
                 {{ ride.distance_miles }} mi
@@ -61,10 +69,18 @@
             <div class="flex-grow-1">
               <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                 <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
-                <span class="text-muted small">{{ ride.club.name }}</span>
+                {% if ride.owner_id %}
+                  <span class="text-muted small">@{{ ride.owner.username }}</span>
+                {% else %}
+                  <span class="text-muted small">{{ ride.club.name }}</span>
+                {% endif %}
                 {% if w %}{% include '_weather_chip.html' with context %}{% endif %}
               </div>
-              <a href="{{ url_for('clubs.ride_detail', slug=ride.club.slug, ride_id=ride.id) }}" class="ride-title">{{ ride.title }}</a>
+              {% if ride.owner_id %}
+                <a href="{{ url_for('user_rides.detail', ride_id=ride.id) }}" class="ride-title">{{ ride.title }}</a>
+              {% else %}
+                <a href="{{ url_for('clubs.ride_detail', slug=ride.club.slug, ride_id=ride.id) }}" class="ride-title">{{ ride.title }}</a>
+              {% endif %}
               <p class="ride-meta mb-0">
                 {{ ride.time.strftime('%I:%M %p').lstrip('0') }} &bull;
                 {{ ride.distance_miles }} mi

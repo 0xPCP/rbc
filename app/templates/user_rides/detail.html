@@ -1,0 +1,299 @@
+{% extends "base.html" %}
+{% block title %}{{ ride.title }} — Cycling Clubs{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:960px">
+  <nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+      {% if access == 'owner' %}
+        <li class="breadcrumb-item"><a href="{{ url_for('user_rides.list_rides') }}">My Rides</a></li>
+      {% else %}
+        <li class="breadcrumb-item"><a href="{{ url_for('main.discover') }}">Discover</a></li>
+      {% endif %}
+      <li class="breadcrumb-item active">{{ ride.title }}</li>
+    </ol>
+  </nav>
+
+  {# ── Locked view: none / requested / declined ─────────────────────────── #}
+  {% if access in ('none', 'requested', 'declined') %}
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm text-center p-5">
+        <div style="font-size:3rem">🔒</div>
+        <h2 class="mt-3 mb-1">{{ ride.title }}</h2>
+        <p class="text-muted mb-1">
+          {{ ride.date | strftime('%A, %B %-d, %Y') }}
+          at {{ ride.time | strftime('%-I:%M %p') }}
+        </p>
+        <p class="text-muted small mb-4">Private ride · details hidden until access is granted</p>
+
+        {% if access == 'requested' %}
+          <div class="alert alert-info mb-0">
+            <strong>Request pending</strong><br>
+            The ride creator will review your request. Check back soon.
+          </div>
+        {% elif access == 'declined' %}
+          <div class="alert alert-warning mb-0">
+            Your access request was declined by the ride creator.
+          </div>
+        {% else %}
+          {# access == 'none' #}
+          {% if current_user.is_authenticated %}
+            <form method="post" action="{{ url_for('user_rides.request_access', ride_id=ride.id) }}">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button class="btn btn-rbc w-100">Request Access</button>
+            </form>
+          {% else %}
+            <a href="{{ url_for('auth.login', next=request.path) }}" class="btn btn-rbc w-100">Sign in to request access</a>
+          {% endif %}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# ── Full view: owner / public / accepted / invited ───────────────────── #}
+  {% else %}
+  <div class="row gy-4">
+
+    {# Left column: ride details #}
+    <div class="col-lg-8">
+      <div class="d-flex align-items-start gap-2 mb-3 flex-wrap">
+        <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
+        {% if ride.is_private %}
+          <span class="badge bg-secondary">Private</span>
+        {% else %}
+          <span class="badge bg-success">Public</span>
+        {% endif %}
+        {% if ride.is_cancelled %}
+          <span class="badge bg-danger">Cancelled</span>
+        {% endif %}
+        {% if access == 'invited' %}
+          <span class="badge bg-warning text-dark">You're invited!</span>
+        {% endif %}
+      </div>
+
+      <h1 class="mb-1">{{ ride.title }}</h1>
+      <p class="text-muted mb-4">
+        {{ ride.date | strftime('%A, %B %-d, %Y') }}
+        at {{ ride.time | strftime('%-I:%M %p') }}
+      </p>
+
+      <div class="card border-0 shadow-sm p-4 mb-3">
+        <h5 class="mb-3">Ride Details</h5>
+        <dl class="detail-dl">
+          <dt>Meeting Location</dt>
+          <dd>{{ ride.meeting_location }}</dd>
+
+          <dt>Distance</dt>
+          <dd>{{ ride.distance_miles }} miles{% if ride.elevation_feet %} &bull; {{ ride.elevation_feet }} ft elevation{% endif %}</dd>
+
+          {% if ride.max_riders %}
+          <dt>Capacity</dt>
+          <dd>{{ ride.signup_count }} / {{ ride.max_riders }} riders</dd>
+          {% endif %}
+
+          {% if ride.ride_leader %}
+          <dt>Ride Leader</dt>
+          <dd>{{ ride.ride_leader }}</dd>
+          {% endif %}
+
+          {% if ride.ride_type %}
+          <dt>Type</dt>
+          <dd>{{ ride.ride_type }}</dd>
+          {% endif %}
+
+          {% if ride.route_url %}
+          <dt>Route</dt>
+          <dd><a href="{{ ride.route_url }}" target="_blank" rel="noopener">View Route ↗</a></dd>
+          {% endif %}
+        </dl>
+      </div>
+
+      {% if ride.description %}
+      <div class="card border-0 shadow-sm p-4 mb-3">
+        <h5 class="mb-2">Notes</h5>
+        <p class="mb-0">{{ ride.description }}</p>
+      </div>
+      {% endif %}
+
+      {% if ride.ridewithgps_embed_url %}
+      <div class="card border-0 shadow-sm p-4 mb-3">
+        <h5 class="mb-3">
+          Route Map
+          <a href="{{ ride.route_url }}" target="_blank" rel="noopener" class="detail-card-link ms-2 small">Open on RideWithGPS ↗</a>
+        </h5>
+        <div class="rwgps-wrapper">
+          <iframe src="{{ ride.ridewithgps_embed_url }}" scrolling="no" allowfullscreen></iframe>
+        </div>
+      </div>
+      {% endif %}
+
+      {% if ride.embed_url %}
+      <div class="card border-0 shadow-sm p-4 mb-3">
+        <h5 class="mb-3">Video</h5>
+        <div class="video-wrapper">
+          <iframe src="{{ ride.embed_url }}" allowfullscreen></iframe>
+        </div>
+      </div>
+      {% endif %}
+
+      {# Owner management panel #}
+      {% if access == 'owner' %}
+      <div class="card border-0 shadow-sm p-4 mb-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">Manage Ride</h5>
+          <div class="d-flex gap-2">
+            <a href="{{ url_for('user_rides.edit', ride_id=ride.id) }}" class="btn btn-outline-secondary btn-sm">Edit</a>
+            <form method="post" action="{{ url_for('user_rides.delete', ride_id=ride.id) }}"
+                  onsubmit="return confirm('Delete this ride? This cannot be undone.')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button class="btn btn-outline-danger btn-sm">Delete</button>
+            </form>
+          </div>
+        </div>
+
+        {% if ride.is_private %}
+        <h6 class="text-muted mb-2">Invite someone</h6>
+        <form method="post" action="{{ url_for('user_rides.invite', ride_id=ride.id) }}" class="d-flex gap-2 mb-3">
+          {{ invite_form.hidden_tag() }}
+          {{ invite_form.identifier(class="form-control form-control-sm", placeholder="Username or email") }}
+          <button class="btn btn-rbc btn-sm text-nowrap">Send Invite</button>
+        </form>
+
+        {% if pending_invites %}
+        <h6 class="text-muted mb-2">Pending requests</h6>
+        <ul class="list-group list-group-flush mb-3">
+          {% for inv in pending_invites %}
+          <li class="list-group-item px-0 py-2 d-flex align-items-center justify-content-between">
+            <span>{{ inv.user.username }}</span>
+            <div class="d-flex gap-2">
+              <form method="post" action="{{ url_for('user_rides.approve_invite', ride_id=ride.id, invite_id=inv.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button class="btn btn-success btn-sm">Approve</button>
+              </form>
+              <form method="post" action="{{ url_for('user_rides.decline_invite', ride_id=ride.id, invite_id=inv.id) }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                <button class="btn btn-outline-danger btn-sm">Decline</button>
+              </form>
+            </div>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+        {% endif %}
+
+        {% if accepted_invites %}
+        <h6 class="text-muted mb-2">Riders with access</h6>
+        <ul class="list-group list-group-flush">
+          {% for inv in accepted_invites %}
+          <li class="list-group-item px-0 py-1 d-flex align-items-center justify-content-between">
+            <span>{{ inv.user.username }}</span>
+            <form method="post" action="{{ url_for('user_rides.decline_invite', ride_id=ride.id, invite_id=inv.id) }}"
+                  onsubmit="return confirm('Remove {{ inv.user.username }} from this ride?')">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button class="btn btn-outline-danger btn-sm">Remove</button>
+            </form>
+          </li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
+
+    {# Right column: signup sidebar #}
+    <div class="col-lg-4">
+      <div class="signup-card">
+        <div class="signup-count-big">{{ ride.signup_count }}</div>
+        <div class="signup-count-label">rider{{ 's' if ride.signup_count != 1 else '' }} signed up</div>
+
+        {% if not ride.is_cancelled %}
+
+          {# Owner is always in #}
+          {% if access == 'owner' %}
+            <p class="text-muted small mt-3 mb-0">You're the ride creator.</p>
+
+          {# Accepted — can leave #}
+          {% elif access == 'accepted' %}
+            {% if user_signup %}
+            <form method="post" action="{{ url_for('user_rides.unsignup', ride_id=ride.id) }}" class="mt-3">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button class="btn btn-outline-secondary w-100">Leave Ride</button>
+            </form>
+            {% else %}
+            <form method="post" action="{{ url_for('user_rides.signup', ride_id=ride.id) }}" class="mt-3">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button class="btn btn-rbc w-100">Join Ride</button>
+            </form>
+            {% endif %}
+
+          {# Invited — accept invitation #}
+          {% elif access == 'invited' %}
+            {% set my_invite = ride.invites | selectattr('user_id', 'eq', current_user.id) | first %}
+            {% if my_invite %}
+            <form method="post" action="{{ url_for('user_rides.accept_invite', ride_id=ride.id, invite_id=my_invite.id) }}" class="mt-3">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+              <button class="btn btn-rbc w-100">Accept Invitation</button>
+            </form>
+            {% endif %}
+
+          {# Public ride — standard join #}
+          {% elif access == 'public' %}
+            {% if current_user.is_authenticated %}
+              {% if ride.is_full %}
+                <button class="btn btn-secondary w-100 mt-3" disabled>Ride Full</button>
+              {% elif user_signup %}
+                <form method="post" action="{{ url_for('user_rides.unsignup', ride_id=ride.id) }}" class="mt-3">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <button class="btn btn-outline-secondary w-100">Cancel Signup</button>
+                </form>
+              {% else %}
+                <form method="post" action="{{ url_for('user_rides.signup', ride_id=ride.id) }}" class="mt-3">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <div class="form-check mb-2 text-start">
+                    <input class="form-check-input" type="checkbox" name="is_anonymous" id="anon-check" value="1">
+                    <label class="form-check-label small text-muted" for="anon-check">Sign up anonymously</label>
+                  </div>
+                  <button class="btn btn-rbc w-100">Sign Up</button>
+                </form>
+              {% endif %}
+            {% else %}
+              <p class="signup-login-cta">
+                <a href="{{ url_for('auth.login', next=request.path) }}">Sign in</a> to sign up for this ride.
+              </p>
+            {% endif %}
+          {% endif %}
+
+        {% else %}
+          <p class="text-danger mt-3 mb-0"><strong>This ride has been cancelled.</strong></p>
+        {% endif %}
+
+        {# Riders list — auth-gated, consistent with club ride behaviour #}
+        {% if ride.signups %}
+        <hr />
+        {% if current_user.is_authenticated %}
+        {% from '_macros.html' import signup_name %}
+        <h6 class="signup-list-title">Who's coming</h6>
+        <ul class="signup-list">
+          {% for s in ride.signups %}
+          <li>{{ signup_name(s, can_see_real=(access == 'owner')) }}</li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="signup-login-cta">
+          <a href="{{ url_for('auth.login', next=request.path) }}">Sign in</a> to see who's coming.
+        </p>
+        {% endif %}
+        {% endif %}
+      </div>
+
+      {# Ride creator attribution #}
+      <div class="text-muted small mt-3 text-center">
+        Ride by <strong>{{ ride.owner.username }}</strong>
+      </div>
+    </div>
+
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

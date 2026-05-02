@@ -1,0 +1,93 @@
+# Italian translations for Cycling Clubs
+msgid ""
+msgstr ""
+"Project-Id-Version: CyclingClubs 1.0\n"
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Find Clubs"
+msgstr "Trova club"
+
+msgid "Discover Rides"
+msgstr "Scopri uscite"
+
+msgid "Map"
+msgstr "Mappa"
+
+msgid "About"
+msgstr "Info"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "Profile"
+msgstr "Profilo"
+
+msgid "My Rides"
+msgstr "Le mie uscite"
+
+msgid "Sign Out"
+msgstr "Disconnettiti"
+
+msgid "Sign In"
+msgstr "Accedi"
+
+msgid "Join"
+msgstr "Iscriviti"
+
+msgid "Your local cycling community"
+msgstr "La tua comunità ciclistica locale"
+
+msgid "Quick Links"
+msgstr "Link rapidi"
+
+msgid "Find a Club"
+msgstr "Trova un club"
+
+msgid "Create Account"
+msgstr "Crea account"
+
+msgid "Open Source"
+msgstr "Open Source"
+
+msgid "Language"
+msgstr "Lingua"
+
+msgid "Don't have an account?"
+msgstr "Non hai un account?"
+
+msgid "Join for free"
+msgstr "Iscriviti gratuitamente"
+
+msgid "Already have an account?"
+msgstr "Hai già un account?"
+
+msgid "Sign in"
+msgstr "Accedi"
+
+msgid "Profile updated."
+msgstr "Profilo aggiornato."
+
+msgid "That username is already taken."
+msgstr "Questo nome utente è già in uso."
+
+msgid "An account with that email already exists."
+msgstr "Esiste già un account con questa email."
+
+msgid "Zip code saved but could not be geocoded."
+msgstr "CAP salvato ma non geocodificato."
+
+msgid "Invalid email or password."
+msgstr "Email o password non validi."
+
+msgid "Account created — you have been granted admin access as the first user."
+msgstr "Account creato — sei stato nominato amministratore come primo utente."
+
+msgid "Account created! You can now sign in."
+msgstr "Account creato! Ora puoi accedere."
+
+msgid "This account has been deactivated. Please contact support."
+msgstr "Questo account è stato disattivato. Contattare il supporto."

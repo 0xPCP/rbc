@@ -40,6 +40,68 @@
     </div>
   </div>
 
+  {# Management links #}
+  <div class="row g-3 mb-5">
+    <div class="col-6 col-lg-3">
+      <a href="{{ url_for('admin.users') }}" class="text-decoration-none">
+        <div class="admin-stat-card admin-stat-card--link">
+          <div class="admin-stat-num">{{ stats.total_members }}</div>
+          <div class="admin-stat-label">Manage Users ↗</div>
+        </div>
+      </a>
+    </div>
+    <div class="col-6 col-lg-3">
+      <div class="admin-stat-card">
+        <div class="admin-stat-num">{{ stats.inactive_users }}</div>
+        <div class="admin-stat-label">Inactive Accounts</div>
+      </div>
+    </div>
+  </div>
+
+  {# Super admins + popular clubs #}
+  <div class="row g-4 mb-5">
+
+    <div class="col-lg-5">
+      <div class="detail-card h-100">
+        <h5 class="detail-card-title">Super Admins</h5>
+        {% if super_admins %}
+        <ul class="list-unstyled mb-0">
+          {% for u in super_admins %}
+          <li class="mb-2 d-flex align-items-center justify-content-between">
+            <div>
+              <a href="{{ url_for('admin.user_detail', user_id=u.id) }}" class="fw-medium text-decoration-none">{{ u.username }}</a>
+              <div class="text-muted small">{{ u.email }}</div>
+            </div>
+            {% if not u.is_active %}<span class="badge bg-secondary">Inactive</span>{% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted mb-0 small">No super admins found.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-7">
+      <div class="detail-card h-100">
+        <h5 class="detail-card-title">Most Popular Clubs</h5>
+        {% if popular %}
+        <ul class="list-unstyled mb-0">
+          {% for row in popular %}
+          <li class="mb-2 d-flex align-items-center justify-content-between gap-2">
+            <a href="{{ url_for('clubs.home', slug=row.Club.slug) }}" class="text-decoration-none fw-medium">{{ row.Club.name }}</a>
+            <span class="text-muted small text-nowrap">{{ row.mc }} member{{ 's' if row.mc != 1 }}</span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted mb-0 small">No clubs yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+  </div>
+
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">All Clubs</h4>
     <a href="{{ url_for('admin.club_new') }}" class="btn btn-rbc btn-sm">+ New Club</a>

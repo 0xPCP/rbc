@@ -1,0 +1,93 @@
+# Portuguese translations for Cycling Clubs
+msgid ""
+msgstr ""
+"Project-Id-Version: CyclingClubs 1.0\n"
+"Language: pt\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Find Clubs"
+msgstr "Encontrar clubes"
+
+msgid "Discover Rides"
+msgstr "Descobrir percursos"
+
+msgid "Map"
+msgstr "Mapa"
+
+msgid "About"
+msgstr "Sobre"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "Profile"
+msgstr "Perfil"
+
+msgid "My Rides"
+msgstr "Minhas saídas"
+
+msgid "Sign Out"
+msgstr "Sair"
+
+msgid "Sign In"
+msgstr "Entrar"
+
+msgid "Join"
+msgstr "Juntar-se"
+
+msgid "Your local cycling community"
+msgstr "Sua comunidade ciclística local"
+
+msgid "Quick Links"
+msgstr "Links rápidos"
+
+msgid "Find a Club"
+msgstr "Encontrar um clube"
+
+msgid "Create Account"
+msgstr "Criar conta"
+
+msgid "Open Source"
+msgstr "Open Source"
+
+msgid "Language"
+msgstr "Idioma"
+
+msgid "Don't have an account?"
+msgstr "Não tem conta?"
+
+msgid "Join for free"
+msgstr "Juntar-se gratuitamente"
+
+msgid "Already have an account?"
+msgstr "Já tem conta?"
+
+msgid "Sign in"
+msgstr "Entrar"
+
+msgid "Profile updated."
+msgstr "Perfil atualizado."
+
+msgid "That username is already taken."
+msgstr "Este nome de utilizador já está em uso."
+
+msgid "An account with that email already exists."
+msgstr "Já existe uma conta com esse endereço de e-mail."
+
+msgid "Zip code saved but could not be geocoded."
+msgstr "Código postal guardado mas não geocodificado."
+
+msgid "Invalid email or password."
+msgstr "E-mail ou senha inválidos."
+
+msgid "Account created — you have been granted admin access as the first user."
+msgstr "Conta criada — você recebeu acesso de administrador como primeiro utilizador."
+
+msgid "Account created! You can now sign in."
+msgstr "Conta criada! Agora pode entrar."
+
+msgid "This account has been deactivated. Please contact support."
+msgstr "Esta conta foi desativada. Por favor contacte o suporte."

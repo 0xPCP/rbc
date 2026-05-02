@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ current_locale }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -22,16 +22,16 @@
     </button>
     <div class="collapse navbar-collapse" id="navMenu">
       <ul class="navbar-nav me-auto">
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('clubs.index') }}">Find Clubs</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.discover') }}">Discover Rides</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('clubs.club_map') }}">Map</a></li>
-        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.about') }}">About</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('clubs.index') }}">{{ _('Find Clubs') }}</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.discover') }}">{{ _('Discover Rides') }}</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('clubs.club_map') }}">{{ _('Map') }}</a></li>
+        <li class="nav-item"><a class="nav-link" href="{{ url_for('main.about') }}">{{ _('About') }}</a></li>
       </ul>
       <ul class="navbar-nav ms-auto align-items-lg-center">
         {% if current_user.is_authenticated %}
           {% if current_user.is_admin %}
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('admin.dashboard') }}">Admin</a>
+            <a class="nav-link" href="{{ url_for('admin.dashboard') }}">{{ _('Admin') }}</a>
           </li>
           {% endif %}
           <li class="nav-item dropdown">
@@ -39,17 +39,35 @@
               {{ current_user.username }}
             </a>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">{{ _('Profile') }}</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('user_rides.list_rides') }}">{{ _('My Rides') }}</a></li>
               <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">Sign Out</a></li>
+              <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}">{{ _('Sign Out') }}</a></li>
             </ul>
           </li>
         {% else %}
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">Sign In</a></li>
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">{{ _('Sign In') }}</a></li>
           <li class="nav-item ms-lg-2">
-            <a class="btn btn-rbc-sm" href="{{ url_for('auth.register') }}">Join</a>
+            <a class="btn btn-rbc-sm" href="{{ url_for('auth.register') }}">{{ _('Join') }}</a>
           </li>
         {% endif %}
+
+        <!-- Language switcher -->
+        <li class="nav-item dropdown ms-lg-2">
+          <a class="nav-link dropdown-toggle px-1" href="#" data-bs-toggle="dropdown" aria-label="{{ _('Language') }}" title="{{ _('Language') }}">
+            🌐
+          </a>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% for code, name in languages.items() %}
+            <li>
+              <a class="dropdown-item{% if current_locale == code %} active{% endif %}"
+                 href="{{ url_for('main.set_language', lang=code) }}">
+                {{ name }}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </li>
       </ul>
     </div>
   </div>
@@ -76,20 +94,20 @@
     <div class="row gy-3">
       <div class="col-md-4">
         <div class="footer-brand">⬡ Cycling Clubs</div>
-        <p class="footer-tagline">Your local cycling community</p>
+        <p class="footer-tagline">{{ _('Your local cycling community') }}</p>
       </div>
       <div class="col-md-4">
-        <h6 class="footer-heading">Quick Links</h6>
+        <h6 class="footer-heading">{{ _('Quick Links') }}</h6>
         <ul class="footer-links">
-          <li><a href="{{ url_for('clubs.index') }}">Find a Club</a></li>
-          <li><a href="{{ url_for('main.about') }}">About</a></li>
+          <li><a href="{{ url_for('clubs.index') }}">{{ _('Find a Club') }}</a></li>
+          <li><a href="{{ url_for('main.about') }}">{{ _('About') }}</a></li>
           {% if not current_user.is_authenticated %}
-          <li><a href="{{ url_for('auth.register') }}">Create Account</a></li>
+          <li><a href="{{ url_for('auth.register') }}">{{ _('Create Account') }}</a></li>
           {% endif %}
         </ul>
       </div>
       <div class="col-md-4">
-        <h6 class="footer-heading">Open Source</h6>
+        <h6 class="footer-heading">{{ _('Open Source') }}</h6>
         <ul class="footer-links">
           <li><a href="https://github.com/0xPCP/rbc" target="_blank" rel="noopener">GitHub</a></li>
         </ul>

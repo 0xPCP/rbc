@@ -1,7 +1,30 @@
 import sys
-from flask import Flask
+from flask import Flask, request, session
+from flask_login import current_user
 from .config import Config
-from .extensions import db, login_manager, bcrypt, csrf, mail
+from .extensions import db, login_manager, bcrypt, csrf, mail, babel
+
+
+SUPPORTED_LANGUAGES = ['en', 'fr', 'es', 'it', 'nl', 'de', 'pt']
+
+LANGUAGE_NAMES = {
+    'en': 'English',
+    'fr': 'Français',
+    'es': 'Español',
+    'it': 'Italiano',
+    'nl': 'Nederlands',
+    'de': 'Deutsch',
+    'pt': 'Português',
+}
+
+
+def get_locale():
+    if current_user.is_authenticated and current_user.language:
+        return current_user.language
+    lang = session.get('language')
+    if lang and lang in SUPPORTED_LANGUAGES:
+        return lang
+    return request.accept_languages.best_match(SUPPORTED_LANGUAGES, default='en')
 
 
 def _strftime_filter(value, fmt):
@@ -20,6 +43,7 @@ def create_app(config_class=Config):
     login_manager.init_app(app)
     csrf.init_app(app)
     mail.init_app(app)
+    babel.init_app(app, locale_selector=get_locale)
 
     from .routes.main import main_bp
     from .routes.auth import auth_bp
@@ -28,6 +52,7 @@ def create_app(config_class=Config):
     from .routes.strava import strava_bp
     from .routes.api import api_bp
     from .routes.media import media_bp
+    from .routes.user_rides import user_rides_bp
 
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
@@ -36,6 +61,7 @@ def create_app(config_class=Config):
     app.register_blueprint(strava_bp, url_prefix='/strava')
     app.register_blueprint(api_bp, url_prefix='/api')
     app.register_blueprint(media_bp)
+    app.register_blueprint(user_rides_bp, url_prefix='/my-rides')
 
     from datetime import datetime
     from .version import __version__
@@ -46,7 +72,13 @@ def create_app(config_class=Config):
 
     @app.context_processor
     def inject_globals():
-        return {'now': datetime.utcnow(), 'version': __version__}
+        from flask_babel import get_locale as _get_locale
+        return {
+            'now': datetime.utcnow(),
+            'version': __version__,
+            'current_locale': str(_get_locale() or 'en'),
+            'languages': LANGUAGE_NAMES,
+        }
 
     # Start weather auto-cancel scheduler (skipped in testing)
     if not app.config.get('TESTING'):

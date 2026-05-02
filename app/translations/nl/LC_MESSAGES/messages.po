@@ -1,0 +1,93 @@
+# Dutch translations for Cycling Clubs
+msgid ""
+msgstr ""
+"Project-Id-Version: CyclingClubs 1.0\n"
+"Language: nl\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Find Clubs"
+msgstr "Clubs zoeken"
+
+msgid "Discover Rides"
+msgstr "Ritten ontdekken"
+
+msgid "Map"
+msgstr "Kaart"
+
+msgid "About"
+msgstr "Over ons"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "Profile"
+msgstr "Profiel"
+
+msgid "My Rides"
+msgstr "Mijn ritten"
+
+msgid "Sign Out"
+msgstr "Uitloggen"
+
+msgid "Sign In"
+msgstr "Inloggen"
+
+msgid "Join"
+msgstr "Aanmelden"
+
+msgid "Your local cycling community"
+msgstr "Uw lokale wielrennersgemeenschap"
+
+msgid "Quick Links"
+msgstr "Snelle links"
+
+msgid "Find a Club"
+msgstr "Club zoeken"
+
+msgid "Create Account"
+msgstr "Account aanmaken"
+
+msgid "Open Source"
+msgstr "Open Source"
+
+msgid "Language"
+msgstr "Taal"
+
+msgid "Don't have an account?"
+msgstr "Geen account?"
+
+msgid "Join for free"
+msgstr "Gratis aanmelden"
+
+msgid "Already have an account?"
+msgstr "Al een account?"
+
+msgid "Sign in"
+msgstr "Inloggen"
+
+msgid "Profile updated."
+msgstr "Profiel bijgewerkt."
+
+msgid "That username is already taken."
+msgstr "Die gebruikersnaam is al in gebruik."
+
+msgid "An account with that email already exists."
+msgstr "Er bestaat al een account met dat e-mailadres."
+
+msgid "Zip code saved but could not be geocoded."
+msgstr "Postcode opgeslagen maar niet gegeocodeerd."
+
+msgid "Invalid email or password."
+msgstr "Ongeldig e-mailadres of wachtwoord."
+
+msgid "Account created — you have been granted admin access as the first user."
+msgstr "Account aangemaakt — u heeft beheerderstoegang als eerste gebruiker."
+
+msgid "Account created! You can now sign in."
+msgstr "Account aangemaakt! U kunt nu inloggen."
+
+msgid "This account has been deactivated. Please contact support."
+msgstr "Dit account is gedeactiveerd. Neem contact op met de support."

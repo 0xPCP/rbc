@@ -1,5 +1,5 @@
 import re
-from datetime import datetime, timezone
+from datetime import datetime, date, timedelta, timezone
 from flask_login import UserMixin
 from .extensions import db, login_manager
 
@@ -16,7 +16,8 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
-    is_admin = db.Column(db.Boolean, default=False, nullable=False)  # global superadmin
+    is_admin   = db.Column(db.Boolean, default=False, nullable=False)  # global superadmin
+    is_active  = db.Column(db.Boolean, default=True,  nullable=False)  # False = account disabled
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     # Profile / location
@@ -31,6 +32,11 @@ class User(db.Model, UserMixin):
 
     # Gear inventory — list of item IDs from gear.py GEAR_CATALOG
     gear_inventory = db.Column(db.JSON, nullable=True)
+
+    # Public profile
+    gender   = db.Column(db.String(10), nullable=True)  # 'male' | 'female' | 'nonbinary'
+    bio      = db.Column(db.Text, nullable=True)
+    language = db.Column(db.String(5), nullable=True)   # preferred UI language code
 
     # Strava linking
     strava_id = db.Column(db.BigInteger, unique=True, nullable=True)
@@ -94,6 +100,17 @@ class User(db.Model, UserMixin):
         return WaiverSignature.query.filter_by(
             user_id=self.id, club_id=club.id, year=year
         ).first() is not None
+
+    def user_rides_this_week(self):
+        """Count of user-owned rides in the current calendar week (Mon–Sun)."""
+        today = date.today()
+        week_start = today - timedelta(days=today.weekday())
+        week_end = week_start + timedelta(days=6)
+        return Ride.query.filter(
+            Ride.owner_id == self.id,
+            Ride.date >= week_start,
+            Ride.date <= week_end,
+        ).count()
 
 
 class Club(db.Model):
@@ -338,7 +355,9 @@ class Ride(db.Model):
     __tablename__ = 'rides'
 
     id = db.Column(db.Integer, primary_key=True)
-    club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=False)
+    club_id = db.Column(db.Integer, db.ForeignKey('clubs.id'), nullable=True)
+    owner_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    is_private = db.Column(db.Boolean, default=False, nullable=False)
     title = db.Column(db.String(200), nullable=False)
     date = db.Column(db.Date, nullable=False)
     time = db.Column(db.Time, nullable=False)
@@ -366,6 +385,8 @@ class Ride(db.Model):
     comments = db.relationship('RideComment', backref='ride', lazy=True,
                                order_by='RideComment.created_at.asc()', cascade='all, delete-orphan')
     leader = db.relationship('User', foreign_keys=[leader_id])
+    owner = db.relationship('User', foreign_keys=[owner_id],
+                            backref=db.backref('owned_rides', lazy=True))
     recurrence_instances = db.relationship(
         'Ride', foreign_keys='Ride.recurrence_parent_id',
         backref=db.backref('recurrence_parent', remote_side='Ride.id'),
@@ -441,7 +462,32 @@ class RideSignup(db.Model):
     ride_id = db.Column(db.Integer, db.ForeignKey('rides.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     is_waitlist = db.Column(db.Boolean, default=False, nullable=False)
+    is_anonymous = db.Column(db.Boolean, default=False, nullable=False)
     attended = db.Column(db.Boolean, nullable=True)  # None=not recorded, True=showed up, False=no-show
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
 
     __table_args__ = (db.UniqueConstraint('ride_id', 'user_id', name='uq_ride_user'),)
+
+
+class UserRideInvite(db.Model):
+    """Tracks invitations and access requests for private user rides.
+
+    status values:
+      'invited'   — owner sent an explicit invitation
+      'requested' — visitor found the URL and asked to attend
+      'accepted'  — access confirmed (invite accepted or request approved)
+      'declined'  — owner rejected an access request
+    """
+    __tablename__ = 'user_ride_invites'
+
+    id = db.Column(db.Integer, primary_key=True)
+    ride_id = db.Column(db.Integer, db.ForeignKey('rides.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    status = db.Column(db.String(10), nullable=False, default='invited')
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
+
+    ride = db.relationship('Ride', backref=db.backref('invites', lazy=True,
+                           cascade='all, delete-orphan'))
+    user = db.relationship('User', foreign_keys=[user_id])
+
+    __table_args__ = (db.UniqueConstraint('ride_id', 'user_id', name='uq_user_ride_invite'),)

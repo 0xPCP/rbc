@@ -1,0 +1,93 @@
+# German translations for Cycling Clubs
+msgid ""
+msgstr ""
+"Project-Id-Version: CyclingClubs 1.0\n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgid "Find Clubs"
+msgstr "Clubs finden"
+
+msgid "Discover Rides"
+msgstr "Ausfahrten entdecken"
+
+msgid "Map"
+msgstr "Karte"
+
+msgid "About"
+msgstr "Über uns"
+
+msgid "Admin"
+msgstr "Admin"
+
+msgid "Profile"
+msgstr "Profil"
+
+msgid "My Rides"
+msgstr "Meine Ausfahrten"
+
+msgid "Sign Out"
+msgstr "Abmelden"
+
+msgid "Sign In"
+msgstr "Anmelden"
+
+msgid "Join"
+msgstr "Beitreten"
+
+msgid "Your local cycling community"
+msgstr "Ihre lokale Radsport-Community"
+
+msgid "Quick Links"
+msgstr "Schnelllinks"
+
+msgid "Find a Club"
+msgstr "Club finden"
+
+msgid "Create Account"
+msgstr "Konto erstellen"
+
+msgid "Open Source"
+msgstr "Open Source"
+
+msgid "Language"
+msgstr "Sprache"
+
+msgid "Don't have an account?"
+msgstr "Noch kein Konto?"
+
+msgid "Join for free"
+msgstr "Kostenlos beitreten"
+
+msgid "Already have an account?"
+msgstr "Bereits ein Konto?"
+
+msgid "Sign in"
+msgstr "Anmelden"
+
+msgid "Profile updated."
+msgstr "Profil aktualisiert."
+
+msgid "That username is already taken."
+msgstr "Dieser Benutzername ist bereits vergeben."
+
+msgid "An account with that email already exists."
+msgstr "Ein Konto mit dieser E-Mail-Adresse existiert bereits."
+
+msgid "Zip code saved but could not be geocoded."
+msgstr "Postleitzahl gespeichert, aber nicht geokodiert."
+
+msgid "Invalid email or password."
+msgstr "Ungültige E-Mail-Adresse oder Passwort."
+
+msgid "Account created — you have been granted admin access as the first user."
+msgstr "Konto erstellt — Sie erhalten als erster Benutzer Administratorzugang."
+
+msgid "Account created! You can now sign in."
+msgstr "Konto erstellt! Sie können sich jetzt anmelden."
+
+msgid "This account has been deactivated. Please contact support."
+msgstr "Dieses Konto wurde deaktiviert. Bitte wenden Sie sich an den Support."

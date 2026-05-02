@@ -36,6 +36,24 @@
             <div class="form-text">Used as the fallback location for the What to Wear widget on your dashboard.</div>
           </div>
 
+          <div class="mb-3">
+            {{ form.gender.label(class="form-label") }}
+            {{ form.gender(class="form-select") }}
+            <div class="form-text">Used to display "Anonymous Male/Female Rider" when you sign up anonymously for a ride.</div>
+          </div>
+
+          <div class="mb-3">
+            {{ form.bio.label(class="form-label") }}
+            {{ form.bio(class="form-control" + (" is-invalid" if form.bio.errors else ""), rows=3, placeholder="Tell other riders a bit about yourself (optional). Visible on your public profile.") }}
+            {% for e in form.bio.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+          </div>
+
+          <div class="mb-3">
+            {{ form.language.label(class="form-label") }}
+            {{ form.language(class="form-select") }}
+            <div class="form-text">Overrides automatic language detection from your browser.</div>
+          </div>
+
           <hr class="my-3">
           <h6 class="mb-1">Emergency Contact <span class="text-muted fw-normal">(optional)</span></h6>
           <p class="text-muted small mb-3">Only visible to club ride leaders and admins on ride day.</p>
@@ -70,6 +88,11 @@
           <input type="hidden" name="username" value="{{ current_user.username }}">
           <input type="hidden" name="email" value="{{ current_user.email }}">
           <input type="hidden" name="zip_code" value="{{ current_user.zip_code or '' }}">
+          <input type="hidden" name="gender" value="{{ current_user.gender or '' }}">
+          <input type="hidden" name="bio" value="{{ current_user.bio or '' }}">
+          <input type="hidden" name="language" value="{{ current_user.language or '' }}">
+          <input type="hidden" name="emergency_contact_name" value="{{ current_user.emergency_contact_name or '' }}">
+          <input type="hidden" name="emergency_contact_phone" value="{{ current_user.emergency_contact_phone or '' }}">
 
           {% for category, items in gear_catalog.items() %}
           <div class="mb-3">
@@ -154,13 +177,21 @@
           <ul class="list-unstyled mb-0">
             {% for s in past_signups %}
             <li class="mb-2 pb-2 border-bottom">
-              <a href="{{ url_for('clubs.ride_detail', slug=s.ride.club.slug, ride_id=s.ride.id) }}"
-                 class="fw-semibold small text-decoration-none">{{ s.ride.title }}</a>
+              {% if s.ride.owner_id %}
+                <a href="{{ url_for('user_rides.detail', ride_id=s.ride.id) }}"
+                   class="fw-semibold small text-decoration-none">{{ s.ride.title }}</a>
+              {% else %}
+                <a href="{{ url_for('clubs.ride_detail', slug=s.ride.club.slug, ride_id=s.ride.id) }}"
+                   class="fw-semibold small text-decoration-none">{{ s.ride.title }}</a>
+              {% endif %}
               <div class="text-muted" style="font-size:.8rem">
-                {{ s.ride.date.strftime('%b %d, %Y') }}
+                {{ s.ride.date | strftime('%b %-d, %Y') }}
                 &bull; {{ s.ride.distance_miles }} mi
                 {% if s.ride.elevation_feet %}&bull; {{ s.ride.elevation_feet }} ft{% endif %}
+                {% if s.ride.club %}
                 &bull; <a href="{{ url_for('clubs.home', slug=s.ride.club.slug) }}" class="text-muted">{{ s.ride.club.name }}</a>
+                {% endif %}
+                {% if s.is_anonymous %}<span class="badge bg-secondary ms-1" style="font-size:.6rem">anon</span>{% endif %}
               </div>
             </li>
             {% endfor %}
