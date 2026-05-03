@@ -21,6 +21,9 @@ body {
   flex-direction: column;
   min-height: 100vh;
 }
+body.club-page {
+  background: var(--rbc-club-bg, #fff);
+}
 
 /* ── Navbar ─────────────────────────────────────────────────────────────── */
 .rbc-navbar {
@@ -48,10 +51,10 @@ body {
 
 /* ── Club page nav (used on club home — no platform branding) ─────────────── */
 .club-page-nav {
-  background: #fff;
+  background: var(--rbc-primary-pale, #fff);
   padding: 0.5rem 0;
   box-shadow: 0 1px 3px rgba(0,0,0,.08);
-  border-bottom: 1px solid var(--rbc-border);
+  border-bottom: 1px solid var(--rbc-primary-pale, var(--rbc-border));
 }
 .club-nav-link {
   color: #374151 !important;
@@ -137,8 +140,8 @@ body {
 
 /* ── Next ride strip ─────────────────────────────────────────────────────── */
 .next-ride-strip {
-  background: var(--rbc-light);
-  border-bottom: 1px solid var(--rbc-border);
+  background: var(--rbc-primary-pale, var(--rbc-light));
+  border-bottom: 1px solid var(--rbc-primary-pale, var(--rbc-border));
   padding: .6rem 0;
 }
 .nrs-label {
@@ -156,8 +159,8 @@ body {
 
 /* ── Club tab bar ────────────────────────────────────────────────────────── */
 .club-tab-bar {
-  background: #fff;
-  border-bottom: 2px solid var(--rbc-border);
+  background: var(--rbc-primary-pale, #fff);
+  border-bottom: 2px solid var(--rbc-primary-pale, var(--rbc-border));
   position: sticky;
   top: 0;
   z-index: 100;
@@ -200,8 +203,8 @@ body {
 
 /* ── Club stats band ─────────────────────────────────────────────────────── */
 .club-stats-band {
-  background: var(--rbc-light);
-  border-bottom: 1px solid var(--rbc-border);
+  background: var(--rbc-primary-pale, var(--rbc-light));
+  border-bottom: 1px solid var(--rbc-primary-pale, var(--rbc-border));
 }
 .club-stats-row { }
 .club-stat-item {

@@ -65,6 +65,9 @@ with app.app_context():
         facebook_url='https://facebook.com/restonbikeclub',
         instagram_url='https://instagram.com/restonbikeclub',
         newsletter_url='https://restonbikeclub.org/newsletter',
+        theme_preset='forest',
+        theme_primary='#2d6a4f',
+        theme_accent='#e76f51',
         safety_guidelines=(
             'Always wear a properly fitted helmet — no exceptions.\n'
             'Obey all traffic laws and stop at red lights and stop signs.\n'
@@ -92,7 +95,7 @@ with app.app_context():
         require_membership=True,
         join_approval='manual',
         theme_preset='ocean',
-        theme_primary='#1a5276',
+        theme_primary='#1565c0',
         theme_accent='#f39c12',
     )
     artemis = Club(
@@ -109,6 +112,9 @@ with app.app_context():
         address='Ballston Common, 4238 Wilson Blvd',
         city='Arlington', state='VA', zip_code='22203',
         lat=38.8820, lng=-77.1128,
+        theme_preset='berry',
+        theme_primary='#6c3483',
+        theme_accent='#e74c3c',
     )
 
     db.session.add_all([rbc, nvcc, artemis])

@@ -59,11 +59,13 @@ def club_theme_vars(club):
 
     if club.theme_primary and is_valid_hex(club.theme_primary):
         p = club.theme_primary.lower()
-        result['--rbc-primary']     = p
-        result['--rbc-green-dark']  = _mix_black(p, 0.30)
-        result['--rbc-green']       = p
-        result['--rbc-green-light'] = _mix_white(p, 0.38)
-        result['--rbc-green-pale']  = _mix_white(p, 0.82)
+        result['--rbc-primary']      = p
+        result['--rbc-primary-pale'] = _mix_white(p, 0.90)   # nav, strips, tab bar
+        result['--rbc-club-bg']      = _mix_white(p, 0.96)   # page background tint
+        result['--rbc-green-dark']   = _mix_black(p, 0.30)
+        result['--rbc-green']        = p
+        result['--rbc-green-light']  = _mix_white(p, 0.38)
+        result['--rbc-green-pale']   = _mix_white(p, 0.82)
 
     if club.theme_accent and is_valid_hex(club.theme_accent):
         a = club.theme_accent.lower()
