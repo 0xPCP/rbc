@@ -25,11 +25,16 @@ def index():
 
 def _user_dashboard(today):
     """Home screen for logged-in users: upcoming rides across all subscribed clubs."""
-    # Clubs the user has joined
+    # Clubs the user has joined (active memberships)
     memberships = (ClubMembership.query
                    .filter_by(user_id=current_user.id)
                    .all())
     club_ids = [m.club_id for m in memberships]
+    active_club_ids = [m.club_id for m in memberships if m.status == 'active']
+    my_clubs = (Club.query
+                .filter(Club.id.in_(active_club_ids))
+                .order_by(Club.name.asc())
+                .all()) if active_club_ids else []
 
     # Rides the user is signed up for (upcoming only), across any club
     signed_up_ride_ids = set(
@@ -69,6 +74,7 @@ def _user_dashboard(today):
                            upcoming_club_rides=upcoming_club_rides,
                            weather=weather,
                            today=today,
+                           my_clubs=my_clubs,
                            suggested_clubs=suggested_clubs,
                            signed_up_ride_ids=signed_up_ride_ids)
 

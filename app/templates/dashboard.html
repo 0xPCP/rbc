@@ -122,8 +122,21 @@
         </div>
       </div>
 
+      <!-- My clubs -->
+      {% if my_clubs %}
+      <h4 class="mb-3">My Clubs</h4>
+      {% for club in my_clubs %}
+      <div class="card mb-2 border-0 shadow-sm">
+        <div class="card-body py-2 px-3">
+          <a href="{{ url_for('clubs.home', slug=club.slug) }}" class="fw-semibold text-decoration-none">{{ club.name }}</a>
+          {% if club.city %}<div class="text-muted small">{{ club.city }}, {{ club.state }}</div>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+      {% endif %}
+
       <!-- Discover clubs -->
-      <h4 class="mb-3">{{ _('Discover Clubs') }}</h4>
+      <h4 class="mb-3 {% if my_clubs %}mt-4{% endif %}">{{ _('Discover Clubs') }}</h4>
       {% if suggested_clubs %}
         {% for club in suggested_clubs %}
         <div class="card mb-2 border-0 shadow-sm">
