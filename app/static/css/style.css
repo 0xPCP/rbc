@@ -64,7 +64,7 @@ body {
 .club-hero {
   position: relative;
   min-height: 420px;
-  background: var(--rbc-navy);
+  background: var(--rbc-primary, var(--rbc-navy));
   display: flex;
   align-items: flex-end;
 }

@@ -81,7 +81,28 @@
     </table></div>
   </div>
   {% else %}
+  {% if stats.total_rides == 0 %}
+  <div class="card border-0 shadow-sm p-4 mt-2">
+    <h5 class="mb-3">🎉 Your club is set up! Here's what to do next:</h5>
+    <ul class="list-unstyled mb-0">
+      <li class="mb-2">✅ Club created</li>
+      <li class="mb-2">
+        <a href="{{ url_for('admin.ride_new', slug=club.slug) }}">➕ Create your first ride</a>
+        — add a date, distance, and pace so riders know what to expect
+      </li>
+      <li class="mb-2">
+        <a href="{{ url_for('admin.club_settings', slug=club.slug) }}">⚙️ Review club settings</a>
+        — set join approval, membership requirements, and your club description
+      </li>
+      <li class="mb-2">
+        <a href="{{ url_for('clubs.home', slug=club.slug) }}">🔗 Share your club page</a>
+        — send the link to riders so they can find and join your club
+      </li>
+    </ul>
+  </div>
+  {% else %}
   <p class="text-muted">No upcoming rides. <a href="{{ url_for('admin.ride_new', slug=club.slug) }}">Create one.</a></p>
+  {% endif %}
   {% endif %}
 </div>
 {% endblock %}

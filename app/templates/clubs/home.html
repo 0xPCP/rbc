@@ -86,6 +86,7 @@
           </form>
           {% elif is_pending %}
           <span class="btn btn-outline-light disabled">Pending Approval</span>
+          <p class="text-white-50 small mb-0 mt-1">Your request is under review. You'll be notified when approved.</p>
           {% else %}
           <form method="post" action="{{ url_for('clubs.join', slug=club.slug) }}" class="d-inline">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />

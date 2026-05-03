@@ -39,14 +39,15 @@ def register():
         db.session.add(user)
         db.session.commit()
 
+        login_user(user)
         if is_first_user:
             flash(_('Account created — you have been granted admin access as the first user.'), 'success')
         else:
-            flash(_('Account created! You can now sign in.'), 'success')
+            flash(_('Welcome! Your account has been created.'), 'success')
         next_page = request.args.get('next')
         if next_page and is_safe_url(next_page):
-            return redirect(url_for('auth.login', next=next_page))
-        return redirect(url_for('auth.login'))
+            return redirect(next_page)
+        return redirect(url_for('main.index'))
 
     return render_template('auth/register.html', form=form)
 

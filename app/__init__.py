@@ -63,7 +63,7 @@ def create_app(config_class=Config):
     app.register_blueprint(media_bp)
     app.register_blueprint(user_rides_bp, url_prefix='/my-rides')
 
-    from datetime import datetime
+    from datetime import datetime, timezone
     from .version import __version__
     from .utils import club_theme_vars
 
@@ -74,7 +74,7 @@ def create_app(config_class=Config):
     def inject_globals():
         from flask_babel import get_locale as _get_locale
         return {
-            'now': datetime.utcnow(),
+            'now': datetime.now(timezone.utc),
             'version': __version__,
             'current_locale': str(_get_locale() or 'en'),
             'languages': LANGUAGE_NAMES,
@@ -89,7 +89,7 @@ def create_app(config_class=Config):
         # CSP: allow same-origin + Bootstrap/Google Fonts CDNs already in use
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
-            "script-src 'self' https://cdn.jsdelivr.net; "
+            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com; "
             "img-src 'self' data: https:; "

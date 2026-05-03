@@ -213,7 +213,7 @@ def create():
         db.session.commit()
 
         flash(f'"{club.name}" has been created! Set up your first ride to get started.', 'success')
-        return redirect(url_for('admin.club_dashboard', slug=club.slug))
+        return redirect(url_for('clubs.home', slug=club.slug))
 
     return render_template('clubs/create.html', form=form, presets=THEME_PRESETS)
 
