@@ -59,6 +59,7 @@ def club_theme_vars(club):
 
     if club.theme_primary and is_valid_hex(club.theme_primary):
         p = club.theme_primary.lower()
+        result['--rbc-primary']     = p
         result['--rbc-green-dark']  = _mix_black(p, 0.30)
         result['--rbc-green']       = p
         result['--rbc-green-light'] = _mix_white(p, 0.38)
