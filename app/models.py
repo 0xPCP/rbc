@@ -331,10 +331,18 @@ class ClubInvite(db.Model):
     created_by = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     used_at = db.Column(db.DateTime, nullable=True)
     used_by_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    # True = account was pre-created by bulk import; user must set a password via setup_account
+    is_new_user = db.Column(db.Boolean, default=False, nullable=False)
 
     club = db.relationship('Club', foreign_keys=[club_id])
     creator = db.relationship('User', foreign_keys=[created_by])
     used_by = db.relationship('User', foreign_keys=[used_by_user_id])
+
+    @property
+    def is_expired(self):
+        from datetime import datetime
+        expires = self.expires_at.replace(tzinfo=None) if self.expires_at.tzinfo else self.expires_at
+        return expires < datetime.utcnow()
 
 
 class WaiverSignature(db.Model):

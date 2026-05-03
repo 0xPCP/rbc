@@ -57,6 +57,7 @@
         Team{% if stats.pending %} <span class="badge bg-warning text-dark">{{ stats.pending }}</span>{% endif %}
       </a>
       <a href="{{ url_for('admin.club_invites', slug=club.slug) }}" class="btn btn-outline-secondary btn-sm">Invites</a>
+      <a href="{{ url_for('admin.club_import', slug=club.slug) }}" class="btn btn-outline-secondary btn-sm">Import Members</a>
       <a href="{{ url_for('admin.club_settings', slug=club.slug) }}" class="btn btn-outline-secondary btn-sm">Settings</a>
       {% endif %}
     </div>

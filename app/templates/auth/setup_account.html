@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Set Up Your Account — {{ invite.club.name }}{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container" style="max-width:520px">
+    <h1>Welcome to {{ invite.club.name }}!</h1>
+    <p class="mb-0">Your account has been created. Set a password to get started.</p>
+  </div>
+</div>
+
+<div class="container py-5" style="max-width:520px">
+
+  <div class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+
+      <div class="mb-4 p-3 rounded" style="background:#dcfce7;border-left:4px solid #2d6a4f">
+        <div class="small fw-semibold" style="color:#166534">Setting up account for</div>
+        <div class="fw-semibold">{{ invite.email }}</div>
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+        <div class="alert alert-{{ cat }} alert-dismissible fade show">
+          {{ msg }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+      {% endwith %}
+
+      <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="mb-3">
+          {{ form.password.label(class="form-label fw-semibold") }}
+          {{ form.password(class="form-control form-control-lg" + (" is-invalid" if form.password.errors else ""),
+                           autocomplete="new-password") }}
+          <div class="form-text">Minimum 8 characters.</div>
+          {% for e in form.password.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <div class="mb-4">
+          {{ form.confirm_password.label(class="form-label fw-semibold") }}
+          {{ form.confirm_password(class="form-control form-control-lg" + (" is-invalid" if form.confirm_password.errors else ""),
+                                   autocomplete="new-password") }}
+          {% for e in form.confirm_password.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+        </div>
+
+        <button type="submit" class="btn btn-rbc btn-lg w-100">
+          Set Password &amp; Join {{ invite.club.name }}
+        </button>
+      </form>
+
+    </div>
+  </div>
+
+  <p class="text-center text-muted small mt-3">
+    Already have a Paceline account?
+    <a href="{{ url_for('auth.login') }}">Sign in</a>
+  </p>
+</div>
+{% endblock %}

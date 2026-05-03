@@ -1,0 +1,32 @@
+{% extends "email/_base.html" %}
+{% block body %}
+<div class="club-tag">{{ invite.club.name }}</div>
+<h1>You've been added to {{ invite.club.name }}!</h1>
+
+<p style="font-size:.9rem;color:#495057;margin-bottom:16px">
+  A Paceline account has been created for you by the admin of
+  <strong>{{ invite.club.name }}</strong>. Click below to choose a password
+  and access your membership.
+</p>
+
+{% if invite.creator %}
+<p style="font-size:.85rem;color:#6c757d;margin-bottom:20px">
+  Imported by <strong>{{ invite.creator.username }}</strong>.
+</p>
+{% endif %}
+
+<a href="{{ setup_url }}" class="cta">Set Password &amp; Join Club</a>
+
+<p style="font-size:.82rem;color:#6c757d;margin-top:20px;margin-bottom:4px">
+  Once you set your password you'll be an active member of {{ invite.club.name }}
+  on Paceline and can sign up for rides, view the calendar, and more.
+</p>
+
+<p style="font-size:.8rem;color:#aaa;margin-top:20px">
+  This link expires in 7 days. If it doesn't work, copy and paste:<br>
+  <a href="{{ setup_url }}" style="color:#2d6a4f">{{ setup_url }}</a>
+</p>
+<p style="font-size:.78rem;color:#aaa;margin-top:8px">
+  If you weren't expecting this, you can ignore this email safely.
+</p>
+{% endblock %}

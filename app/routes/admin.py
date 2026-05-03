@@ -1,5 +1,5 @@
 from functools import wraps
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
 from flask_login import login_required, current_user
 import secrets
@@ -8,11 +8,12 @@ from markupsafe import Markup, escape as html_escape
 from sqlalchemy import or_, func
 from ..extensions import db, bcrypt
 from ..models import Club, Ride, RideSignup, User, ClubMembership, ClubAdmin, ClubPost, ClubLeader, ClubSponsor, ClubInvite
-from ..forms import RideForm, ClubForm, ClubSettingsForm, ClubPostForm, ClubLeaderForm, ClubSponsorForm, ClubInviteForm
+from ..forms import RideForm, ClubForm, ClubSettingsForm, ClubPostForm, ClubLeaderForm, ClubSponsorForm, ClubInviteForm, BulkImportForm
 from ..recurrence import generate_instances, delete_future_instances
 from ..geocoding import geocode_zip
 from ..email import (send_cancellation_emails, send_new_ride_notification,
-                     send_membership_approved, send_membership_rejected, send_invite_email)
+                     send_membership_approved, send_membership_rejected, send_invite_email,
+                     send_import_welcome_email, send_import_invite_email)
 
 admin_bp = Blueprint('admin', __name__)
 
@@ -863,7 +864,7 @@ def club_invites(slug):
             club_id=club.id,
             email=form.email.data.strip().lower(),
             token=token,
-            expires_at=datetime.utcnow() + timedelta(days=7),
+            expires_at=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=7),
             created_by=current_user.id,
         )
         db.session.add(invite)
@@ -873,6 +874,111 @@ def club_invites(slug):
         return redirect(url_for('admin.club_invites', slug=slug))
     invites = (ClubInvite.query.filter_by(club_id=club.id)
                .order_by(ClubInvite.id.desc()).limit(50).all())
-    now = datetime.utcnow()
+    now = datetime.now(timezone.utc)
     return render_template('admin/club_invites.html', club=club, form=form, invites=invites, now=now)
+
+
+# ── Bulk member import ────────────────────────────────────────────────────────
+
+def _make_username(email):
+    """Derive a unique username from an email address."""
+    import re as _re
+    local = email.split('@')[0]
+    base = _re.sub(r'[^a-zA-Z0-9._-]', '', local)[:28] or 'rider'
+    candidate = base
+    n = 1
+    while User.query.filter_by(username=candidate).first():
+        candidate = f'{base}{n}'
+        n += 1
+    return candidate
+
+
+@admin_bp.route('/clubs/<slug>/import', methods=['GET', 'POST'])
+@club_admin_required
+def club_import(slug):
+    import re as _re
+    from datetime import datetime, timedelta
+    club = _get_club_or_404(slug)
+    form = BulkImportForm()
+    results = None
+
+    if form.validate_on_submit():
+        raw_emails = _re.split(r'[\n,;\s]+', form.emails.data)
+        emails = list(dict.fromkeys(
+            e.strip().lower() for e in raw_emails if e.strip()
+        ))
+
+        MAX_IMPORT = 200
+        if len(emails) > MAX_IMPORT:
+            flash(f'Maximum {MAX_IMPORT} emails per import. Please split into batches.', 'danger')
+            return render_template('admin/club_import.html', club=club, form=form, results=None)
+
+        created, invited, already_members, invalid = [], [], [], []
+
+        for email in emails:
+            if not _re.match(r'^[^@\s]+@[^@\s]+\.[^@\s]+$', email):
+                invalid.append(email)
+                continue
+
+            existing_user = User.query.filter_by(email=email).first()
+
+            if existing_user:
+                mem = ClubMembership.query.filter_by(
+                    user_id=existing_user.id, club_id=club.id
+                ).first()
+                if mem and mem.status == 'active':
+                    already_members.append(email)
+                    continue
+                # Existing Paceline user not yet in this club — send confirmation invite
+                token = secrets.token_urlsafe(32)
+                invite = ClubInvite(
+                    club_id=club.id,
+                    email=email,
+                    token=token,
+                    expires_at=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=7),
+                    created_by=current_user.id,
+                    is_new_user=False,
+                )
+                db.session.add(invite)
+                db.session.flush()
+                send_import_invite_email(invite)
+                invited.append(email)
+            else:
+                # Brand-new user — create account, add to club, send setup email
+                placeholder_pw = bcrypt.generate_password_hash(
+                    secrets.token_hex(32)
+                ).decode('utf-8')
+                new_user = User(
+                    username=_make_username(email),
+                    email=email,
+                    password_hash=placeholder_pw,
+                )
+                db.session.add(new_user)
+                db.session.flush()
+                db.session.add(ClubMembership(
+                    user_id=new_user.id, club_id=club.id, status='active'
+                ))
+                token = secrets.token_urlsafe(32)
+                invite = ClubInvite(
+                    club_id=club.id,
+                    email=email,
+                    token=token,
+                    expires_at=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=7),
+                    created_by=current_user.id,
+                    is_new_user=True,
+                )
+                db.session.add(invite)
+                db.session.flush()
+                send_import_welcome_email(invite)
+                created.append(email)
+
+        db.session.commit()
+        results = {
+            'created':         created,
+            'invited':         invited,
+            'already_members': already_members,
+            'invalid':         invalid,
+        }
+
+    return render_template('admin/club_import.html', club=club, form=form, results=results)
 

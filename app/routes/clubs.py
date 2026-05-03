@@ -695,9 +695,13 @@ def invite_claim(token):
     if invite.used_at:
         flash('This invite link has already been used.', 'warning')
         return redirect(url_for('clubs.home', slug=invite.club.slug))
-    if invite.expires_at.replace(tzinfo=None) < datetime.utcnow():
+    if invite.expires_at.replace(tzinfo=None) < datetime.now(timezone.utc).replace(tzinfo=None):
         flash('This invite link has expired.', 'warning')
         return redirect(url_for('clubs.home', slug=invite.club.slug))
+
+    # Bulk-import new-user tokens require password setup before login
+    if invite.is_new_user:
+        return redirect(url_for('auth.setup_account', token=token))
 
     if not current_user.is_authenticated:
         return redirect(url_for('auth.login', next=url_for('clubs.invite_claim', token=token)))
@@ -715,7 +719,7 @@ def invite_claim(token):
             club_id=club.id,
             status='active',
         ))
-        invite.used_at = datetime.utcnow()
+        invite.used_at = datetime.now(timezone.utc)
         invite.used_by_user_id = current_user.id
         db.session.commit()
         flash(f"Welcome to {club.name}! Your membership is active.", 'success')

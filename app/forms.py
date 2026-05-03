@@ -206,6 +206,22 @@ class ClubInviteForm(FlaskForm):
     submit = SubmitField('Send Invite')
 
 
+class BulkImportForm(FlaskForm):
+    emails = TextAreaField('Email Addresses', validators=[DataRequired()],
+                           description='One email per line, or comma-separated. Max 200 per batch.')
+    message = TextAreaField('Personal Message (optional)',
+                            validators=[Optional(), Length(max=500)],
+                            description='Included in the email sent to each person.')
+    submit = SubmitField('Import Members')
+
+
+class SetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired(), Length(min=8)])
+    confirm_password = PasswordField('Confirm Password',
+                                     validators=[DataRequired(), EqualTo('password', message='Passwords must match.')])
+    submit = SubmitField('Set Password & Join Club')
+
+
 class RideForm(FlaskForm):
     title = StringField('Ride Title', validators=[DataRequired(), Length(max=200)])
     date = DateField('Date', validators=[DataRequired()])

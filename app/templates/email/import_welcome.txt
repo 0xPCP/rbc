@@ -1,0 +1,15 @@
+You've been added to {{ invite.club.name }} on Paceline!
+
+A Paceline account has been created for you by the admin of {{ invite.club.name }}.
+Click the link below to set your password and access your membership:
+
+{{ setup_url }}
+
+Once you set your password you'll be an active member of {{ invite.club.name }}
+and can sign up for rides, view the calendar, and more.
+
+This link expires in 7 days.
+
+If you weren't expecting this email, you can safely ignore it.
+
+— The Paceline Team

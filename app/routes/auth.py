@@ -1,10 +1,10 @@
-from datetime import date
+from datetime import date, datetime, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, request
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_babel import gettext as _
 from ..extensions import db, bcrypt
-from ..models import User, Ride, RideSignup
-from ..forms import RegisterForm, LoginForm, ProfileForm
+from ..models import User, Ride, RideSignup, ClubInvite
+from ..forms import RegisterForm, LoginForm, ProfileForm, SetPasswordForm
 from ..geocoding import geocode_zip
 from ..gear import GEAR_CATALOG
 from ..utils import is_safe_url
@@ -72,6 +72,45 @@ def login():
         flash(_('Invalid email or password.'), 'danger')
 
     return render_template('auth/login.html', form=form)
+
+
+@auth_bp.route('/setup-account/<token>', methods=['GET', 'POST'])
+def setup_account(token):
+    """Password-setup landing page for users created via bulk import."""
+    invite = ClubInvite.query.filter_by(token=token, is_new_user=True).first_or_404()
+
+    if invite.used_at:
+        flash('This setup link has already been used. Please sign in.', 'warning')
+        return redirect(url_for('auth.login'))
+    if invite.expires_at.replace(tzinfo=None) < datetime.now(timezone.utc).replace(tzinfo=None):
+        flash('This setup link has expired. Ask your club admin to re-import your email.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    user = User.query.filter_by(email=invite.email).first_or_404()
+
+    # Already logged in as the right user — just mark done and send to club
+    if current_user.is_authenticated:
+        if current_user.id != user.id:
+            flash('This setup link belongs to a different account.', 'warning')
+            return redirect(url_for('main.index'))
+        invite.used_at = datetime.now(timezone.utc)
+        invite.used_by_user_id = user.id
+        db.session.commit()
+        return redirect(url_for('clubs.home', slug=invite.club.slug))
+
+    form = SetPasswordForm()
+    if form.validate_on_submit():
+        user.password_hash = bcrypt.generate_password_hash(
+            form.password.data
+        ).decode('utf-8')
+        invite.used_at = datetime.now(timezone.utc)
+        invite.used_by_user_id = user.id
+        db.session.commit()
+        login_user(user)
+        flash(f"Welcome to {invite.club.name}! Your Paceline account is ready.", 'success')
+        return redirect(url_for('clubs.home', slug=invite.club.slug))
+
+    return render_template('auth/setup_account.html', form=form, invite=invite)
 
 
 @auth_bp.route('/logout')

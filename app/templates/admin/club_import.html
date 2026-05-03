@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block title %}Import Members — {{ club.name }} Admin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('clubs.home', slug=club.slug) }}">{{ club.name }}</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}">Admin</a></li>
+        <li class="breadcrumb-item active">Import Members</li>
+      </ol>
+    </nav>
+    <h1>Import Members</h1>
+    <p class="mb-0">Migrate your existing roster from another platform. Paste a list of email addresses and we'll handle the rest.</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-4">
+
+    <div class="col-lg-7">
+
+      {% if results %}
+      {# ── Results summary ── #}
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-body p-4">
+          <h5 class="mb-3">Import Complete</h5>
+
+          <div class="row g-3 mb-4">
+            <div class="col-6 col-md-3">
+              <div class="text-center p-3 rounded" style="background:#dcfce7">
+                <div style="font-size:1.6rem;font-weight:700;color:#166534">{{ results.created|length }}</div>
+                <div style="font-size:.78rem;color:#166534;font-weight:600">New Accounts</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="text-center p-3 rounded" style="background:#dbeafe">
+                <div style="font-size:1.6rem;font-weight:700;color:#1e40af">{{ results.invited|length }}</div>
+                <div style="font-size:.78rem;color:#1e40af;font-weight:600">Invites Sent</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="text-center p-3 rounded" style="background:#f3f4f6">
+                <div style="font-size:1.6rem;font-weight:700;color:#374151">{{ results.already_members|length }}</div>
+                <div style="font-size:.78rem;color:#6b7280;font-weight:600">Already Members</div>
+              </div>
+            </div>
+            <div class="col-6 col-md-3">
+              <div class="text-center p-3 rounded" style="background:{% if results.invalid %}#fee2e2{% else %}#f3f4f6{% endif %}">
+                <div style="font-size:1.6rem;font-weight:700;color:{% if results.invalid %}#991b1b{% else %}#374151{% endif %}">{{ results.invalid|length }}</div>
+                <div style="font-size:.78rem;color:{% if results.invalid %}#991b1b{% else %}#6b7280{% endif %};font-weight:600">Invalid</div>
+              </div>
+            </div>
+          </div>
+
+          {% if results.created %}
+          <div class="mb-3">
+            <div class="fw-semibold small mb-1" style="color:#166534">✅ New accounts created &amp; membership active — setup email sent:</div>
+            <ul class="list-unstyled mb-0 small text-muted" style="column-count:2;column-gap:1rem">
+              {% for e in results.created %}<li>{{ e }}</li>{% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if results.invited %}
+          <div class="mb-3">
+            <div class="fw-semibold small mb-1" style="color:#1e40af">📧 Existing Paceline users — confirmation email sent:</div>
+            <ul class="list-unstyled mb-0 small text-muted" style="column-count:2;column-gap:1rem">
+              {% for e in results.invited %}<li>{{ e }}</li>{% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if results.already_members %}
+          <div class="mb-3">
+            <div class="fw-semibold small mb-1 text-muted">Already active members (skipped):</div>
+            <ul class="list-unstyled mb-0 small text-muted" style="column-count:2;column-gap:1rem">
+              {% for e in results.already_members %}<li>{{ e }}</li>{% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+          {% if results.invalid %}
+          <div class="mb-0">
+            <div class="fw-semibold small mb-1" style="color:#991b1b">⚠️ Invalid / skipped:</div>
+            <ul class="list-unstyled mb-0 small" style="color:#991b1b;column-count:2;column-gap:1rem">
+              {% for e in results.invalid %}<li>{{ e }}</li>{% endfor %}
+            </ul>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+      {% endif %}
+
+      {# ── Import form ── #}
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h5 class="mb-1">{% if results %}Import Another Batch{% else %}Paste Email List{% endif %}</h5>
+          <p class="text-muted small mb-4">One email per line, or comma-separated. Maximum 200 per batch.</p>
+
+          <form method="post" novalidate>
+            {{ form.hidden_tag() }}
+
+            <div class="mb-3">
+              {{ form.emails.label(class="form-label fw-semibold") }}
+              {{ form.emails(class="form-control font-monospace" + (" is-invalid" if form.emails.errors else ""),
+                             rows=10, placeholder="alice@example.com\nbob@example.com\ncarol@example.com") }}
+              {% for e in form.emails.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+
+            <div class="mb-4">
+              {{ form.message.label(class="form-label fw-semibold") }}
+              {{ form.message(class="form-control" + (" is-invalid" if form.message.errors else ""),
+                              rows=3, placeholder="Hey! We're moving to Paceline for our club rides. Click the link to set up your account.") }}
+              <div class="form-text">{{ form.message.description }}</div>
+              {% for e in form.message.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-rbc">Import Members</button>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+          <h6 class="mb-3">How it works</h6>
+          <ol class="small text-muted ps-3" style="line-height:1.8">
+            <li><strong>New to Paceline</strong> — A Paceline account is created for them and they're added as an active member. They receive an email to set their password and access their account.</li>
+            <li class="mt-2"><strong>Existing Paceline user</strong> — They receive an email asking them to confirm they want to join {{ club.name }}. Their membership activates when they click the link.</li>
+            <li class="mt-2"><strong>Already a member</strong> — Skipped with no email sent.</li>
+            <li class="mt-2"><strong>Invalid email</strong> — Skipped and listed in the results.</li>
+          </ol>
+          <hr class="my-3">
+          <p class="small text-muted mb-0">Invite links expire after <strong>7 days</strong>. Re-import any emails that didn't respond to send a fresh link.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

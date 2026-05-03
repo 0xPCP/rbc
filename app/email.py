@@ -122,6 +122,34 @@ def send_invite_email(invite):
     logger.info('Invite email sent to %s for club %d', invite.email, invite.club_id)
 
 
+def send_import_welcome_email(invite):
+    """
+    Send a new-account welcome email to a user created via bulk import.
+    Includes a link to set their password and activate their Paceline account.
+    """
+    from flask import url_for
+    setup_url = url_for('auth.setup_account', token=invite.token, _external=True)
+    html = render_template('email/import_welcome.html', invite=invite, setup_url=setup_url)
+    text = render_template('email/import_welcome.txt', invite=invite, setup_url=setup_url)
+    subject = f"Welcome to {invite.club.name} — set up your Paceline account"
+    _send(subject, [invite.email], html, text)
+    logger.info('Import welcome email sent to %s for club %d', invite.email, invite.club_id)
+
+
+def send_import_invite_email(invite):
+    """
+    Notify an existing Paceline user that a club admin has added them to a club.
+    They must click to confirm before being added.
+    """
+    from flask import url_for
+    claim_url = url_for('clubs.invite_claim', token=invite.token, _external=True)
+    html = render_template('email/import_invite.html', invite=invite, claim_url=claim_url)
+    text = render_template('email/import_invite.txt', invite=invite, claim_url=claim_url)
+    subject = f"You've been added to {invite.club.name} on Paceline"
+    _send(subject, [invite.email], html, text)
+    logger.info('Import invite email sent to %s for club %d', invite.email, invite.club_id)
+
+
 def send_weekly_digest(club, rides):
     """
     Send the Sunday weekly digest to all active club members.

@@ -1,0 +1,13 @@
+{{ invite.club.name }} wants you to join on Paceline!
+
+The admin of {{ invite.club.name }} has added your email to their member roster.
+Click the link below to confirm you'd like to join:
+
+{{ claim_url }}
+
+You already have a Paceline account — clicking the link activates your membership
+in {{ invite.club.name }} immediately.
+
+This link expires in 7 days. If you weren't expecting this, you can safely ignore it.
+
+— The Paceline Team
