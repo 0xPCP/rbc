@@ -3,18 +3,6 @@
 {% block head %}{% include 'clubs/_theme.html' %}{% endblock %}
 
 {# On the home page the club name is in the hero — nav shows only the logo to avoid doubling #}
-{% block club_nav_brand %}
-<a href="{{ url_for('clubs.home', slug=club.slug) }}" class="d-flex align-items-center gap-2 text-decoration-none">
-  {% if club.logo_url %}
-  <img src="{{ club.logo_url }}" alt="{{ club.name }}"
-       style="height:26px;width:26px;object-fit:contain;border-radius:4px;background:rgba(255,255,255,.2);padding:2px"
-       onerror="this.style.display='none'">
-  {% else %}
-  <span style="font-size:1.1rem;color:rgba(255,255,255,.7)">⬡</span>
-  {% endif %}
-</a>
-{% endblock %}
-
 {% block content %}
 
 {# ── Hero ─────────────────────────────────────────────────────────────────── #}

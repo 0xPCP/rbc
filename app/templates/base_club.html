@@ -17,7 +17,6 @@
     <a class="navbar-brand" href="{{ url_for('main.index') }}" style="line-height:1">
       <img src="{{ url_for('static', filename='img/logo-dark.svg') }}?v={{ version }}" alt="Paceline" height="28" style="width:auto;display:block">
     </a>
-    {% block club_nav_brand %}{% endblock %}
     <ul class="navbar-nav ms-auto align-items-lg-center">
       {% if current_user.is_authenticated %}
         {% if current_user.is_admin %}
