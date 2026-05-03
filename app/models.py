@@ -340,9 +340,9 @@ class ClubInvite(db.Model):
 
     @property
     def is_expired(self):
-        from datetime import datetime
+        from datetime import datetime, timezone
         expires = self.expires_at.replace(tzinfo=None) if self.expires_at.tzinfo else self.expires_at
-        return expires < datetime.utcnow()
+        return expires < datetime.now(timezone.utc).replace(tzinfo=None)
 
 
 class WaiverSignature(db.Model):
