@@ -1,15 +1,16 @@
 /* ── RBC Design Tokens ──────────────────────────────────────────────────── */
 :root {
-  --rbc-green:       #2d6a4f;
-  --rbc-green-dark:  #1b4332;
-  --rbc-green-light: #52b788;
-  --rbc-green-pale:  #d8f3dc;
+  --rbc-green:       #0d9488;
+  --rbc-green-dark:  #0f766e;
+  --rbc-green-light: #2dd4bf;
+  --rbc-green-pale:  #f0fdfa;
   --rbc-orange:      #e76f51;
   --rbc-orange-dark: #c75c40;
-  --rbc-dark:        #1a1a2e;
-  --rbc-gray:        #6c757d;
-  --rbc-light:       #f8fffe;
-  --rbc-border:      #dee2e6;
+  --rbc-dark:        #111827;
+  --rbc-navy:        #1e293b;
+  --rbc-gray:        #6b7280;
+  --rbc-light:       #f9fafb;
+  --rbc-border:      #e5e7eb;
 }
 
 body {
@@ -23,45 +24,47 @@ body {
 
 /* ── Navbar ─────────────────────────────────────────────────────────────── */
 .rbc-navbar {
-  background: var(--rbc-green-dark);
+  background: #fff;
   padding: 0.75rem 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  border-bottom: 1px solid var(--rbc-border);
 }
 .rbc-navbar .nav-link,
 .rbc-navbar .navbar-toggler {
-  color: rgba(255,255,255,.85) !important;
+  color: #374151 !important;
 }
-.rbc-navbar .nav-link:hover { color: #fff !important; }
+.rbc-navbar .nav-link:hover { color: var(--rbc-dark) !important; }
 .rbc-navbar .dropdown-menu { border: none; box-shadow: 0 4px 16px rgba(0,0,0,.15); }
 
 .rbc-brand {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
-  color: #fff !important;
+  color: var(--rbc-dark) !important;
   letter-spacing: .03em;
   text-decoration: none;
 }
-.brand-icon { color: var(--rbc-green-light); }
+.brand-icon { color: var(--rbc-green); }
 
 /* ── Club page nav (used on club home — no platform branding) ─────────────── */
 .club-page-nav {
-  background: var(--rbc-green-dark);
+  background: #fff;
   padding: 0.5rem 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,.2);
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  border-bottom: 1px solid var(--rbc-border);
 }
 .club-nav-link {
-  color: rgba(255,255,255,.9) !important;
+  color: #374151 !important;
   font-size: .9rem;
 }
-.club-nav-link:hover { color: #fff !important; }
+.club-nav-link:hover { color: var(--rbc-dark) !important; }
 .club-page-nav .dropdown-menu { border: none; box-shadow: 0 4px 16px rgba(0,0,0,.15); }
 
 /* ── Club home hero ──────────────────────────────────────────────────────── */
 .club-hero {
   position: relative;
   min-height: 420px;
-  background: var(--rbc-green-dark);
+  background: var(--rbc-navy);
   display: flex;
   align-items: flex-end;
 }
@@ -134,8 +137,8 @@ body {
 
 /* ── Next ride strip ─────────────────────────────────────────────────────── */
 .next-ride-strip {
-  background: #f0fdf4;
-  border-bottom: 1px solid #bbf7d0;
+  background: var(--rbc-light);
+  border-bottom: 1px solid var(--rbc-border);
   padding: .6rem 0;
 }
 .nrs-label {
@@ -197,26 +200,26 @@ body {
 
 /* ── Club stats band ─────────────────────────────────────────────────────── */
 .club-stats-band {
-  background: var(--rbc-green-pale);
-  border-bottom: 1px solid #b7e4c7;
+  background: var(--rbc-light);
+  border-bottom: 1px solid var(--rbc-border);
 }
 .club-stats-row { }
 .club-stat-item {
   padding: 1.25rem 1rem;
   text-align: center;
-  border-right: 1px solid #b7e4c7;
+  border-right: 1px solid var(--rbc-border);
 }
 .club-stat-item:last-child { border-right: none; }
 .csi-num {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 2rem;
   font-weight: 700;
-  color: var(--rbc-green-dark);
+  color: var(--rbc-dark);
   line-height: 1;
 }
 .csi-label {
   font-size: .78rem;
-  color: #4b7c63;
+  color: var(--rbc-gray);
   font-weight: 500;
   margin-top: .25rem;
 }
@@ -227,8 +230,8 @@ body {
   font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: .02em;
-  color: var(--rbc-green-dark);
-  border-bottom: 2px solid var(--rbc-green-pale);
+  color: var(--rbc-dark);
+  border-bottom: 2px solid var(--rbc-border);
   padding-bottom: .4rem;
   margin-bottom: 1.2rem;
 }
@@ -312,7 +315,7 @@ body {
 /* ── Hero ────────────────────────────────────────────────────────────────── */
 .rbc-hero {
   position: relative;
-  background: linear-gradient(135deg, var(--rbc-green-dark) 0%, var(--rbc-green) 60%, #40916c 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #111827 100%);
   min-height: 520px;
   display: flex;
   align-items: center;
@@ -375,9 +378,10 @@ body {
 
 /* ── Page header ─────────────────────────────────────────────────────────── */
 .page-header {
-  background: var(--rbc-green-dark);
-  color: #fff;
+  background: var(--rbc-light);
+  color: var(--rbc-dark);
   padding: 2.5rem 0;
+  border-bottom: 1px solid var(--rbc-border);
 }
 .page-header h1 {
   font-family: 'Barlow Condensed', sans-serif;
@@ -385,8 +389,8 @@ body {
   font-size: 2.2rem;
   margin-bottom: .25rem;
 }
-.page-header p { color: rgba(255,255,255,.75); margin: 0; }
-.page-header-cancelled { background: #6c757d; }
+.page-header p { color: var(--rbc-gray); margin: 0; }
+.page-header-cancelled { background: #f3f4f6; border-bottom-color: #d1d5db; }
 
 /* ── Next Ride card ──────────────────────────────────────────────────────── */
 .next-ride-card {
@@ -431,7 +435,7 @@ body {
   gap: 1rem;
 }
 .stat-card {
-  background: var(--rbc-green-pale);
+  background: var(--rbc-light);
   border-radius: 10px;
   padding: 1.5rem;
   text-align: center;
@@ -440,7 +444,7 @@ body {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 2rem;
   font-weight: 700;
-  color: var(--rbc-green-dark);
+  color: var(--rbc-dark);
 }
 .stat-label { font-size: .85rem; color: var(--rbc-gray); }
 
@@ -515,9 +519,9 @@ body {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--rbc-green-dark);
+  color: var(--rbc-dark);
   margin: 2rem 0 .75rem;
-  border-bottom: 2px solid var(--rbc-green-pale);
+  border-bottom: 2px solid var(--rbc-border);
   padding-bottom: .4rem;
 }
 .ride-row {
@@ -569,8 +573,8 @@ body {
   text-align: left;
   transition: background .12s;
 }
-.ride-group-header:hover { background: #eef4f0; }
-.ride-group-header[aria-expanded="true"] { background: #eef4f0; }
+.ride-group-header:hover { background: var(--rbc-light); }
+.ride-group-header[aria-expanded="true"] { background: var(--rbc-light); }
 .ride-group-summary { flex: 1; display: flex; align-items: center; gap: .75rem; }
 .ride-group-label { font-weight: 600; font-size: .95rem; }
 .ride-group-badges { display: flex; gap: .25rem; }
@@ -586,7 +590,7 @@ body {
   color: inherit;
   transition: background .1s;
 }
-.ride-group-row:hover { background: #f4faf6; }
+.ride-group-row:hover { background: var(--rbc-light); }
 
 /* ── Ride detail ─────────────────────────────────────────────────────────── */
 .detail-card {
@@ -597,7 +601,7 @@ body {
 }
 .detail-card-title {
   font-weight: 700;
-  color: var(--rbc-green-dark);
+  color: var(--rbc-dark);
   border-bottom: 1px solid var(--rbc-border);
   padding-bottom: .75rem;
   margin-bottom: 1rem;
@@ -663,12 +667,12 @@ body {
   padding: 1.5rem;
   text-align: center;
 }
-.admin-stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 2.2rem; font-weight: 700; color: var(--rbc-green-dark); }
+.admin-stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 2.2rem; font-weight: 700; color: var(--rbc-dark); }
 .admin-stat-label { font-size: .85rem; color: var(--rbc-gray); }
 .admin-stat-card--link { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
 .admin-stat-card--link:hover { border-color: var(--rbc-green); box-shadow: 0 2px 10px rgba(0,0,0,.08); }
 
-.rbc-table thead th { background: var(--rbc-green-pale); font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--rbc-green-dark); border-color: var(--rbc-border); }
+.rbc-table thead th { background: var(--rbc-light); font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--rbc-gray); border-color: var(--rbc-border); }
 .rbc-table td { vertical-align: middle; }
 
 /* ── Auth pages ──────────────────────────────────────────────────────────── */
@@ -680,15 +684,15 @@ body {
 .auth-switch a { color: var(--rbc-green); }
 
 /* ── About sidebar ───────────────────────────────────────────────────────── */
-.about-sidebar { background: var(--rbc-green-pale); border-radius: 10px; padding: 1.5rem; }
-.about-sidebar h5 { font-weight: 700; color: var(--rbc-green-dark); }
+.about-sidebar { background: var(--rbc-light); border-radius: 10px; padding: 1.5rem; }
+.about-sidebar h5 { font-weight: 700; color: var(--rbc-dark); }
 .pace-list { list-style: none; padding: 0; margin: 0; }
 .pace-list li { padding: .4rem 0; display: flex; align-items: center; gap: .5rem; border-bottom: 1px solid rgba(0,0,0,.08); font-size: .9rem; }
 .pace-list li:last-child { border-bottom: none; }
 
 /* ── Footer ──────────────────────────────────────────────────────────────── */
 .rbc-footer {
-  background: var(--rbc-green-dark);
+  background: var(--rbc-navy);
   color: rgba(255,255,255,.75);
   padding: 3rem 0 1.5rem;
   margin-top: auto;
@@ -730,7 +734,7 @@ body {
   transition: background .12s;
 }
 .view-btn:last-child { border-right: none; }
-.view-btn:hover { background: var(--rbc-green-pale); color: var(--rbc-green-dark); }
+.view-btn:hover { background: var(--rbc-light); color: var(--rbc-dark); }
 .view-btn.active { background: var(--rbc-green); color: #fff; }
 
 .cal-nav { display: flex; align-items: center; gap: .75rem; }
@@ -745,7 +749,7 @@ body {
   background: #fff;
   transition: background .12s;
 }
-.cal-nav-btn:hover { background: var(--rbc-green-pale); }
+.cal-nav-btn:hover { background: var(--rbc-light); }
 .cal-nav-title { font-weight: 700; font-size: .95rem; color: var(--rbc-dark); min-width: 180px; text-align: center; }
 
 /* ── Month grid ──────────────────────────────────────────────────────────── */
@@ -764,8 +768,8 @@ body {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .08em;
-  color: var(--rbc-green-dark);
-  background: var(--rbc-green-pale);
+  color: var(--rbc-gray);
+  background: var(--rbc-light);
   border-right: 1px solid var(--rbc-border);
   border-bottom: 1px solid var(--rbc-border);
 }
@@ -778,7 +782,7 @@ body {
   vertical-align: top;
 }
 .month-cell.other-month { background: #f9fafb; }
-.month-cell.is-today { background: #f0fdf4; }
+.month-cell.is-today { background: #f0fdfa; }
 .cell-date-num {
   font-size: .8rem;
   font-weight: 700;
@@ -843,7 +847,7 @@ body {
 }
 .week-col-today { border-color: var(--rbc-green); border-width: 2px; }
 .week-col-hdr {
-  background: var(--rbc-green-pale);
+  background: var(--rbc-light);
   padding: .5rem;
   text-align: center;
   border-bottom: 1px solid var(--rbc-border);
@@ -1108,7 +1112,7 @@ a:hover { color: var(--rbc-green-dark); }
   .club-stat-item { padding: .9rem .5rem; }
   .club-stat-item:nth-child(2) { border-right: none; }
   .club-stat-item:nth-child(3),
-  .club-stat-item:nth-child(4) { border-top: 1px solid #b7e4c7; }
+  .club-stat-item:nth-child(4) { border-top: 1px solid var(--rbc-border); }
   .csi-num { font-size: 1.6rem; }
 
   /* Next ride strip: stack on very small screens */
