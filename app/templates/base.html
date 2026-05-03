@@ -16,7 +16,7 @@
 <nav class="navbar navbar-expand-lg rbc-navbar">
   <div class="container">
     <a class="navbar-brand" href="{{ url_for('main.index') }}" style="line-height:1">
-      <img src="{{ url_for('static', filename='img/logo-dark.svg') }}" alt="Paceline" height="34" style="width:auto;display:block">
+      <img src="{{ url_for('static', filename='img/logo-dark.svg') }}?v={{ version }}" alt="Paceline" height="34" style="width:auto;display:block">
     </a>
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navMenu">
       <span class="navbar-toggler-icon"></span>
@@ -94,7 +94,7 @@
   <div class="container">
     <div class="row gy-3">
       <div class="col-md-4">
-        <img src="{{ url_for('static', filename='img/logo-dark.svg') }}" alt="Paceline" height="28" style="width:auto;margin-bottom:.35rem;display:block">
+        <img src="{{ url_for('static', filename='img/logo-dark.svg') }}?v={{ version }}" alt="Paceline" height="28" style="width:auto;margin-bottom:.35rem;display:block">
         <p class="footer-tagline">{{ _('Find your pack.') }}</p>
       </div>
       <div class="col-md-4">
