@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 318 56" role="img" aria-label="Paceline.club">
+  <!--
+    Concept: the draft formation.
+    Each bar = a rider. The orange bar is the lead rider breaking the wind.
+    Each green bar behind is shorter — drafting, benefiting from the slipstream.
+    The further back, the shorter the bar, the deeper the draft.
+  -->
+
+  <!-- Lead rider (orange — working hardest) -->
+  <rect x="0" y="3"  width="48" height="11" rx="5.5" fill="#e76f51"/>
+  <!-- Drafting riders (green — progressively shorter) -->
+  <rect x="0" y="18" width="37" height="11" rx="5.5" fill="#2d6a4f"/>
+  <rect x="0" y="33" width="26" height="11" rx="5.5" fill="#2d6a4f" opacity="0.70"/>
+  <rect x="0" y="48" width="15" height="11" rx="5.5" fill="#2d6a4f" opacity="0.42"/>
+
+  <!-- Wordmark -->
+  <text x="60" y="45"
+        font-family="'Barlow Condensed', 'Arial Narrow', Arial, sans-serif"
+        font-size="42"
+        font-weight="700"
+        fill="#1b4332"
+        letter-spacing="0.3">paceline<tspan fill="#e76f51" font-weight="400">.club</tspan></text>
+</svg>

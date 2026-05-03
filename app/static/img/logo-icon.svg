@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Paceline">
+  <!-- Square icon — works at 16px favicon, 32px, 64px app icon -->
+
+  <!-- Dark background tile -->
+  <rect width="64" height="64" rx="14" fill="#1b4332"/>
+
+  <!-- Lead rider -->
+  <rect x="8" y="11" width="48" height="13" rx="6.5" fill="#e76f51"/>
+  <!-- Drafting riders -->
+  <rect x="8" y="29" width="35" height="13" rx="6.5" fill="white"/>
+  <rect x="8" y="47" width="22" height="13" rx="6.5" fill="white" opacity="0.55"/>
+</svg>

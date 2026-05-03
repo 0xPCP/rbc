@@ -5,4 +5,4 @@ A spot opened up and you're now confirmed for {{ ride.title }} on {{ ride.date.s
 Meeting point: {{ ride.meeting_location }}
 Distance: {{ ride.distance_miles }} miles
 
-View ride: https://cyclingclub.pcp.dev/clubs/{{ ride.club.slug }}/rides/{{ ride.id }}
+View ride: https://paceline.club/clubs/{{ ride.club.slug }}/rides/{{ ride.id }}

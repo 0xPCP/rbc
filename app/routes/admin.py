@@ -138,8 +138,12 @@ def dashboard():
         clubs.append({'club': club, 'upcoming': upcoming})
 
     super_admins = User.query.filter_by(is_admin=True).order_by(User.username.asc()).all()
+    ungeocodeable_count = Club.query.filter(
+        Club.zip_code.isnot(None), Club.lat.is_(None)
+    ).count()
     return render_template('admin/dashboard.html', stats=stats, clubs=clubs,
-                           super_admins=super_admins, popular=popular)
+                           super_admins=super_admins, popular=popular,
+                           ungeocodeable_count=ungeocodeable_count)
 
 
 # ── User management ───────────────────────────────────────────────────────────
@@ -222,6 +226,30 @@ def toggle_active(user_id):
     action = 'reactivated' if user.is_active else 'deactivated'
     flash(f'Account {action} for {user.username}.', 'success')
     return redirect(url_for('admin.user_detail', user_id=user_id))
+
+
+@admin_bp.route('/geocode-clubs', methods=['POST'])
+@superadmin_required
+def geocode_clubs():
+    """Bulk geocode all clubs that have a zip_code but no lat/lng."""
+    clubs = Club.query.filter(
+        Club.zip_code.isnot(None),
+        Club.lat.is_(None),
+    ).all()
+    succeeded, failed = 0, 0
+    for club in clubs:
+        coords = geocode_zip(club.zip_code)
+        if coords:
+            club.lat, club.lng = coords
+            succeeded += 1
+        else:
+            failed += 1
+    db.session.commit()
+    msg = f'Geocoded {succeeded} club{"s" if succeeded != 1 else ""}.'
+    if failed:
+        msg += f' {failed} could not be resolved.'
+    flash(msg, 'success' if not failed else 'warning')
+    return redirect(url_for('admin.dashboard'))
 
 
 @admin_bp.route('/clubs/new', methods=['GET', 'POST'])

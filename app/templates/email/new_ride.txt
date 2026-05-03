@@ -13,4 +13,4 @@ Pace:         {{ ride.pace_label }}
 {% endif %}{% if ride.description %}
 {{ ride.description }}
 {% endif %}
-View and sign up: https://cyclingclub.pcp.dev/clubs/{{ ride.club.slug }}/rides/{{ ride.id }}
+View and sign up: https://paceline.club/clubs/{{ ride.club.slug }}/rides/{{ ride.id }}

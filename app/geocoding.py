@@ -7,7 +7,7 @@ import requests
 
 
 NOMINATIM_URL = 'https://nominatim.openstreetmap.org/search'
-NOMINATIM_HEADERS = {'User-Agent': 'CyclingClubs/1.0 (cyclingclub.pcp.dev)'}
+NOMINATIM_HEADERS = {'User-Agent': 'Paceline/1.0 (paceline.club)'}
 
 
 def geocode_zip(zip_code: str):

@@ -85,7 +85,7 @@ def create_app(config_class=Config):
         response.headers['X-Content-Type-Options'] = 'nosniff'
         response.headers['X-Frame-Options'] = 'SAMEORIGIN'
         response.headers['Referrer-Policy'] = 'strict-origin-when-cross-origin'
-        response.headers['Permissions-Policy'] = 'geolocation=(), microphone=(), camera=()'
+        response.headers['Permissions-Policy'] = 'geolocation=(self), microphone=(), camera=()'
         # CSP: allow same-origin + Bootstrap/Google Fonts CDNs already in use
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "

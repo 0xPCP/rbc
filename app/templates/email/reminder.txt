@@ -13,4 +13,4 @@ Pace:         {{ ride.pace_label }}
 {% if ride.route_url %}
 Route: {{ ride.route_url }}
 {% endif %}
-View ride details: https://cyclingclub.pcp.dev/clubs/{{ ride.club.slug }}/rides/{{ ride.id }}
+View ride details: https://paceline.club/clubs/{{ ride.club.slug }}/rides/{{ ride.id }}

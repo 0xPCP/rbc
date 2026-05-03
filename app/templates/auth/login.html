@@ -1,10 +1,10 @@
 {% extends "base.html" %}
-{% block title %}{{ _('Sign In') }} — Cycling Clubs{% endblock %}
+{% block title %}{{ _('Sign In') }} — Paceline.club{% endblock %}
 
 {% block content %}
 <div class="auth-wrapper">
   <div class="auth-card">
-    <div class="auth-logo">⬡ Cycling Clubs</div>
+    <div class="auth-logo"><img src="{{ url_for('static', filename='img/logo.svg') }}" alt="Paceline.club" style="height:36px;width:auto"></div>
     <h2 class="auth-title">{{ _('Sign In') }}</h2>
 
     <form method="post" novalidate>

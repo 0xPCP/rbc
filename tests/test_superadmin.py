@@ -9,8 +9,9 @@ Tests for the super admin panel:
   - Deactivated user cannot log in
 """
 import pytest
+from unittest.mock import patch
 from app.extensions import db, bcrypt
-from app.models import User
+from app.models import Club, User
 from tests.conftest import login, logout
 
 
@@ -326,3 +327,58 @@ class TestDeactivatedLogin:
         # Flask-Login checks is_active on each request — they should be redirected
         resp = client.get('/auth/profile', follow_redirects=False)
         assert resp.status_code == 302
+
+
+# ── Bulk geocoding ─────────────────────────────────────────────────────────────
+
+class TestBulkGeocoding:
+
+    def _ungeocodeable_club(self, db):
+        club = Club(slug='geo-test', name='Geo Test Club', zip_code='20148', lat=None, lng=None)
+        db.session.add(club)
+        db.session.commit()
+        return club
+
+    def test_geocode_clubs_requires_superadmin(self, client, db, regular_user):
+        login_as(client, regular_user)
+        resp = client.post('/admin/geocode-clubs', follow_redirects=False)
+        assert resp.status_code == 403
+
+    def test_geocode_clubs_fills_coordinates(self, client, db, admin_user):
+        club = self._ungeocodeable_club(db)
+        login_as(client, admin_user)
+        with patch('app.routes.admin.geocode_zip', return_value=(38.9, -77.4)):
+            resp = client.post('/admin/geocode-clubs', follow_redirects=True)
+        assert resp.status_code == 200
+        db.session.refresh(club)
+        assert club.lat == pytest.approx(38.9)
+        assert club.lng == pytest.approx(-77.4)
+
+    def test_geocode_clubs_skips_already_geocoded(self, client, db, admin_user, sample_club):
+        original_lat = sample_club.lat
+        login_as(client, admin_user)
+        with patch('app.routes.admin.geocode_zip', return_value=(0.0, 0.0)) as mock_geo:
+            client.post('/admin/geocode-clubs', follow_redirects=True)
+        mock_geo.assert_not_called()
+        db.session.refresh(sample_club)
+        assert sample_club.lat == original_lat
+
+    def test_geocode_clubs_handles_lookup_failure(self, client, db, admin_user):
+        club = self._ungeocodeable_club(db)
+        login_as(client, admin_user)
+        with patch('app.routes.admin.geocode_zip', return_value=None):
+            resp = client.post('/admin/geocode-clubs', follow_redirects=True)
+        assert resp.status_code == 200
+        db.session.refresh(club)
+        assert club.lat is None
+
+    def test_dashboard_shows_geocode_warning(self, client, db, admin_user):
+        self._ungeocodeable_club(db)
+        login_as(client, admin_user)
+        resp = client.get('/admin/')
+        assert b'missing map coordinates' in resp.data
+
+    def test_dashboard_no_geocode_warning_when_all_geocoded(self, client, db, admin_user, sample_club):
+        login_as(client, admin_user)
+        resp = client.get('/admin/')
+        assert b'missing map coordinates' not in resp.data

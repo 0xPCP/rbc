@@ -1,6 +1,6 @@
 You've been invited to join {{ invite.club.name }}!
 
-You've been personally invited to join {{ invite.club.name }} on Cycling Clubs.
+You've been personally invited to join {{ invite.club.name }} on Paceline.club.
 Click the link below to accept your invite and get immediate active membership.
 
 {{ claim_url }}

@@ -10,4 +10,4 @@ Location: {{ ride.meeting_location }}
 Distance: {{ ride.distance_miles }} miles
 Pace:     {{ ride.pace_label }}
 
-View the club calendar: https://cyclingclub.pcp.dev/clubs/{{ ride.club.slug }}/rides/
+View the club calendar: https://paceline.club/clubs/{{ ride.club.slug }}/rides/

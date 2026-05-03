@@ -454,11 +454,11 @@ def ride_ics(slug, ride_id):
     ics = (
         'BEGIN:VCALENDAR\r\n'
         'VERSION:2.0\r\n'
-        'PRODID:-//Cycling Clubs//cyclingclub.pcp.dev//EN\r\n'
+        'PRODID:-//Paceline.club//paceline.club//EN\r\n'
         'CALSCALE:GREGORIAN\r\n'
         'METHOD:PUBLISH\r\n'
         'BEGIN:VEVENT\r\n'
-        f'UID:ride-{ride.id}@cyclingclub.pcp.dev\r\n'
+        f'UID:ride-{ride.id}@paceline.club\r\n'
         f'DTSTAMP:{dt_stamp}\r\n'
         f'DTSTART:{dt_start.strftime("%Y%m%dT%H%M%S")}\r\n'
         f'DTEND:{dt_end.strftime("%Y%m%dT%H%M%S")}\r\n'
@@ -494,7 +494,7 @@ def ride_gpx(slug, ride_id):
     gpx_url = f'https://ridewithgps.com/routes/{ride.ridewithgps_route_id}.gpx'
     try:
         upstream = http_requests.get(gpx_url, timeout=15,
-                                     headers={'User-Agent': 'CyclingClubsApp/1.0'})
+                                     headers={'User-Agent': 'Paceline/1.0 (paceline.club)'})
         if upstream.status_code != 200:
             abort(404)
     except http_requests.RequestException:

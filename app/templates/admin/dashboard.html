@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% block title %}Superadmin Dashboard — Cycling Clubs{% endblock %}
+{% block title %}Superadmin Dashboard — Paceline.club{% endblock %}
 
 {% block content %}
 <div class="page-header">
@@ -101,6 +101,20 @@
     </div>
 
   </div>
+
+  {# Geocoding status #}
+  {% if ungeocodeable_count > 0 %}
+  <div class="alert alert-warning d-flex align-items-center justify-content-between gap-3 mb-4" role="alert">
+    <div>
+      <strong>{{ ungeocodeable_count }} club{{ 's' if ungeocodeable_count != 1 }} missing map coordinates.</strong>
+      These clubs won't appear on the map until geocoded.
+    </div>
+    <form method="post" action="{{ url_for('admin.geocode_clubs') }}" class="flex-shrink-0">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button class="btn btn-warning btn-sm text-nowrap">Geocode Now</button>
+    </form>
+  </div>
+  {% endif %}
 
   <div class="d-flex justify-content-between align-items-center mb-3">
     <h4 class="mb-0">All Clubs</h4>

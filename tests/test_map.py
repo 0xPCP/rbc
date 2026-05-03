@@ -123,8 +123,8 @@ def test_map_rides_hidden_from_anonymous(client, db, sample_club):
     _make_club_ride(db, sample_club)
     resp = client.get('/clubs/map/')
     assert resp.status_code == 200
-    # The rides JSON embedded in the page should be an empty list
-    assert b'"rides": []' in resp.data or b'const rides = []' in resp.data
+    # The rides data attribute should be an empty JSON array
+    assert b'data-rides="[]"' in resp.data
 
 
 def test_map_rides_visible_for_authenticated(client, db, sample_club, regular_user):

@@ -5,8 +5,8 @@ This week's rides — {{ club.name }}
 {% for ride in rides %}{{ ride.date.strftime('%a %b %-d') }} {{ ride.time.strftime('%-I:%M %p') }}
 {{ ride.title }} | {{ ride.pace_category }} | {{ ride.distance_miles }} mi{% if ride.meeting_location %} | {{ ride.meeting_location }}{% endif %}
 
-{% endfor %}View the full calendar: https://cyclingclub.pcp.dev/clubs/{{ club.slug }}/calendar/
+{% endfor %}View the full calendar: https://paceline.club/clubs/{{ club.slug }}/calendar/
 {% else %}No rides are scheduled this week. Check back soon!
 
-Visit the club: https://cyclingclub.pcp.dev/clubs/{{ club.slug }}/
+Visit the club: https://paceline.club/clubs/{{ club.slug }}/
 {% endif %}
