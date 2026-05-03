@@ -74,31 +74,31 @@
 <div class="page-header" style="padding:1rem 0">
   <div class="container d-flex align-items-center justify-content-between flex-wrap gap-2">
     <div>
-      <h1 style="font-size:1.8rem;margin-bottom:.1rem">Club Map</h1>
-      <p id="map-subtitle" class="mb-0" style="font-size:.9rem">{% if clubs %}{{ clubs|length }} club{{ 's' if clubs|length != 1 else '' }} on the map{% else %}No geocoded clubs yet.{% endif %}</p>
+      <h1 style="font-size:1.8rem;margin-bottom:.1rem">{{ _('Club Map') }}</h1>
+      <p id="map-subtitle" class="mb-0" style="font-size:.9rem">{% if clubs %}{{ ngettext('%(num)d club on the map', '%(num)d clubs on the map', clubs|length) }}{% else %}{{ _('No geocoded clubs yet.') }}{% endif %}</p>
     </div>
     <div class="d-flex gap-2 align-items-center flex-wrap">
 
       {# Layer toggle #}
       <div class="btn-group map-layer-toggle" role="group">
         <button id="layer-clubs" class="btn btn-rbc-sm active">
-          &#x1F3E2; Clubs
+          &#x1F3E2; {{ _('Clubs') }}
         </button>
         {% if current_user.is_authenticated %}
         <button id="layer-rides" class="btn btn-outline-light">
-          &#x1F6B4; Rides This Week
+          &#x1F6B4; {{ _('Rides This Week') }}
         </button>
         {% else %}
         <a href="{{ url_for('auth.login', next=request.path) }}"
-           class="btn btn-outline-light" title="Sign in to see upcoming rides">
-          &#x1F512; Rides This Week
+           class="btn btn-outline-light" title="{{ _('Sign in to see upcoming rides') }}">
+          &#x1F512; {{ _('Rides This Week') }}
         </a>
         {% endif %}
       </div>
 
-      <a href="{{ url_for('clubs.index') }}" class="btn btn-outline-light btn-sm">List View</a>
+      <a href="{{ url_for('clubs.index') }}" class="btn btn-outline-light btn-sm">{{ _('List View') }}</a>
       <button id="locate-btn" class="btn btn-rbc-sm" style="font-size:.85rem;padding:.4rem .9rem">
-        &#x1F4CD; Near Me
+        &#x1F4CD; {{ _('Near Me') }}
       </button>
     </div>
   </div>

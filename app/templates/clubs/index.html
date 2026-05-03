@@ -5,37 +5,37 @@
 <div class="page-header">
   <div class="container">
     <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-2">
-      <h1 class="mb-0">Find a Club</h1>
+      <h1 class="mb-0">{{ _('Find a Club') }}</h1>
       <div class="d-flex gap-2">
-        <a href="{{ url_for('clubs.club_map') }}" class="btn btn-outline-light btn-sm">&#x1F5FA; Map View</a>
+        <a href="{{ url_for('clubs.club_map') }}" class="btn btn-outline-light btn-sm">&#x1F5FA; {{ _('Map View') }}</a>
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('clubs.create') }}" class="btn btn-rbc btn-sm">+ Create a Club</a>
+        <a href="{{ url_for('clubs.create') }}" class="btn btn-rbc btn-sm">{{ _('+ Create a Club') }}</a>
         {% endif %}
       </div>
     </div>
     <div class="row g-2 mt-2">
       <div class="col-md-6">
         <form class="d-flex gap-2" method="get">
-          <input type="text" name="q" class="form-control" placeholder="Search by name, city, or state…" value="{{ q }}">
-          <button class="btn btn-rbc" type="submit">Search</button>
-          {% if q %}<a href="{{ url_for('clubs.index') }}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+          <input type="text" name="q" class="form-control" placeholder="{{ _('Search by name, city, or state…') }}" value="{{ q }}">
+          <button class="btn btn-rbc" type="submit">{{ _('Search') }}</button>
+          {% if q %}<a href="{{ url_for('clubs.index') }}" class="btn btn-outline-secondary">{{ _('Clear') }}</a>{% endif %}
         </form>
       </div>
       <div class="col-md-6">
         <form class="d-flex gap-2" method="get">
-          <input type="text" name="zip" class="form-control" placeholder="Zip code…" value="{{ zip_q }}" maxlength="10">
+          <input type="text" name="zip" class="form-control" placeholder="{{ _('Zip code…') }}" value="{{ zip_q }}" maxlength="10">
           <select name="radius" class="form-select" style="width:auto;flex-shrink:0">
             {% for r in [10, 25, 50, 100] %}
             <option value="{{ r }}" {{ 'selected' if radius == r else '' }}>{{ r }} mi</option>
             {% endfor %}
           </select>
-          <button class="btn btn-rbc" type="submit">Near Me</button>
-          {% if zip_q %}<a href="{{ url_for('clubs.index') }}" class="btn btn-outline-secondary">Clear</a>{% endif %}
+          <button class="btn btn-rbc" type="submit">{{ _('Near Me') }}</button>
+          {% if zip_q %}<a href="{{ url_for('clubs.index') }}" class="btn btn-outline-secondary">{{ _('Clear') }}</a>{% endif %}
         </form>
       </div>
     </div>
     {% if geo_error %}<p class="text-danger small mt-2">{{ geo_error }}</p>{% endif %}
-    {% if zip_q and not geo_error %}<p class="text-muted small mt-2">Clubs within {{ radius }} miles of {{ zip_q }}</p>{% endif %}
+    {% if zip_q and not geo_error %}<p class="text-muted small mt-2">{{ _('Clubs within %(radius)s miles of %(zip_q)s', radius=radius, zip_q=zip_q) }}</p>{% endif %}
   </div>
 </div>
 
@@ -49,15 +49,15 @@
           <div class="d-flex justify-content-between align-items-start mb-2">
             <h5 class="mb-0">{{ club.name }}</h5>
             <div class="d-flex flex-column align-items-end gap-1">
-              <span class="badge bg-secondary">{{ club.member_count }} members</span>
+              <span class="badge bg-secondary">{{ ngettext('%(num)s member', '%(num)s members', club.member_count) }}</span>
               {% if distances.get(club.id) is not none %}
-              <span class="badge bg-light text-dark border">{{ distances[club.id] }} mi away</span>
+              <span class="badge bg-light text-dark border">{{ _('%(dist)s mi away', dist=distances[club.id]) }}</span>
               {% endif %}
             </div>
           </div>
           {% if club.city %}<p class="text-muted small mb-1">{{ club.city }}, {{ club.state }}{% if club.zip_code %} {{ club.zip_code }}{% endif %}</p>{% endif %}
           {% if club.description %}<p class="text-muted small mb-2">{{ club.description[:140] }}{% if club.description|length > 140 %}…{% endif %}</p>{% endif %}
-          <span class="btn btn-rbc-sm">View Club</span>
+          <span class="btn btn-rbc-sm">{{ _('View Club') }}</span>
         </div>
       </a>
     </div>
@@ -65,7 +65,7 @@
   </div>
   {% else %}
   <p class="text-muted">
-    No clubs found{% if zip_q %} within {{ radius }} miles of {{ zip_q }}{% elif q %} for "{{ q }}"{% endif %}.
+    {{ _('No clubs found') }}{% if zip_q %} {{ _('within %(radius)s miles of %(zip_q)s', radius=radius, zip_q=zip_q) }}{% elif q %} {{ _('for "%(q)s"', q=q) }}{% endif %}.
   </p>
   {% endif %}
 </div>

@@ -91,3 +91,145 @@ msgstr "Account aangemaakt! U kunt nu inloggen."
 
 msgid "This account has been deactivated. Please contact support."
 msgstr "Dit account is gedeactiveerd. Neem contact op met de support."
+
+msgid "Find your pack."
+msgstr "Vind jouw groep."
+
+msgid "Group Cycling, Simplified"
+msgstr "Wielrennen in groep, vereenvoudigd"
+
+msgid "Discover local cycling clubs, sign up for group rides, and keep your whole calendar in one place."
+msgstr "Ontdek lokale wielrenclubs, meld u aan voor groepsritten en bewaar uw hele agenda op één plek."
+
+msgid "How It Works"
+msgstr "Hoe het werkt"
+
+msgid "Create a free account"
+msgstr "Maak een gratis account aan"
+
+msgid "Subscribe to local clubs"
+msgstr "Abonneer u op lokale clubs"
+
+msgid "See all your rides in one dashboard"
+msgstr "Zie al uw ritten in één dashboard"
+
+msgid "Clubs on the Platform"
+msgstr "Clubs op het platform"
+
+msgid "Browse All Clubs"
+msgstr "Alle clubs bekijken"
+
+msgid "Welcome back, %(username)s"
+msgstr "Welkom terug, %(username)s"
+
+msgid "Your rides across all subscribed clubs."
+msgstr "Uw ritten bij alle ingeschreven clubs."
+
+msgid "My Upcoming Rides"
+msgstr "Mijn aankomende ritten"
+
+msgid "Your Ride"
+msgstr "Uw rit"
+
+msgid "Cancelled"
+msgstr "Geannuleerd"
+
+msgid "You haven't signed up for any upcoming rides."
+msgstr "U heeft zich voor geen aankomende rit aangemeld."
+
+msgid "Check the suggestions below."
+msgstr "Bekijk de suggesties hieronder."
+
+msgid "Upcoming from Your Clubs"
+msgstr "Binnenkort van uw clubs"
+
+msgid "What to Wear"
+msgstr "Wat te dragen"
+
+msgid "no location set"
+msgstr "geen locatie ingesteld"
+
+msgid "Loading…"
+msgstr "Laden…"
+
+msgid "Save your zip code"
+msgstr "Sla uw postcode op"
+
+msgid "for gear recommendations."
+msgstr "voor aanbevelingen over uitrusting."
+
+msgid "Use my current location"
+msgstr "Mijn huidige locatie gebruiken"
+
+msgid "Discover Clubs"
+msgstr "Clubs ontdekken"
+
+msgid "You've joined all available clubs!"
+msgstr "U heeft zich bij alle beschikbare clubs aangesloten!"
+
+msgid "Map View"
+msgstr "Kaartweergave"
+
+msgid "+ Create a Club"
+msgstr "+ Club aanmaken"
+
+msgid "Search by name, city, or state…"
+msgstr "Zoeken op naam, stad of staat…"
+
+msgid "Search"
+msgstr "Zoeken"
+
+msgid "Clear"
+msgstr "Wissen"
+
+msgid "Zip code…"
+msgstr "Postcode…"
+
+msgid "Near Me"
+msgstr "Bij mij in de buurt"
+
+msgid "View Club"
+msgstr "Club bekijken"
+
+msgid "No clubs found"
+msgstr "Geen clubs gevonden"
+
+msgid "within %(radius)s miles of %(zip_q)s"
+msgstr "binnen %(radius)s mijl van %(zip_q)s"
+
+msgid "for \"%(q)s\""
+msgstr "voor \"%(q)s\""
+
+msgid "Clubs within %(radius)s miles of %(zip_q)s"
+msgstr "Clubs binnen %(radius)s mijl van %(zip_q)s"
+
+msgid "%(dist)s mi away"
+msgstr "%(dist)s mijl weg"
+
+msgid "Club Map"
+msgstr "Clubkaart"
+
+msgid "No geocoded clubs yet."
+msgstr "Nog geen geocodeerde clubs."
+
+msgid "Clubs"
+msgstr "Clubs"
+
+msgid "Rides This Week"
+msgstr "Ritten deze week"
+
+msgid "Sign in to see upcoming rides"
+msgstr "Log in om aankomende ritten te zien"
+
+msgid "List View"
+msgstr "Lijstweergave"
+
+msgid "%(num)s member"
+msgid_plural "%(num)s members"
+msgstr[0] "%(num)s lid"
+msgstr[1] "%(num)s leden"
+
+msgid "%(num)d club on the map"
+msgid_plural "%(num)d clubs on the map"
+msgstr[0] "%(num)d club op de kaart"
+msgstr[1] "%(num)d clubs op de kaart"

@@ -4,8 +4,8 @@
 {% block content %}
 <div class="page-header">
   <div class="container">
-    <h1>Welcome back, {{ current_user.username }}</h1>
-    <p class="mb-0">Your rides across all subscribed clubs.</p>
+    <h1>{{ _('Welcome back, %(username)s', username=current_user.username) }}</h1>
+    <p class="mb-0">{{ _('Your rides across all subscribed clubs.') }}</p>
   </div>
 </div>
 
@@ -14,7 +14,7 @@
 
     <!-- My upcoming signed-up rides -->
     <div class="col-lg-8">
-      <h4 class="mb-3">My Upcoming Rides</h4>
+      <h4 class="mb-3">{{ _('My Upcoming Rides') }}</h4>
       {% if my_rides %}
         {% for ride in my_rides %}
         {% set w = weather.get(ride.id) %}
@@ -28,11 +28,11 @@
               <div class="d-flex align-items-center gap-2 mb-1 flex-wrap">
                 <span class="pace-badge pace-{{ ride.pace_category }}">{{ ride.pace_category }}</span>
                 {% if ride.owner_id %}
-                  <span class="badge bg-primary">Your Ride</span>
+                  <span class="badge bg-primary">{{ _('Your Ride') }}</span>
                 {% else %}
                   <span class="text-muted small">{{ ride.club.name }}</span>
                 {% endif %}
-                {% if ride.is_cancelled %}<span class="badge bg-danger">Cancelled</span>{% endif %}
+                {% if ride.is_cancelled %}<span class="badge bg-danger">{{ _('Cancelled') }}</span>{% endif %}
                 {% if w %}{% include '_weather_chip.html' with context %}{% endif %}
               </div>
               {% if ride.owner_id %}
@@ -50,14 +50,14 @@
         </div>
         {% endfor %}
       {% else %}
-        <div class="text-muted">You haven't signed up for any upcoming rides.
-          {% if upcoming_club_rides %} Check the suggestions below.{% endif %}
+        <div class="text-muted">{{ _("You haven't signed up for any upcoming rides.") }}
+          {% if upcoming_club_rides %} {{ _('Check the suggestions below.') }}{% endif %}
         </div>
       {% endif %}
 
       <!-- Upcoming from subscribed clubs not yet signed up -->
       {% if upcoming_club_rides %}
-      <h5 class="mt-4 mb-3">Upcoming from Your Clubs</h5>
+      <h5 class="mt-4 mb-3">{{ _('Upcoming from Your Clubs') }}</h5>
         {% for ride in upcoming_club_rides %}
         {% set w = weather.get(ride.id) %}
         <div class="ride-card mb-2">
@@ -98,32 +98,32 @@
       <!-- What to Wear widget -->
       <div class="wtw-card mb-4" id="wtw-widget">
         <div class="wtw-header">
-          <span class="wtw-title">What to Wear</span>
+          <span class="wtw-title">{{ _('What to Wear') }}</span>
           <span class="wtw-location" id="wtw-location-label">
-            {% if current_user.zip_code %}{{ current_user.zip_code }}{% else %}no location set{% endif %}
+            {% if current_user.zip_code %}{{ current_user.zip_code }}{% else %}{{ _('no location set') }}{% endif %}
           </span>
         </div>
         <div id="wtw-body">
           {% if current_user.zip_code %}
           <div class="wtw-loading">
             <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
-            <span class="ms-2 text-muted small">Loading…</span>
+            <span class="ms-2 text-muted small">{{ _('Loading…') }}</span>
           </div>
           {% else %}
           <p class="text-muted small mb-2">
-            <a href="{{ url_for('auth.profile') }}">Save your zip code</a> for gear recommendations.
+            <a href="{{ url_for('auth.profile') }}">{{ _('Save your zip code') }}</a> {{ _('for gear recommendations.') }}
           </p>
           {% endif %}
         </div>
         <div class="mt-2" id="wtw-geo-row">
           <button class="btn btn-outline-secondary btn-sm" id="wtw-geo-btn" type="button">
-            📍 Use my current location
+            📍 {{ _('Use my current location') }}
           </button>
         </div>
       </div>
 
       <!-- Discover clubs -->
-      <h4 class="mb-3">Discover Clubs</h4>
+      <h4 class="mb-3">{{ _('Discover Clubs') }}</h4>
       {% if suggested_clubs %}
         {% for club in suggested_clubs %}
         <div class="card mb-2 border-0 shadow-sm">
@@ -135,16 +135,16 @@
               </div>
               <form method="post" action="{{ url_for('clubs.join', slug=club.slug) }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                <button class="btn btn-rbc-sm">Join</button>
+                <button class="btn btn-rbc-sm">{{ _('Join') }}</button>
               </form>
             </div>
           </div>
         </div>
         {% endfor %}
       {% else %}
-        <p class="text-muted small">You've joined all available clubs!</p>
+        <p class="text-muted small">{{ _("You've joined all available clubs!") }}</p>
       {% endif %}
-      <a href="{{ url_for('clubs.index') }}" class="btn btn-rbc-outline btn-sm mt-2">Browse All Clubs</a>
+      <a href="{{ url_for('clubs.index') }}" class="btn btn-rbc-outline btn-sm mt-2">{{ _('Browse All Clubs') }}</a>
     </div>
 
   </div>

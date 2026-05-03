@@ -91,3 +91,145 @@ msgstr "Konto erstellt! Sie können sich jetzt anmelden."
 
 msgid "This account has been deactivated. Please contact support."
 msgstr "Dieses Konto wurde deaktiviert. Bitte wenden Sie sich an den Support."
+
+msgid "Find your pack."
+msgstr "Finde deine Gruppe."
+
+msgid "Group Cycling, Simplified"
+msgstr "Gruppenradfahren, vereinfacht"
+
+msgid "Discover local cycling clubs, sign up for group rides, and keep your whole calendar in one place."
+msgstr "Entdecken Sie lokale Radsportvereine, melden Sie sich für Gruppenausfahrten an und behalten Sie Ihren gesamten Kalender an einem Ort."
+
+msgid "How It Works"
+msgstr "So funktioniert es"
+
+msgid "Create a free account"
+msgstr "Kostenloses Konto erstellen"
+
+msgid "Subscribe to local clubs"
+msgstr "Lokale Clubs abonnieren"
+
+msgid "See all your rides in one dashboard"
+msgstr "Alle Ausfahrten in einem Dashboard anzeigen"
+
+msgid "Clubs on the Platform"
+msgstr "Clubs auf der Plattform"
+
+msgid "Browse All Clubs"
+msgstr "Alle Clubs durchsuchen"
+
+msgid "Welcome back, %(username)s"
+msgstr "Willkommen zurück, %(username)s"
+
+msgid "Your rides across all subscribed clubs."
+msgstr "Ihre Ausfahrten bei allen abonnierten Clubs."
+
+msgid "My Upcoming Rides"
+msgstr "Meine bevorstehenden Ausfahrten"
+
+msgid "Your Ride"
+msgstr "Ihre Ausfahrt"
+
+msgid "Cancelled"
+msgstr "Abgesagt"
+
+msgid "You haven't signed up for any upcoming rides."
+msgstr "Sie haben sich für keine bevorstehenden Ausfahrten angemeldet."
+
+msgid "Check the suggestions below."
+msgstr "Sehen Sie sich die Vorschläge unten an."
+
+msgid "Upcoming from Your Clubs"
+msgstr "Demnächst von Ihren Clubs"
+
+msgid "What to Wear"
+msgstr "Was anziehen"
+
+msgid "no location set"
+msgstr "kein Standort gesetzt"
+
+msgid "Loading…"
+msgstr "Wird geladen…"
+
+msgid "Save your zip code"
+msgstr "Speichern Sie Ihre Postleitzahl"
+
+msgid "for gear recommendations."
+msgstr "für Ausrüstungsempfehlungen."
+
+msgid "Use my current location"
+msgstr "Meinen aktuellen Standort verwenden"
+
+msgid "Discover Clubs"
+msgstr "Clubs entdecken"
+
+msgid "You've joined all available clubs!"
+msgstr "Sie sind allen verfügbaren Clubs beigetreten!"
+
+msgid "Map View"
+msgstr "Kartenansicht"
+
+msgid "+ Create a Club"
+msgstr "+ Club erstellen"
+
+msgid "Search by name, city, or state…"
+msgstr "Nach Name, Stadt oder Bundesland suchen…"
+
+msgid "Search"
+msgstr "Suchen"
+
+msgid "Clear"
+msgstr "Löschen"
+
+msgid "Zip code…"
+msgstr "Postleitzahl…"
+
+msgid "Near Me"
+msgstr "In meiner Nähe"
+
+msgid "View Club"
+msgstr "Club ansehen"
+
+msgid "No clubs found"
+msgstr "Keine Clubs gefunden"
+
+msgid "within %(radius)s miles of %(zip_q)s"
+msgstr "im Umkreis von %(radius)s Meilen von %(zip_q)s"
+
+msgid "for \"%(q)s\""
+msgstr "für \"%(q)s\""
+
+msgid "Clubs within %(radius)s miles of %(zip_q)s"
+msgstr "Clubs im Umkreis von %(radius)s Meilen von %(zip_q)s"
+
+msgid "%(dist)s mi away"
+msgstr "%(dist)s Meilen entfernt"
+
+msgid "Club Map"
+msgstr "Club-Karte"
+
+msgid "No geocoded clubs yet."
+msgstr "Noch keine geokodierten Clubs."
+
+msgid "Clubs"
+msgstr "Clubs"
+
+msgid "Rides This Week"
+msgstr "Ausfahrten diese Woche"
+
+msgid "Sign in to see upcoming rides"
+msgstr "Anmelden, um bevorstehende Ausfahrten zu sehen"
+
+msgid "List View"
+msgstr "Listenansicht"
+
+msgid "%(num)s member"
+msgid_plural "%(num)s members"
+msgstr[0] "%(num)s Mitglied"
+msgstr[1] "%(num)s Mitglieder"
+
+msgid "%(num)d club on the map"
+msgid_plural "%(num)d clubs on the map"
+msgstr[0] "%(num)d Club auf der Karte"
+msgstr[1] "%(num)d Clubs auf der Karte"
