@@ -1,6 +1,7 @@
 import sys
-from flask import Flask, request, session
-from flask_login import current_user
+from datetime import datetime, timezone
+from flask import Flask, request, session, redirect, url_for, flash
+from flask_login import current_user, logout_user, login_fresh
 from .config import Config
 from .extensions import db, login_manager, bcrypt, csrf, mail, babel
 
@@ -34,6 +35,17 @@ def _strftime_filter(value, fmt):
     return value.strftime(fmt)
 
 
+def _is_auth_timeout_exempt(endpoint):
+    if not endpoint:
+        return False
+    return endpoint == 'static' or endpoint in {
+        'auth.login',
+        'auth.logout',
+        'auth.register',
+        'auth.setup_account',
+    }
+
+
 def create_app(config_class=Config):
     app = Flask(__name__)
     app.config.from_object(config_class)
@@ -63,7 +75,6 @@ def create_app(config_class=Config):
     app.register_blueprint(media_bp)
     app.register_blueprint(user_rides_bp, url_prefix='/my-rides')
 
-    from datetime import datetime, timezone
     from .version import __version__
     from .utils import club_theme_vars
 
@@ -79,6 +90,37 @@ def create_app(config_class=Config):
             'current_locale': str(_get_locale() or 'en'),
             'languages': LANGUAGE_NAMES,
         }
+
+    @app.before_request
+    def enforce_auth_age():
+        if (
+            not current_user.is_authenticated
+            or _is_auth_timeout_exempt(request.endpoint)
+            or session.get('_paceline_trusted_browser')
+            or not login_fresh()
+        ):
+            return None
+
+        now_ts = datetime.now(timezone.utc).timestamp()
+        started_at = session.get('_paceline_auth_started_at')
+        if started_at is None:
+            session['_paceline_auth_started_at'] = now_ts
+            session.permanent = True
+            return None
+
+        max_age = app.config.get('AUTH_REAUTH_SECONDS', 6 * 60 * 60)
+        try:
+            expired = now_ts - float(started_at) > max_age
+        except (TypeError, ValueError):
+            expired = True
+
+        if expired:
+            logout_user()
+            session.pop('_paceline_auth_started_at', None)
+            session.pop('_paceline_trusted_browser', None)
+            flash('Your session expired. Please sign in again.', 'info')
+            return redirect(url_for('auth.login', next=request.full_path.rstrip('?')))
+        return None
 
     @app.after_request
     def set_security_headers(response):

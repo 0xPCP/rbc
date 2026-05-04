@@ -1,4 +1,5 @@
 from datetime import date, timedelta
+from urllib.parse import urlparse
 from flask import Blueprint, render_template, request, redirect, url_for, session, current_app
 from flask_login import current_user, login_required
 from sqlalchemy import or_, and_
@@ -94,6 +95,15 @@ def set_language(lang):
 @main_bp.route('/about')
 def about():
     return render_template('about.html')
+
+
+@main_bp.route('/donate')
+def donate():
+    donate_url = (current_app.config.get('DONATE_URL') or '').strip()
+    parsed = urlparse(donate_url)
+    if donate_url and parsed.scheme in ('http', 'https') and parsed.netloc:
+        return redirect(donate_url)
+    return render_template('donate.html')
 
 
 @main_bp.route('/users/<username>')

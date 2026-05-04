@@ -6,6 +6,7 @@ services:
     environment:
       - DATABASE_URL=postgresql://paceline:${DB_PASSWORD}@db:5432/paceline
       - SECRET_KEY=${SECRET_KEY}
+      - DONATE_URL=${DONATE_URL:-}
       - STRAVA_CLIENT_ID=${STRAVA_CLIENT_ID:-}
       - STRAVA_CLIENT_SECRET=${STRAVA_CLIENT_SECRET:-}
       - STRAVA_CLUB_ID=${STRAVA_CLUB_ID:-}

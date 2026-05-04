@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 
 class Config:
@@ -9,6 +10,13 @@ class Config:
     )
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     WTF_CSRF_ENABLED = True
+    AUTH_REAUTH_SECONDS = int(os.environ.get('AUTH_REAUTH_HOURS', 6)) * 60 * 60
+    PERMANENT_SESSION_LIFETIME = timedelta(seconds=AUTH_REAUTH_SECONDS)
+    REMEMBER_COOKIE_DURATION = timedelta(days=int(os.environ.get('TRUSTED_BROWSER_DAYS', 30)))
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
 
     # Strava
     STRAVA_CLIENT_ID = os.environ.get('STRAVA_CLIENT_ID')
@@ -28,6 +36,9 @@ class Config:
     # Internationalisation
     BABEL_DEFAULT_LOCALE = 'en'
     BABEL_DEFAULT_TIMEZONE = 'UTC'
+
+    # Hosted donation page. Leave blank to show the local coming-soon stub.
+    DONATE_URL = os.environ.get('DONATE_URL', '').strip()
 
     # Media uploads — see docs/media_strategy.md for rationale and update guidance
     UPLOAD_FOLDER = os.environ.get(

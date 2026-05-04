@@ -379,6 +379,14 @@ body.club-page {
 }
 .section-body { color: #495057; line-height: 1.7; }
 
+.donate-panel {
+  background: #fff;
+  border: 1px solid var(--paceline-border);
+  border-radius: 8px;
+  padding: 2rem;
+  box-shadow: 0 4px 18px rgba(15,23,42,.06);
+}
+
 /* ── Page header ─────────────────────────────────────────────────────────── */
 .page-header {
   background: var(--paceline-light);

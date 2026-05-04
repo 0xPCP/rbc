@@ -1,5 +1,5 @@
 from datetime import date, datetime, timezone
-from flask import Blueprint, render_template, redirect, url_for, flash, request
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session
 from flask_login import login_user, logout_user, login_required, current_user
 from flask_babel import gettext as _
 from ..extensions import db, bcrypt
@@ -10,6 +10,12 @@ from ..gear import GEAR_CATALOG
 from ..utils import is_safe_url
 
 auth_bp = Blueprint('auth', __name__)
+
+
+def _mark_interactive_login(trusted_browser=False):
+    session.permanent = True
+    session['_paceline_auth_started_at'] = datetime.now(timezone.utc).timestamp()
+    session['_paceline_trusted_browser'] = bool(trusted_browser)
 
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
@@ -40,6 +46,7 @@ def register():
         db.session.commit()
 
         login_user(user)
+        _mark_interactive_login()
         if is_first_user:
             flash(_('Account created — you have been granted admin access as the first user.'), 'success')
         else:
@@ -64,7 +71,9 @@ def login():
             if not user.is_active:
                 flash(_('This account has been deactivated. Please contact support.'), 'danger')
                 return render_template('auth/login.html', form=form)
-            login_user(user, remember=form.remember.data)
+            trusted_browser = bool(form.remember.data)
+            login_user(user, remember=trusted_browser)
+            _mark_interactive_login(trusted_browser=trusted_browser)
             next_page = request.args.get('next')
             if next_page and is_safe_url(next_page):
                 return redirect(next_page)
@@ -107,6 +116,7 @@ def setup_account(token):
         invite.used_by_user_id = user.id
         db.session.commit()
         login_user(user)
+        _mark_interactive_login()
         flash(f"Welcome to {invite.club.name}! Your Paceline account is ready.", 'success')
         return redirect(url_for('clubs.home', slug=invite.club.slug))
 
@@ -117,6 +127,8 @@ def setup_account(token):
 @login_required
 def logout():
     logout_user()
+    session.pop('_paceline_auth_started_at', None)
+    session.pop('_paceline_trusted_browser', None)
     return redirect(url_for('main.index'))
 
 

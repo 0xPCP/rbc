@@ -2,7 +2,7 @@
 Tests for authentication: registration, login, logout, first-user admin promotion.
 """
 import pytest
-from datetime import date, time, timedelta
+from datetime import date, datetime, time, timedelta, timezone
 from app.models import User, Ride, RideSignup
 from tests.conftest import login, logout
 
@@ -92,6 +92,28 @@ class TestLogin:
         # Should be redirected away from login — check for username in nav
         assert b'rider' in resp.data
 
+    def test_login_page_uses_trust_browser_label(self, client):
+        resp = client.get('/auth/login')
+        assert b'Trust this browser' in resp.data
+        assert b'signed out after 6 hours' in resp.data
+
+    def test_login_without_trust_does_not_issue_remember_cookie(self, client, regular_user):
+        resp = client.post('/auth/login', data={
+            'email': 'rider@test.com',
+            'password': 'password123',
+        })
+        cookies = '\n'.join(resp.headers.getlist('Set-Cookie'))
+        assert 'remember_token=' not in cookies
+
+    def test_login_with_trust_issues_remember_cookie(self, client, regular_user):
+        resp = client.post('/auth/login', data={
+            'email': 'rider@test.com',
+            'password': 'password123',
+            'remember': 'y',
+        })
+        cookies = '\n'.join(resp.headers.getlist('Set-Cookie'))
+        assert 'remember_token=' in cookies
+
     def test_login_with_bad_password(self, client, regular_user):
         resp = client.post('/auth/login', data={
             'email': 'rider@test.com',
@@ -120,6 +142,36 @@ class TestLogin:
             'password': 'password123',
         }, follow_redirects=True)
         assert resp.status_code == 200
+
+    def test_non_trusted_session_expires_after_six_hours(self, client, regular_user):
+        login(client, 'rider@test.com', 'password123')
+        old = datetime.now(timezone.utc) - timedelta(hours=6, minutes=1)
+        with client.session_transaction() as sess:
+            sess['_paceline_auth_started_at'] = old.timestamp()
+            sess['_paceline_trusted_browser'] = False
+
+        resp = client.get('/auth/profile', follow_redirects=False)
+        assert resp.status_code == 302
+        assert '/auth/login?next=/auth/profile' in resp.headers['Location']
+
+        resp = client.get('/auth/profile', follow_redirects=True)
+        assert b'Your session expired' in resp.data
+        assert b'Sign In' in resp.data
+
+    def test_trusted_browser_skips_six_hour_reauth(self, client, regular_user):
+        client.post('/auth/login', data={
+            'email': 'rider@test.com',
+            'password': 'password123',
+            'remember': 'y',
+        })
+        old = datetime.now(timezone.utc) - timedelta(hours=12)
+        with client.session_transaction() as sess:
+            sess['_paceline_auth_started_at'] = old.timestamp()
+            sess['_paceline_trusted_browser'] = True
+
+        resp = client.get('/auth/profile')
+        assert resp.status_code == 200
+        assert b'rider' in resp.data
 
 
 # ── Admin access ──────────────────────────────────────────────────────────────

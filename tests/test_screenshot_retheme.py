@@ -13,7 +13,7 @@ from app.extensions import bcrypt
 
 DESKTOP = {'width': 1440, 'height': 900}
 MOBILE  = {'width': 390,  'height': 844}
-PORT    = 5099
+PORT    = 5204
 DB_PATH = os.path.join(os.path.dirname(__file__), '_retheme_test.db')
 OUT_DIR = os.path.join(os.path.dirname(__file__), 'screenshots', 'retheme')
 
@@ -91,7 +91,7 @@ def test_landing_page_desktop(srv, browser):
     """Landing page hero — should be dark charcoal, not green."""
     page = browser.new_page(viewport=DESKTOP)
     page.goto(srv)
-    page.wait_for_selector('.rbc-hero')
+    page.wait_for_selector('.paceline-hero')
     page.wait_for_timeout(500)
     page.screenshot(path=f'{OUT_DIR}/01_landing_desktop.png', full_page=True)
     page.close()
@@ -100,7 +100,7 @@ def test_landing_page_desktop(srv, browser):
 def test_landing_page_mobile(srv, browser):
     page = browser.new_page(viewport=MOBILE)
     page.goto(srv)
-    page.wait_for_selector('.rbc-hero')
+    page.wait_for_selector('.paceline-hero')
     page.wait_for_timeout(400)
     page.screenshot(path=f'{OUT_DIR}/02_landing_mobile.png', full_page=True)
     page.close()
@@ -110,8 +110,8 @@ def test_navbar_closeup(srv, browser):
     """Navbar should be white with dark logo."""
     page = browser.new_page(viewport=DESKTOP)
     page.goto(srv)
-    page.wait_for_selector('.rbc-navbar')
-    nav = page.locator('.rbc-navbar')
+    page.wait_for_selector('.paceline-navbar')
+    nav = page.locator('.paceline-navbar')
     nav.screenshot(path=f'{OUT_DIR}/03_navbar_closeup.png')
     page.close()
 
@@ -120,10 +120,10 @@ def test_footer_closeup(srv, browser):
     """Footer should be dark charcoal."""
     page = browser.new_page(viewport=DESKTOP)
     page.goto(srv)
-    page.wait_for_selector('.rbc-footer')
+    page.wait_for_selector('.paceline-footer')
     page.evaluate('window.scrollTo(0, document.body.scrollHeight)')
     page.wait_for_timeout(300)
-    footer = page.locator('.rbc-footer')
+    footer = page.locator('.paceline-footer')
     footer.screenshot(path=f'{OUT_DIR}/04_footer_closeup.png')
     page.close()
 

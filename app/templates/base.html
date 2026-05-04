@@ -102,6 +102,7 @@
         <ul class="footer-links">
           <li><a href="{{ url_for('clubs.index') }}">{{ _('Find a Club') }}</a></li>
           <li><a href="{{ url_for('main.about') }}">{{ _('About') }}</a></li>
+          <li><a href="{{ url_for('main.donate') }}">{{ _('Donate') }}</a></li>
           {% if not current_user.is_authenticated %}
           <li><a href="{{ url_for('auth.register') }}">{{ _('Create Account') }}</a></li>
           {% endif %}
