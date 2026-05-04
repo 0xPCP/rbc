@@ -47,3 +47,5 @@ networks:
 
 volumes:
   postgres_data:
+    external: true
+    name: cyclingclub_postgres_data
