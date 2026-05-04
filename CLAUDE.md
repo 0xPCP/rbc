@@ -18,19 +18,19 @@ The current codebase started as a single-club app (Reston Bike Club). It is bein
 
 ## Repository & deployment
 
-- **Local dev / source of truth:** `D:\Projects\rbc\`
+- **Local dev / source of truth:** `/home/nullbnx/Projects/paceline/`
 - **Dev platform:** TrueNAS Scale at `192.168.50.189` via Docker Compose
 - **Dev URL:** `cyclingclub.pcp.dev` (Cloudflare Tunnel)
-- **Git remote:** `github.com/0xPCP/rbc` (private)
+- **Git remote:** `github.com/0xPCP/paceline` (private)
 
 ## Dev/deploy workflow
 
-1. Implement feature locally in `D:\Projects\rbc\`
+1. Implement feature locally in `/home/nullbnx/Projects/paceline/`
 2. Write/update test harness for the feature (see `tests/`)
 3. Run tests: `pytest` inside the container or locally
 4. Commit to GitHub with a message naming the feature
-5. `robocopy` project to `\\192.168.50.189\docker\projects\rbc\` (excluding `.git`, `__pycache__`, `*.pyc`)
-6. SSH to TrueNAS: `cd /mnt/fast/docker/projects/rbc && docker compose up -d --build`
+5. `rsync` project to TrueNAS: `rsync -av --exclude='.git' --exclude='__pycache__' --exclude='*.pyc' --exclude='.venv' --exclude='instance/' --exclude='*.db' /home/nullbnx/Projects/paceline/ nullbnx@192.168.50.189:/mnt/fast/docker/projects/paceline/`
+6. SSH to TrueNAS: `cd /mnt/fast/docker/projects/paceline && sg docker -c 'docker compose up -d --build'`
 7. If schema changed: `docker compose exec web python seed.py` (wipe + re-seed dev DB)
 
 ## Testing rules
@@ -56,7 +56,7 @@ This catches Cloudflare Access intercepts, JS runtime errors, CDN failures, and 
 
 **Screenshot directory:** `tests/screenshots/` (gitignored — add `tests/screenshots/` to `.gitignore`)
 
-**Known issue:** `cyclingclub.pcp.dev` is behind Cloudflare Access. Browser tests that need to reach the live URL must either:
+**Known issue:** `cyclingclub.pcp.dev` is behind Cloudflare Access (URL unchanged for now). Browser tests that need to reach the live URL must either:
 - Use a Cloudflare service token passed as a header, OR
 - Run against the local Flask dev server (`flask run`) started before the test session
 - Preferred approach: use `pytest-playwright` with `base_url` pointed at `http://localhost:5000` with `FLASK_ENV=testing`

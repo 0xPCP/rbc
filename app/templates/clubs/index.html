@@ -9,7 +9,7 @@
       <div class="d-flex gap-2">
         <a href="{{ url_for('clubs.club_map') }}" class="btn btn-outline-light btn-sm">&#x1F5FA; {{ _('Map View') }}</a>
         {% if current_user.is_authenticated %}
-        <a href="{{ url_for('clubs.create') }}" class="btn btn-rbc btn-sm">{{ _('+ Create a Club') }}</a>
+        <a href="{{ url_for('clubs.create') }}" class="btn btn-paceline btn-sm">{{ _('+ Create a Club') }}</a>
         {% endif %}
       </div>
     </div>
@@ -17,7 +17,7 @@
       <div class="col-md-6">
         <form class="d-flex gap-2" method="get">
           <input type="text" name="q" class="form-control" placeholder="{{ _('Search by name, city, or state…') }}" value="{{ q }}">
-          <button class="btn btn-rbc" type="submit">{{ _('Search') }}</button>
+          <button class="btn btn-paceline" type="submit">{{ _('Search') }}</button>
           {% if q %}<a href="{{ url_for('clubs.index') }}" class="btn btn-outline-secondary">{{ _('Clear') }}</a>{% endif %}
         </form>
       </div>
@@ -29,7 +29,7 @@
             <option value="{{ r }}" {{ 'selected' if radius == r else '' }}>{{ r }} mi</option>
             {% endfor %}
           </select>
-          <button class="btn btn-rbc" type="submit">{{ _('Near Me') }}</button>
+          <button class="btn btn-paceline" type="submit">{{ _('Near Me') }}</button>
           {% if zip_q %}<a href="{{ url_for('clubs.index') }}" class="btn btn-outline-secondary">{{ _('Clear') }}</a>{% endif %}
         </form>
       </div>
@@ -57,7 +57,7 @@
           </div>
           {% if club.city %}<p class="text-muted small mb-1">{{ club.city }}, {{ club.state }}{% if club.zip_code %} {{ club.zip_code }}{% endif %}</p>{% endif %}
           {% if club.description %}<p class="text-muted small mb-2">{{ club.description[:140] }}{% if club.description|length > 140 %}…{% endif %}</p>{% endif %}
-          <span class="btn btn-rbc-sm">{{ _('View Club') }}</span>
+          <span class="btn btn-paceline-sm">{{ _('View Club') }}</span>
         </div>
       </a>
     </div>

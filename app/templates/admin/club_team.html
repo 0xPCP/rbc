@@ -29,8 +29,8 @@
           </p>
 
           {% if admins %}
-          <div class="rbc-table-wrap mb-3">
-            <table class="table table-sm rbc-table">
+          <div class="paceline-table-wrap mb-3">
+            <table class="table table-sm paceline-table">
               <thead><tr><th>User</th><th>Role</th><th></th></tr></thead>
               <tbody>
                 {% for row, user in admins %}
@@ -41,7 +41,7 @@
                   </td>
                   <td>
                     {% if row.role == 'admin' %}
-                    <span class="badge" style="background:var(--rbc-green,#2d6a4f)">Admin</span>
+                    <span class="badge" style="background:var(--paceline-green,#2d6a4f)">Admin</span>
                     {% elif row.role == 'ride_manager' %}
                     <span class="badge bg-secondary">Ride Manager</span>
                     {% elif row.role == 'content_editor' %}
@@ -83,7 +83,7 @@
               <option value="content_editor">Content Editor</option>
               <option value="treasurer">Treasurer</option>
             </select>
-            <button type="submit" class="btn btn-rbc btn-sm">Add</button>
+            <button type="submit" class="btn btn-paceline btn-sm">Add</button>
           </form>
         </div>
       </div>
@@ -114,8 +114,8 @@
 
           {% if pending %}
           <h6 class="mb-2">Pending Requests</h6>
-          <div class="rbc-table-wrap mb-3">
-            <table class="table table-sm rbc-table">
+          <div class="paceline-table-wrap mb-3">
+            <table class="table table-sm paceline-table">
               <thead><tr><th>User</th><th>Requested</th><th></th></tr></thead>
               <tbody>
                 {% for row, user in pending %}
@@ -147,8 +147,8 @@
 
           {% if members %}
           <div style="max-height:340px;overflow-y:auto" class="mb-3">
-            <div class="rbc-table-wrap">
-              <table class="table table-sm rbc-table">
+            <div class="paceline-table-wrap">
+              <table class="table table-sm paceline-table">
                 <thead><tr><th>User</th><th>Joined</th><th></th></tr></thead>
                 <tbody>
                   {% for row, user in members %}
@@ -181,7 +181,7 @@
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
             <input type="text" name="identifier" class="form-control form-control-sm"
                    placeholder="Username or email" required>
-            <button type="submit" class="btn btn-rbc btn-sm">Add</button>
+            <button type="submit" class="btn btn-paceline btn-sm">Add</button>
           </form>
         </div>
       </div>

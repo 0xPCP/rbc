@@ -148,7 +148,7 @@
               </div>
               <form method="post" action="{{ url_for('clubs.join', slug=club.slug) }}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-                <button class="btn btn-rbc-sm">{{ _('Join') }}</button>
+                <button class="btn btn-paceline-sm">{{ _('Join') }}</button>
               </form>
             </div>
           </div>
@@ -157,7 +157,7 @@
       {% else %}
         <p class="text-muted small">{{ _("You've joined all available clubs!") }}</p>
       {% endif %}
-      <a href="{{ url_for('clubs.index') }}" class="btn btn-rbc-outline btn-sm mt-2">{{ _('Browse All Clubs') }}</a>
+      <a href="{{ url_for('clubs.index') }}" class="btn btn-paceline-outline btn-sm mt-2">{{ _('Browse All Clubs') }}</a>
     </div>
 
   </div>

@@ -1,10 +1,10 @@
-name: cyclingclub
+name: paceline
 
 services:
   web:
     build: .
     environment:
-      - DATABASE_URL=postgresql://cyclingclub:${DB_PASSWORD}@db:5432/cyclingclub
+      - DATABASE_URL=postgresql://paceline:${DB_PASSWORD}@db:5432/paceline
       - SECRET_KEY=${SECRET_KEY}
       - STRAVA_CLIENT_ID=${STRAVA_CLIENT_ID:-}
       - STRAVA_CLIENT_SECRET=${STRAVA_CLIENT_SECRET:-}
@@ -18,21 +18,21 @@ services:
       - internal
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.cyclingclub.rule=Host(`cyclingclub.pcp.dev`)"
-      - "traefik.http.routers.cyclingclub.entrypoints=websecure"
-      - "traefik.http.services.cyclingclub.loadbalancer.server.port=8000"
+      - "traefik.http.routers.paceline.rule=Host(`cyclingclub.pcp.dev`)"
+      - "traefik.http.routers.paceline.entrypoints=websecure"
+      - "traefik.http.services.paceline.loadbalancer.server.port=8000"
       - "com.centurylinklabs.watchtower.enable=false"
 
   db:
     image: postgres:16-alpine
     environment:
-      - POSTGRES_DB=cyclingclub
-      - POSTGRES_USER=cyclingclub
+      - POSTGRES_DB=paceline
+      - POSTGRES_USER=paceline
       - POSTGRES_PASSWORD=${DB_PASSWORD}
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U cyclingclub"]
+      test: ["CMD-SHELL", "pg_isready -U paceline"]
       interval: 10s
       timeout: 5s
       retries: 5

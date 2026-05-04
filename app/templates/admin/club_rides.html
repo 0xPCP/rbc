@@ -13,14 +13,14 @@
       </nav>
       <h1>Manage Rides</h1>
     </div>
-    <a href="{{ url_for('admin.ride_new', slug=club.slug) }}" class="btn btn-rbc">+ New Ride</a>
+    <a href="{{ url_for('admin.ride_new', slug=club.slug) }}" class="btn btn-paceline">+ New Ride</a>
   </div>
 </div>
 
 <div class="container py-4">
   {% if rides %}
   <div class="table-responsive">
-    <div class="rbc-table-wrap"><table class="table rbc-table">
+    <div class="paceline-table-wrap"><table class="table paceline-table">
       <thead>
         <tr><th>Date</th><th>Title</th><th>Pace</th><th>Distance</th><th>Signups</th><th>Status</th><th></th></tr>
       </thead>

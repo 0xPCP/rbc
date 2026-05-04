@@ -1,8 +1,8 @@
 (function () {
   'use strict';
 
-  const RBC_GREEN  = '#2d6a4f';
-  const RBC_ORANGE = '#e76f51';
+  const PACELINE_GREEN  = '#2d6a4f';
+  const PACELINE_ORANGE = '#e76f51';
   const RIDE_BLUE  = '#1a6cbf';
   const RIDE_DARK  = '#0f4c91';
 
@@ -19,7 +19,7 @@
   // ── Icons ─────────────────────────────────────────────────────────────────────
 
   function clubIcon(isMember) {
-    const fill   = isMember ? RBC_GREEN : RBC_ORANGE;
+    const fill   = isMember ? PACELINE_GREEN : PACELINE_ORANGE;
     const stroke = isMember ? '#1b4332' : '#c75c40';
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="28" height="36" viewBox="0 0 28 36">
       <path d="M14 0C6.27 0 0 6.27 0 14c0 9.63 12.5 21.4 13.03 21.9a1.38 1.38 0 0 0 1.94 0C15.5 35.4 28 23.63 28 14 28 6.27 21.73 0 14 0z"

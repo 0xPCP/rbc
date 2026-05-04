@@ -81,7 +81,7 @@
 
       {# Layer toggle #}
       <div class="btn-group map-layer-toggle" role="group">
-        <button id="layer-clubs" class="btn btn-rbc-sm active">
+        <button id="layer-clubs" class="btn btn-paceline-sm active">
           &#x1F3E2; {{ _('Clubs') }}
         </button>
         {% if current_user.is_authenticated %}
@@ -97,7 +97,7 @@
       </div>
 
       <a href="{{ url_for('clubs.index') }}" class="btn btn-outline-light btn-sm">{{ _('List View') }}</a>
-      <button id="locate-btn" class="btn btn-rbc-sm" style="font-size:.85rem;padding:.4rem .9rem">
+      <button id="locate-btn" class="btn btn-paceline-sm" style="font-size:.85rem;padding:.4rem .9rem">
         &#x1F4CD; {{ _('Near Me') }}
       </button>
     </div>

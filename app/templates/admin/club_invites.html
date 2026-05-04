@@ -30,7 +30,7 @@
             {% for e in form.email.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
             <div class="form-text">An email with a 7-day invite link will be sent immediately.</div>
           </div>
-          {{ form.submit(class="btn btn-rbc") }}
+          {{ form.submit(class="btn btn-paceline") }}
         </form>
       </div>
     </div>
@@ -39,7 +39,7 @@
       <h5 class="mb-3">Recent Invites</h5>
       {% if invites %}
       <div class="table-responsive">
-        <div class="rbc-table-wrap"><table class="table rbc-table">
+        <div class="paceline-table-wrap"><table class="table paceline-table">
           <thead><tr><th>Email</th><th>Sent</th><th>Expires</th><th>Status</th></tr></thead>
           <tbody>
             {% for inv in invites %}

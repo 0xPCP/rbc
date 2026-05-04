@@ -3,15 +3,15 @@
 
 {% block content %}
 
-<section class="rbc-hero">
+<section class="paceline-hero">
   <div class="hero-overlay"></div>
   <div class="container hero-content">
     <p class="hero-eyebrow">{{ _('Group Cycling, Simplified') }}</p>
     <h1 class="hero-title">{{ _('Find your pack.') }}</h1>
     <p class="hero-sub">{{ _('Discover local cycling clubs, sign up for group rides, and keep your whole calendar in one place.') }}</p>
     <div class="hero-actions">
-      <a href="{{ url_for('clubs.index') }}" class="btn btn-rbc btn-lg">{{ _('Find a Club') }}</a>
-      <a href="{{ url_for('auth.register') }}" class="btn btn-rbc-outline btn-lg">{{ _('Create Account') }}</a>
+      <a href="{{ url_for('clubs.index') }}" class="btn btn-paceline btn-lg">{{ _('Find a Club') }}</a>
+      <a href="{{ url_for('auth.register') }}" class="btn btn-paceline-outline btn-lg">{{ _('Create Account') }}</a>
     </div>
   </div>
 </section>
@@ -54,7 +54,7 @@
       {% endfor %}
     </div>
     <div class="mt-3">
-      <a href="{{ url_for('clubs.index') }}" class="btn btn-rbc-outline">{{ _('Browse All Clubs') }}</a>
+      <a href="{{ url_for('clubs.index') }}" class="btn btn-paceline-outline">{{ _('Browse All Clubs') }}</a>
     </div>
   </div>
 </section>

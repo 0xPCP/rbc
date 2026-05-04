@@ -90,11 +90,11 @@
           {% else %}
           <form method="post" action="{{ url_for('clubs.join', slug=club.slug) }}" class="d-inline">
             <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
-            <button class="btn btn-rbc">Join Club</button>
+            <button class="btn btn-paceline">Join Club</button>
           </form>
           {% endif %}
         {% else %}
-          <a href="{{ url_for('auth.login') }}" class="btn btn-rbc">Sign In to Join</a>
+          <a href="{{ url_for('auth.login') }}" class="btn btn-paceline">Sign In to Join</a>
         {% endif %}
         {% if current_user.is_authenticated and current_user.is_club_admin(club) %}
         <a href="{{ url_for('admin.club_dashboard', slug=club.slug) }}" class="btn btn-outline-light">Admin</a>
@@ -122,7 +122,7 @@
       </div>
     </div>
     <div class="d-flex gap-3 align-items-center flex-shrink-0">
-      <a href="{{ url_for('clubs.ride_detail', slug=club.slug, ride_id=nr.id) }}" class="btn btn-rbc-sm">View Ride</a>
+      <a href="{{ url_for('clubs.ride_detail', slug=club.slug, ride_id=nr.id) }}" class="btn btn-paceline-sm">View Ride</a>
       <a href="#" class="nrs-more" onclick="switchToTab('tab-rides-btn');return false;">
         {% if upcoming|length > 1 %}+{{ upcoming|length - 1 }} more upcoming{% else %}Full calendar{% endif %} →
       </a>
@@ -219,7 +219,7 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
               <h4 class="club-section-title mb-0">News &amp; Announcements</h4>
               {% if current_user.is_authenticated and current_user.can_manage_content(club) %}
-              <a href="{{ url_for('admin.club_posts', slug=club.slug) }}" class="btn btn-rbc-sm">Manage</a>
+              <a href="{{ url_for('admin.club_posts', slug=club.slug) }}" class="btn btn-paceline-sm">Manage</a>
               {% endif %}
             </div>
             <div class="row g-3">
@@ -259,7 +259,7 @@
                 <div class="card border-0 shadow-sm h-100">
                   <div class="card-body p-3">
                     <div class="d-flex align-items-center gap-2 mb-1">
-                      <span class="badge rounded-pill" style="background:var(--rbc-green,#2d6a4f);font-size:.7rem">{{ a.type or 'Ride' }}</span>
+                      <span class="badge rounded-pill" style="background:var(--paceline-green,#2d6a4f);font-size:.7rem">{{ a.type or 'Ride' }}</span>
                       <small class="text-muted">{{ a.athlete.firstname }} {{ a.athlete.lastname }}</small>
                     </div>
                     <div class="fw-semibold small text-truncate">{{ a.name }}</div>
@@ -283,7 +283,7 @@
             <h5>Nothing here yet</h5>
             <p class="text-muted">This club hasn't added content yet.</p>
             {% if current_user.is_authenticated and current_user.is_club_admin(club) %}
-            <a href="{{ url_for('admin.club_settings', slug=club.slug) }}" class="btn btn-rbc-sm">Add Club Info</a>
+            <a href="{{ url_for('admin.club_settings', slug=club.slug) }}" class="btn btn-paceline-sm">Add Club Info</a>
             {% endif %}
           </div>
           {% endif %}
@@ -300,7 +300,7 @@
               <h6 class="card-title d-flex justify-content-between align-items-center mb-3">
                 Ride Leaders
                 <a href="{{ url_for('clubs.club_leaders_public', slug=club.slug) }}"
-                   class="btn btn-rbc-sm" style="font-size:.75rem">View All</a>
+                   class="btn btn-paceline-sm" style="font-size:.75rem">View All</a>
               </h6>
               <div class="d-flex flex-column gap-3">
                 {% for leader in club.leaders[:4] %}
@@ -310,7 +310,7 @@
                        style="width:42px;height:42px;object-fit:cover;border-radius:50%;flex-shrink:0"
                        onerror="this.style.display='none'">
                   {% else %}
-                  <div style="width:42px;height:42px;border-radius:50%;background:var(--rbc-green,#2d6a4f);
+                  <div style="width:42px;height:42px;border-radius:50%;background:var(--paceline-green,#2d6a4f);
                               display:flex;align-items:center;justify-content:center;flex-shrink:0;
                               color:#fff;font-size:1rem;font-weight:700">
                     {{ leader.name[0].upper() }}
@@ -378,7 +378,7 @@
                 <p class="text-success small mb-0">✓ Signed for {{ today.year }}</p>
                 {% else %}
                 <p class="small mb-2">Must be signed before joining rides.</p>
-                <a href="{{ url_for('clubs.waiver', slug=club.slug) }}" class="btn btn-rbc-sm">Review &amp; Sign</a>
+                <a href="{{ url_for('clubs.waiver', slug=club.slug) }}" class="btn btn-paceline-sm">Review &amp; Sign</a>
                 {% endif %}
               {% else %}
               <p class="small mb-0"><a href="{{ url_for('auth.login') }}">Sign in</a> to accept the waiver.</p>
@@ -397,7 +397,7 @@
     <div class="container py-4">
       <div class="d-flex justify-content-between align-items-center mb-4">
         <h4 class="club-section-title mb-0">Upcoming Rides</h4>
-        <a href="{{ url_for('clubs.rides', slug=club.slug) }}" class="btn btn-rbc">Full Calendar</a>
+        <a href="{{ url_for('clubs.rides', slug=club.slug) }}" class="btn btn-paceline">Full Calendar</a>
       </div>
 
       {% if upcoming %}
@@ -442,7 +442,7 @@
           <h5>No upcoming rides scheduled</h5>
           <p class="text-muted">Check back soon — rides will appear here when posted.</p>
           {% if current_user.is_authenticated and current_user.can_manage_rides(club) %}
-          <a href="{{ url_for('admin.club_rides', slug=club.slug) }}" class="btn btn-rbc-sm">Add a Ride</a>
+          <a href="{{ url_for('admin.club_rides', slug=club.slug) }}" class="btn btn-paceline-sm">Add a Ride</a>
           {% endif %}
         </div>
       {% endif %}

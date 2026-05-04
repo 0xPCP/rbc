@@ -187,7 +187,7 @@
                 <input class="form-check-input" type="checkbox" name="is_anonymous" id="anon-check" value="1">
                 <label class="form-check-label small text-muted" for="anon-check">Sign up anonymously</label>
               </div>
-              <button type="submit" class="btn btn-rbc w-100">Sign Up for This Ride</button>
+              <button type="submit" class="btn btn-paceline w-100">Sign Up for This Ride</button>
             </form>
             {% endif %}
           {% else %}
@@ -342,7 +342,7 @@
               <input type="text" name="caption" placeholder="Caption (optional)" maxlength="300"
                      class="form-control form-control-sm">
             </div>
-            <button type="submit" class="btn btn-rbc btn-sm">Upload Photo</button>
+            <button type="submit" class="btn btn-paceline btn-sm">Upload Photo</button>
           </form>
         </div>
         <div class="col-md-6">
@@ -359,7 +359,7 @@
               <input type="text" name="caption" placeholder="Caption (optional)" maxlength="300"
                      class="form-control form-control-sm">
             </div>
-            <button type="submit" class="btn btn-rbc btn-sm">Share Video</button>
+            <button type="submit" class="btn btn-paceline btn-sm">Share Video</button>
           </form>
         </div>
       </div>
@@ -411,7 +411,7 @@
         <div class="mb-2">
           {{ comment_form.body(class="form-control", rows=2, placeholder="Ask a question or leave a note about this ride…") }}
         </div>
-        {{ comment_form.submit(class="btn btn-rbc btn-sm") }}
+        {{ comment_form.submit(class="btn btn-paceline btn-sm") }}
       </form>
       {% else %}
       <p class="text-muted small mt-2"><a href="{{ url_for('auth.login', next=request.url) }}">Sign in</a> to leave a comment.</p>

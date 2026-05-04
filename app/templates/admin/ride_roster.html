@@ -38,7 +38,7 @@
         <form method="post" action="{{ url_for('admin.ride_attendance', slug=club.slug, ride_id=ride.id) }}">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         {% endif %}
-        <table class="table rbc-table mb-0">
+        <table class="table paceline-table mb-0">
           <thead>
             <tr>
               {% if past_ride %}<th style="width:2.5rem;">✓</th>{% endif %}
@@ -103,7 +103,7 @@
           Waitlist
           <span class="badge bg-secondary ms-2">{{ waitlist | length }}</span>
         </h5>
-        <table class="table rbc-table mb-0">
+        <table class="table paceline-table mb-0">
           <thead>
             <tr>
               <th>#</th>

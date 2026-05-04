@@ -13,7 +13,7 @@
     </nav>
     <div class="d-flex justify-content-between align-items-center">
       <h1>{{ club.name }} — Sponsors</h1>
-      <a href="{{ url_for('admin.sponsor_new', slug=club.slug) }}" class="btn btn-rbc">+ Add Sponsor</a>
+      <a href="{{ url_for('admin.sponsor_new', slug=club.slug) }}" class="btn btn-paceline">+ Add Sponsor</a>
     </div>
   </div>
 </div>
@@ -21,8 +21,8 @@
 <div class="container py-4">
   <p class="text-muted small mb-4">Sponsors are shown in a logo strip on the club home page. Use Display Order to control the sort.</p>
   {% if sponsors %}
-  <div class="rbc-table-wrap">
-    <table class="table rbc-table">
+  <div class="paceline-table-wrap">
+    <table class="table paceline-table">
       <thead><tr><th>Sponsor</th><th>Website</th><th>Order</th><th></th></tr></thead>
       <tbody>
         {% for sponsor in sponsors %}

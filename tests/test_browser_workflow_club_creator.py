@@ -184,7 +184,7 @@ def test_scenario_a_club_creation_wizard(server_info, browser):
     _shot(page, '03_wizard_step1_filled')
 
     # Click "Next: Privacy"
-    page.locator('#step-1 button.btn-rbc').click()
+    page.locator('#step-1 button.btn-paceline').click()
     page.wait_for_timeout(400)
     _shot(page, '04_wizard_step2')
 
@@ -195,7 +195,7 @@ def test_scenario_a_club_creation_wizard(server_info, browser):
         public_card.click()
         page.wait_for_timeout(200)
 
-    page.locator('#step-2 button.btn-rbc').click()
+    page.locator('#step-2 button.btn-paceline').click()
     page.wait_for_timeout(400)
     _shot(page, '05_wizard_step3')
 
@@ -206,7 +206,7 @@ def test_scenario_a_club_creation_wizard(server_info, browser):
         theme_card.click()
         page.wait_for_timeout(200)
 
-    page.locator('#step-3 button.btn-rbc').click()
+    page.locator('#step-3 button.btn-paceline').click()
     page.wait_for_timeout(400)
     _shot(page, '06_wizard_step4')
 
@@ -218,7 +218,7 @@ def test_scenario_a_club_creation_wizard(server_info, browser):
     if contact_field.count() > 0:
         contact_field.fill('rides@blueridgecyclists.com')
 
-    page.locator('#step-4 button.btn-rbc').click()
+    page.locator('#step-4 button.btn-paceline').click()
     page.wait_for_timeout(400)
     _shot(page, '07_wizard_step5_review')
 
@@ -426,7 +426,7 @@ def test_scenario_c_membership_approval_workflow(server_info, browser):
     page.fill('input[name="zip_code"]', '22101')
 
     # Navigate to privacy step and select "Members Only"
-    page.locator('#step-1 button.btn-rbc').click()
+    page.locator('#step-1 button.btn-paceline').click()
     page.wait_for_timeout(400)
 
     # Click the private/members-only card if it exists
@@ -437,7 +437,7 @@ def test_scenario_c_membership_approval_workflow(server_info, browser):
 
     # Navigate through remaining steps using step-specific selectors
     for step_id in ['#step-2', '#step-3', '#step-4']:
-        btn = page.locator(f'{step_id} button.btn-rbc')
+        btn = page.locator(f'{step_id} button.btn-paceline')
         if btn.count() > 0:
             btn.click()
             page.wait_for_timeout(400)

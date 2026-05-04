@@ -8,14 +8,14 @@
       <h1>Manage Rides</h1>
       <p class="mb-0">All rides — past and upcoming.</p>
     </div>
-    <a href="{{ url_for('admin.ride_new') }}" class="btn btn-rbc">+ New Ride</a>
+    <a href="{{ url_for('admin.ride_new') }}" class="btn btn-paceline">+ New Ride</a>
   </div>
 </div>
 
 <div class="container py-4">
   {% if rides %}
   <div class="table-responsive">
-    <table class="table rbc-table">
+    <table class="table paceline-table">
       <thead>
         <tr>
           <th>Date</th>

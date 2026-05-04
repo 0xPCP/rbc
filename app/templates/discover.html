@@ -19,11 +19,11 @@
         <label class="form-label small mb-1">Date Range</label>
         <div class="btn-group" role="group">
           <a href="{{ url_for('main.discover', range='weekend', pace=active_pace, type=active_type, zip=zip_q) }}"
-             class="btn btn-sm {{ 'btn-rbc' if active_range == 'weekend' else 'btn-outline-secondary' }}">This Weekend</a>
+             class="btn btn-sm {{ 'btn-paceline' if active_range == 'weekend' else 'btn-outline-secondary' }}">This Weekend</a>
           <a href="{{ url_for('main.discover', range='week', pace=active_pace, type=active_type, zip=zip_q) }}"
-             class="btn btn-sm {{ 'btn-rbc' if active_range == 'week' else 'btn-outline-secondary' }}">Next 7 Days</a>
+             class="btn btn-sm {{ 'btn-paceline' if active_range == 'week' else 'btn-outline-secondary' }}">Next 7 Days</a>
           <a href="{{ url_for('main.discover', range='two-weeks', pace=active_pace, type=active_type, zip=zip_q) }}"
-             class="btn btn-sm {{ 'btn-rbc' if active_range == 'two-weeks' else 'btn-outline-secondary' }}">Next 2 Weeks</a>
+             class="btn btn-sm {{ 'btn-paceline' if active_range == 'two-weeks' else 'btn-outline-secondary' }}">Next 2 Weeks</a>
         </div>
       </div>
 

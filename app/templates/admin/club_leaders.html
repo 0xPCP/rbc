@@ -13,7 +13,7 @@
     </nav>
     <div class="d-flex justify-content-between align-items-center">
       <h1>{{ club.name }} — Ride Leaders</h1>
-      <a href="{{ url_for('admin.leader_new', slug=club.slug) }}" class="btn btn-rbc">+ Add Leader</a>
+      <a href="{{ url_for('admin.leader_new', slug=club.slug) }}" class="btn btn-paceline">+ Add Leader</a>
     </div>
   </div>
 </div>
@@ -21,8 +21,8 @@
 <div class="container py-4">
   <p class="text-muted small mb-4">Leaders are displayed publicly on the club's Leaders page. Use Display Order to control the sort (lower = earlier).</p>
   {% if leaders %}
-  <div class="rbc-table-wrap">
-    <table class="table rbc-table">
+  <div class="paceline-table-wrap">
+    <table class="table paceline-table">
       <thead><tr><th>Name</th><th>Bio</th><th>Order</th><th></th></tr></thead>
       <tbody>
         {% for leader in leaders %}

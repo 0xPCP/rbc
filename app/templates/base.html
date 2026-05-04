@@ -13,7 +13,7 @@
 <body>
 
 <!-- Navbar -->
-<nav class="navbar navbar-expand-lg rbc-navbar">
+<nav class="navbar navbar-expand-lg paceline-navbar">
   <div class="container">
     <a class="navbar-brand" href="{{ url_for('main.index') }}" style="line-height:1">
       <img src="{{ url_for('static', filename='img/logo.svg') }}?v={{ version }}" alt="Paceline" height="34" style="width:auto;display:block">
@@ -49,7 +49,7 @@
         {% else %}
           <li class="nav-item"><a class="nav-link" href="{{ url_for('auth.login') }}">{{ _('Sign In') }}</a></li>
           <li class="nav-item ms-lg-2">
-            <a class="btn btn-rbc-sm" href="{{ url_for('auth.register') }}">{{ _('Join') }}</a>
+            <a class="btn btn-paceline-sm" href="{{ url_for('auth.register') }}">{{ _('Join') }}</a>
           </li>
         {% endif %}
 
@@ -90,7 +90,7 @@
 
 {% block content %}{% endblock %}
 
-<footer class="rbc-footer mt-auto">
+<footer class="paceline-footer mt-auto">
   <div class="container">
     <div class="row gy-3">
       <div class="col-md-4">

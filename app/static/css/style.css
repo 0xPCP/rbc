@@ -1,16 +1,16 @@
 /* ── RBC Design Tokens ──────────────────────────────────────────────────── */
 :root {
-  --rbc-green:       #0d9488;
-  --rbc-green-dark:  #0f766e;
-  --rbc-green-light: #2dd4bf;
-  --rbc-green-pale:  #f0fdfa;
-  --rbc-orange:      #e76f51;
-  --rbc-orange-dark: #c75c40;
-  --rbc-dark:        #111827;
-  --rbc-navy:        #1e293b;
-  --rbc-gray:        #6b7280;
-  --rbc-light:       #f9fafb;
-  --rbc-border:      #e5e7eb;
+  --paceline-green:       #0d9488;
+  --paceline-green-dark:  #0f766e;
+  --paceline-green-light: #2dd4bf;
+  --paceline-green-pale:  #f0fdfa;
+  --paceline-orange:      #e76f51;
+  --paceline-orange-dark: #c75c40;
+  --paceline-dark:        #111827;
+  --paceline-navy:        #1e293b;
+  --paceline-gray:        #6b7280;
+  --paceline-light:       #f9fafb;
+  --paceline-border:      #e5e7eb;
 }
 
 body {
@@ -22,52 +22,52 @@ body {
   min-height: 100vh;
 }
 body.club-page {
-  background: var(--rbc-club-bg, #fff);
+  background: var(--paceline-club-bg, #fff);
 }
 
 /* ── Navbar ─────────────────────────────────────────────────────────────── */
-.rbc-navbar {
+.paceline-navbar {
   background: #fff;
   padding: 0.75rem 0;
   box-shadow: 0 1px 3px rgba(0,0,0,.08);
-  border-bottom: 1px solid var(--rbc-border);
+  border-bottom: 1px solid var(--paceline-border);
 }
-.rbc-navbar .nav-link,
-.rbc-navbar .navbar-toggler {
+.paceline-navbar .nav-link,
+.paceline-navbar .navbar-toggler {
   color: #374151 !important;
 }
-.rbc-navbar .nav-link:hover { color: var(--rbc-dark) !important; }
-.rbc-navbar .dropdown-menu { border: none; box-shadow: 0 4px 16px rgba(0,0,0,.15); }
+.paceline-navbar .nav-link:hover { color: var(--paceline-dark) !important; }
+.paceline-navbar .dropdown-menu { border: none; box-shadow: 0 4px 16px rgba(0,0,0,.15); }
 
-.rbc-brand {
+.paceline-brand {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--rbc-dark) !important;
+  color: var(--paceline-dark) !important;
   letter-spacing: .03em;
   text-decoration: none;
 }
-.brand-icon { color: var(--rbc-green); }
+.brand-icon { color: var(--paceline-green); }
 
 /* ── Club page nav (used on club home — no platform branding) ─────────────── */
 .club-page-nav {
-  background: var(--rbc-primary-pale, #fff);
+  background: var(--paceline-primary-pale, #fff);
   padding: 0.5rem 0;
   box-shadow: 0 1px 3px rgba(0,0,0,.08);
-  border-bottom: 1px solid var(--rbc-primary-pale, var(--rbc-border));
+  border-bottom: 1px solid var(--paceline-primary-pale, var(--paceline-border));
 }
 .club-nav-link {
   color: #374151 !important;
   font-size: .9rem;
 }
-.club-nav-link:hover { color: var(--rbc-dark) !important; }
+.club-nav-link:hover { color: var(--paceline-dark) !important; }
 .club-page-nav .dropdown-menu { border: none; box-shadow: 0 4px 16px rgba(0,0,0,.15); }
 
 /* ── Club home hero ──────────────────────────────────────────────────────── */
 .club-hero {
   position: relative;
   min-height: 420px;
-  background: var(--rbc-primary, var(--rbc-navy));
+  background: var(--paceline-primary, var(--paceline-navy));
   display: flex;
   align-items: flex-end;
 }
@@ -136,12 +136,12 @@ body.club-page {
 .hero-pill-ig    { background: #e1306c; color: #fff; }
 .hero-pill-tw    { background: #1da1f2; color: #fff; }
 .hero-pill-strava { background: #fc4c02; color: #fff; }
-.hero-pill-nl    { background: var(--rbc-green); color: #fff; }
+.hero-pill-nl    { background: var(--paceline-green); color: #fff; }
 
 /* ── Next ride strip ─────────────────────────────────────────────────────── */
 .next-ride-strip {
-  background: var(--rbc-primary-pale, var(--rbc-light));
-  border-bottom: 1px solid var(--rbc-primary-pale, var(--rbc-border));
+  background: var(--paceline-primary-pale, var(--paceline-light));
+  border-bottom: 1px solid var(--paceline-primary-pale, var(--paceline-border));
   padding: .6rem 0;
 }
 .nrs-label {
@@ -149,18 +149,18 @@ body.club-page {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .08em;
-  color: var(--rbc-green);
+  color: var(--paceline-green);
   margin-right: .35rem;
 }
-.nrs-title { font-weight: 600; font-size: .9rem; color: var(--rbc-dark); }
-.nrs-meta  { font-size: .82rem; color: var(--rbc-gray); margin-left: .35rem; }
-.nrs-more  { font-size: .82rem; color: var(--rbc-green); font-weight: 600; text-decoration: none; white-space: nowrap; }
-.nrs-more:hover { color: var(--rbc-green-dark); }
+.nrs-title { font-weight: 600; font-size: .9rem; color: var(--paceline-dark); }
+.nrs-meta  { font-size: .82rem; color: var(--paceline-gray); margin-left: .35rem; }
+.nrs-more  { font-size: .82rem; color: var(--paceline-green); font-weight: 600; text-decoration: none; white-space: nowrap; }
+.nrs-more:hover { color: var(--paceline-green-dark); }
 
 /* ── Club tab bar ────────────────────────────────────────────────────────── */
 .club-tab-bar {
-  background: var(--rbc-primary-pale, #fff);
-  border-bottom: 2px solid var(--rbc-primary-pale, var(--rbc-border));
+  background: var(--paceline-primary-pale, #fff);
+  border-bottom: 2px solid var(--paceline-primary-pale, var(--paceline-border));
   position: sticky;
   top: 0;
   z-index: 100;
@@ -181,17 +181,17 @@ body.club-page {
   font-size: 1.05rem;
   font-weight: 700;
   letter-spacing: .02em;
-  color: var(--rbc-gray);
+  color: var(--paceline-gray);
   transition: color .15s, border-color .15s;
 }
-.club-tab:hover { color: var(--rbc-green); }
-.club-tab.active { color: var(--rbc-green); border-bottom-color: var(--rbc-green); }
+.club-tab:hover { color: var(--paceline-green); }
+.club-tab.active { color: var(--paceline-green); border-bottom-color: var(--paceline-green); }
 .club-tab-count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--rbc-green-pale);
-  color: var(--rbc-green);
+  background: var(--paceline-green-pale);
+  color: var(--paceline-green);
   font-size: .7rem;
   font-weight: 700;
   min-width: 18px;
@@ -203,26 +203,26 @@ body.club-page {
 
 /* ── Club stats band ─────────────────────────────────────────────────────── */
 .club-stats-band {
-  background: var(--rbc-primary-pale, var(--rbc-light));
-  border-bottom: 1px solid var(--rbc-primary-pale, var(--rbc-border));
+  background: var(--paceline-primary-pale, var(--paceline-light));
+  border-bottom: 1px solid var(--paceline-primary-pale, var(--paceline-border));
 }
 .club-stats-row { }
 .club-stat-item {
   padding: 1.25rem 1rem;
   text-align: center;
-  border-right: 1px solid var(--rbc-border);
+  border-right: 1px solid var(--paceline-border);
 }
 .club-stat-item:last-child { border-right: none; }
 .csi-num {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 2rem;
   font-weight: 700;
-  color: var(--rbc-dark);
+  color: var(--paceline-dark);
   line-height: 1;
 }
 .csi-label {
   font-size: .78rem;
-  color: var(--rbc-gray);
+  color: var(--paceline-gray);
   font-weight: 500;
   margin-top: .25rem;
 }
@@ -233,8 +233,8 @@ body.club-page {
   font-size: 1.4rem;
   font-weight: 700;
   letter-spacing: .02em;
-  color: var(--rbc-dark);
-  border-bottom: 2px solid var(--rbc-border);
+  color: var(--paceline-dark);
+  border-bottom: 2px solid var(--paceline-border);
   padding-bottom: .4rem;
   margin-bottom: 1.2rem;
 }
@@ -262,11 +262,11 @@ body.club-page {
 .social-link-instagram { background: #e1306c; color: #fff; }
 .social-link-twitter   { background: #1da1f2; color: #fff; }
 .social-link-strava    { background: #fc4c02; color: #fff; }
-.social-link-newsletter { background: var(--rbc-green); color: #fff; }
+.social-link-newsletter { background: var(--paceline-green); color: #fff; }
 
 /* ── Buttons ─────────────────────────────────────────────────────────────── */
-.btn-rbc {
-  background: var(--rbc-orange);
+.btn-paceline {
+  background: var(--paceline-orange);
   color: #fff;
   border: none;
   font-weight: 600;
@@ -274,10 +274,10 @@ body.club-page {
   padding: .5rem 1.25rem;
   transition: background .15s;
 }
-.btn-rbc:hover { background: var(--rbc-orange-dark); color: #fff; }
+.btn-paceline:hover { background: var(--paceline-orange-dark); color: #fff; }
 
-.btn-rbc-sm {
-  background: var(--rbc-orange);
+.btn-paceline-sm {
+  background: var(--paceline-orange);
   color: #fff;
   border: none;
   font-weight: 600;
@@ -288,9 +288,9 @@ body.club-page {
   display: inline-block;
   transition: background .15s;
 }
-.btn-rbc-sm:hover { background: var(--rbc-orange-dark); color: #fff; }
+.btn-paceline-sm:hover { background: var(--paceline-orange-dark); color: #fff; }
 
-.btn-rbc-outline {
+.btn-paceline-outline {
   background: transparent;
   color: #fff;
   border: 2px solid rgba(255,255,255,.7);
@@ -301,7 +301,7 @@ body.club-page {
   display: inline-block;
   transition: all .15s;
 }
-.btn-rbc-outline:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,.1); }
+.btn-paceline-outline:hover { border-color: #fff; color: #fff; background: rgba(255,255,255,.1); }
 
 .btn-strava {
   background: #fc4c02;
@@ -316,7 +316,7 @@ body.club-page {
 .btn-xs { font-size: .75rem; padding: .2rem .5rem; }
 
 /* ── Hero ────────────────────────────────────────────────────────────────── */
-.rbc-hero {
+.paceline-hero {
   position: relative;
   background: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #111827 100%);
   min-height: 520px;
@@ -324,7 +324,7 @@ body.club-page {
   align-items: center;
   overflow: hidden;
 }
-.rbc-hero::before {
+.paceline-hero::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -341,7 +341,7 @@ body.club-page {
   font-weight: 600;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--rbc-green-light);
+  color: var(--paceline-green-light);
   margin-bottom: .75rem;
 }
 .hero-title {
@@ -361,30 +361,30 @@ body.club-page {
 .hero-actions { display: flex; gap: 1rem; flex-wrap: wrap; }
 
 /* ── Sections ────────────────────────────────────────────────────────────── */
-.section-light { background: var(--rbc-light); }
+.section-light { background: var(--paceline-light); }
 .section-label {
   font-size: .8rem;
   font-weight: 700;
   letter-spacing: .12em;
   text-transform: uppercase;
-  color: var(--rbc-green);
+  color: var(--paceline-green);
   margin-bottom: .5rem;
 }
 .section-heading {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 2rem;
   font-weight: 700;
-  color: var(--rbc-dark);
+  color: var(--paceline-dark);
   margin-bottom: 1rem;
 }
 .section-body { color: #495057; line-height: 1.7; }
 
 /* ── Page header ─────────────────────────────────────────────────────────── */
 .page-header {
-  background: var(--rbc-light);
-  color: var(--rbc-dark);
+  background: var(--paceline-light);
+  color: var(--paceline-dark);
   padding: 2.5rem 0;
-  border-bottom: 1px solid var(--rbc-border);
+  border-bottom: 1px solid var(--paceline-border);
 }
 .page-header h1 {
   font-family: 'Barlow Condensed', sans-serif;
@@ -392,7 +392,7 @@ body.club-page {
   font-size: 2.2rem;
   margin-bottom: .25rem;
 }
-.page-header p { color: var(--rbc-gray); margin: 0; }
+.page-header p { color: var(--paceline-gray); margin: 0; }
 .page-header-cancelled { background: #f3f4f6; border-bottom-color: #d1d5db; }
 
 /* ── Next Ride card ──────────────────────────────────────────────────────── */
@@ -401,8 +401,8 @@ body.club-page {
   align-items: center;
   gap: 1.5rem;
   background: #fff;
-  border: 1px solid var(--rbc-border);
-  border-left: 5px solid var(--rbc-green);
+  border: 1px solid var(--paceline-border);
+  border-left: 5px solid var(--paceline-green);
   border-radius: 10px;
   padding: 1.5rem;
   flex-wrap: wrap;
@@ -416,19 +416,19 @@ body.club-page {
   font-weight: 700;
   letter-spacing: .1em;
   text-transform: uppercase;
-  color: var(--rbc-green);
+  color: var(--paceline-green);
 }
 .nrd-day {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--rbc-dark);
+  color: var(--paceline-dark);
   line-height: 1;
 }
 .next-ride-info { flex: 1; min-width: 200px; }
 .next-ride-title { font-size: 1.3rem; font-weight: 600; margin: .25rem 0; }
-.next-ride-meta { color: var(--rbc-gray); font-size: .9rem; margin-bottom: .25rem; }
-.next-ride-signup { font-size: .9rem; color: var(--rbc-green); margin: 0; }
+.next-ride-meta { color: var(--paceline-gray); font-size: .9rem; margin-bottom: .25rem; }
+.next-ride-signup { font-size: .9rem; color: var(--paceline-green); margin: 0; }
 .next-ride-actions { margin-left: auto; }
 
 /* ── Stats grid ──────────────────────────────────────────────────────────── */
@@ -438,7 +438,7 @@ body.club-page {
   gap: 1rem;
 }
 .stat-card {
-  background: var(--rbc-light);
+  background: var(--paceline-light);
   border-radius: 10px;
   padding: 1.5rem;
   text-align: center;
@@ -447,9 +447,9 @@ body.club-page {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 2rem;
   font-weight: 700;
-  color: var(--rbc-dark);
+  color: var(--paceline-dark);
 }
-.stat-label { font-size: .85rem; color: var(--rbc-gray); }
+.stat-label { font-size: .85rem; color: var(--paceline-gray); }
 
 /* ── Pace badges ─────────────────────────────────────────────────────────── */
 .pace-badge {
@@ -482,7 +482,7 @@ body.club-page {
 /* ── Pace cards (home) ───────────────────────────────────────────────────── */
 .pace-card {
   background: #fff;
-  border: 1px solid var(--rbc-border);
+  border: 1px solid var(--paceline-border);
   border-radius: 10px;
   padding: 1.5rem;
   height: 100%;
@@ -490,7 +490,7 @@ body.club-page {
 }
 .pace-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.08); }
 .pace-card-title { font-weight: 600; margin-bottom: .5rem; }
-.pace-card-desc { font-size: .88rem; color: var(--rbc-gray); }
+.pace-card-desc { font-size: .88rem; color: var(--paceline-gray); }
 
 /* ── Pace filter bar ─────────────────────────────────────────────────────── */
 .pace-filter {
@@ -499,19 +499,19 @@ body.club-page {
   gap: .5rem;
   flex-wrap: wrap;
 }
-.filter-label { font-size: .85rem; color: var(--rbc-gray); }
+.filter-label { font-size: .85rem; color: var(--paceline-gray); }
 .pace-filter-btn {
   font-size: .8rem;
   font-weight: 600;
   padding: .3rem .8rem;
   border-radius: 20px;
-  border: 1px solid var(--rbc-border);
+  border: 1px solid var(--paceline-border);
   color: #495057;
   text-decoration: none;
   transition: all .15s;
 }
 .pace-filter-btn:hover,
-.pace-filter-btn.active { background: var(--rbc-green); color: #fff; border-color: var(--rbc-green); }
+.pace-filter-btn.active { background: var(--paceline-green); color: #fff; border-color: var(--paceline-green); }
 .pace-filter-A.active { background: #dc3545; border-color: #dc3545; }
 .pace-filter-B.active { background: #fd7e14; border-color: #fd7e14; }
 .pace-filter-C.active { background: #e9a800; border-color: #e9a800; }
@@ -522,9 +522,9 @@ body.club-page {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
-  color: var(--rbc-dark);
+  color: var(--paceline-dark);
   margin: 2rem 0 .75rem;
-  border-bottom: 2px solid var(--rbc-border);
+  border-bottom: 2px solid var(--paceline-border);
   padding-bottom: .4rem;
 }
 .ride-row {
@@ -532,7 +532,7 @@ body.club-page {
   align-items: center;
   gap: 1.25rem;
   padding: 1rem 1.25rem;
-  border: 1px solid var(--rbc-border);
+  border: 1px solid var(--paceline-border);
   border-radius: 8px;
   margin-bottom: .5rem;
   text-decoration: none;
@@ -540,25 +540,25 @@ body.club-page {
   background: #fff;
   transition: box-shadow .12s, border-color .12s;
 }
-.ride-row:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08); border-color: var(--rbc-green-light); }
+.ride-row:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08); border-color: var(--paceline-green-light); }
 .ride-row-cancelled { opacity: .6; }
 
 .ride-row-date { text-align: center; min-width: 44px; }
-.rrd-dow { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: var(--rbc-gray); }
-.rrd-day { font-family: 'Barlow Condensed', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--rbc-dark); line-height: 1; }
+.rrd-dow { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: var(--paceline-gray); }
+.rrd-day { font-family: 'Barlow Condensed', sans-serif; font-size: 1.8rem; font-weight: 700; color: var(--paceline-dark); line-height: 1; }
 
 .ride-row-main { flex: 1; }
-.ride-row-time { font-size: .8rem; color: var(--rbc-gray); }
+.ride-row-time { font-size: .8rem; color: var(--paceline-gray); }
 .ride-row-title { font-weight: 600; font-size: 1rem; }
-.ride-row-meta { font-size: .82rem; color: var(--rbc-gray); margin-top: .15rem; }
+.ride-row-meta { font-size: .82rem; color: var(--paceline-gray); margin-top: .15rem; }
 
 .ride-row-signups { text-align: center; min-width: 50px; }
-.signup-count { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--rbc-green); line-height: 1; }
-.signup-label { font-size: .7rem; color: var(--rbc-gray); }
+.signup-count { font-family: 'Barlow Condensed', sans-serif; font-size: 1.6rem; font-weight: 700; color: var(--paceline-green); line-height: 1; }
+.signup-label { font-size: .7rem; color: var(--paceline-gray); }
 
 /* ── Multi-group ride card ───────────────────────────────────────────────── */
 .ride-group-card {
-  border: 1px solid var(--rbc-border);
+  border: 1px solid var(--paceline-border);
   border-radius: 8px;
   overflow: hidden;
   background: #fff;
@@ -576,8 +576,8 @@ body.club-page {
   text-align: left;
   transition: background .12s;
 }
-.ride-group-header:hover { background: var(--rbc-light); }
-.ride-group-header[aria-expanded="true"] { background: var(--rbc-light); }
+.ride-group-header:hover { background: var(--paceline-light); }
+.ride-group-header[aria-expanded="true"] { background: var(--paceline-light); }
 .ride-group-summary { flex: 1; display: flex; align-items: center; gap: .75rem; }
 .ride-group-label { font-weight: 600; font-size: .95rem; }
 .ride-group-badges { display: flex; gap: .25rem; }
@@ -588,29 +588,29 @@ body.club-page {
   align-items: center;
   gap: 1.25rem;
   padding: .85rem 1.25rem .85rem 2.25rem;
-  border-top: 1px solid var(--rbc-border);
+  border-top: 1px solid var(--paceline-border);
   text-decoration: none;
   color: inherit;
   transition: background .1s;
 }
-.ride-group-row:hover { background: var(--rbc-light); }
+.ride-group-row:hover { background: var(--paceline-light); }
 
 /* ── Ride detail ─────────────────────────────────────────────────────────── */
 .detail-card {
   background: #fff;
-  border: 1px solid var(--rbc-border);
+  border: 1px solid var(--paceline-border);
   border-radius: 10px;
   padding: 1.5rem;
 }
 .detail-card-title {
   font-weight: 700;
-  color: var(--rbc-dark);
-  border-bottom: 1px solid var(--rbc-border);
+  color: var(--paceline-dark);
+  border-bottom: 1px solid var(--paceline-border);
   padding-bottom: .75rem;
   margin-bottom: 1rem;
 }
 .detail-dl { margin: 0; }
-.detail-dl dt { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--rbc-gray); margin-top: .75rem; }
+.detail-dl dt { font-size: .8rem; font-weight: 600; text-transform: uppercase; letter-spacing: .05em; color: var(--paceline-gray); margin-top: .75rem; }
 .detail-dl dd { margin: .15rem 0 0; }
 
 .video-wrapper { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; }
@@ -620,7 +620,7 @@ body.club-page {
 .rwgps-wrapper iframe { display: block; width: 100%; height: 500px; border: 0; }
 
 .detail-card-title { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: .5rem; }
-.detail-card-link { font-size: .8rem; font-weight: 500; color: var(--rbc-green); }
+.detail-card-link { font-size: .8rem; font-weight: 500; color: var(--paceline-green); }
 
 .rwgps-badge {
   font-size: .65rem;
@@ -638,64 +638,64 @@ body.club-page {
 
 .signup-card {
   background: #fff;
-  border: 1px solid var(--rbc-border);
+  border: 1px solid var(--paceline-border);
   border-radius: 10px;
   padding: 1.5rem;
   text-align: center;
 }
-.signup-count-big { font-family: 'Barlow Condensed', sans-serif; font-size: 3rem; font-weight: 700; color: var(--rbc-green); line-height: 1; }
-.signup-count-label { color: var(--rbc-gray); font-size: .9rem; margin-bottom: .5rem; }
-.signup-list-title { font-size: .8rem; font-weight: 700; text-transform: uppercase; color: var(--rbc-gray); text-align: left; }
+.signup-count-big { font-family: 'Barlow Condensed', sans-serif; font-size: 3rem; font-weight: 700; color: var(--paceline-green); line-height: 1; }
+.signup-count-label { color: var(--paceline-gray); font-size: .9rem; margin-bottom: .5rem; }
+.signup-list-title { font-size: .8rem; font-weight: 700; text-transform: uppercase; color: var(--paceline-gray); text-align: left; }
 .signup-list { list-style: none; padding: 0; margin: 0; text-align: left; }
-.signup-list li { padding: .3rem 0; border-bottom: 1px solid var(--rbc-border); font-size: .9rem; }
+.signup-list li { padding: .3rem 0; border-bottom: 1px solid var(--paceline-border); font-size: .9rem; }
 .signup-list li:last-child { border-bottom: none; }
-.signup-login-cta, .signup-private-note { font-size: .9rem; color: var(--rbc-gray); margin-top: 1rem; }
+.signup-login-cta, .signup-private-note { font-size: .9rem; color: var(--paceline-gray); margin-top: 1rem; }
 
 /* ── Activity cards (Strava feed) ────────────────────────────────────────── */
 .activity-card {
   background: #fff;
-  border: 1px solid var(--rbc-border);
+  border: 1px solid var(--paceline-border);
   border-radius: 10px;
   padding: 1.25rem;
 }
-.activity-athlete { font-size: .8rem; font-weight: 600; color: var(--rbc-green); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .25rem; }
+.activity-athlete { font-size: .8rem; font-weight: 600; color: var(--paceline-green); text-transform: uppercase; letter-spacing: .05em; margin-bottom: .25rem; }
 .activity-name { font-weight: 600; margin-bottom: .5rem; }
-.activity-stats { display: flex; gap: 1rem; font-size: .85rem; color: var(--rbc-gray); }
+.activity-stats { display: flex; gap: 1rem; font-size: .85rem; color: var(--paceline-gray); }
 
 /* ── Admin ───────────────────────────────────────────────────────────────── */
 .admin-stat-card {
   background: #fff;
-  border: 1px solid var(--rbc-border);
+  border: 1px solid var(--paceline-border);
   border-radius: 10px;
   padding: 1.5rem;
   text-align: center;
 }
-.admin-stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 2.2rem; font-weight: 700; color: var(--rbc-dark); }
-.admin-stat-label { font-size: .85rem; color: var(--rbc-gray); }
+.admin-stat-num { font-family: 'Barlow Condensed', sans-serif; font-size: 2.2rem; font-weight: 700; color: var(--paceline-dark); }
+.admin-stat-label { font-size: .85rem; color: var(--paceline-gray); }
 .admin-stat-card--link { cursor: pointer; transition: border-color .15s, box-shadow .15s; }
-.admin-stat-card--link:hover { border-color: var(--rbc-green); box-shadow: 0 2px 10px rgba(0,0,0,.08); }
+.admin-stat-card--link:hover { border-color: var(--paceline-green); box-shadow: 0 2px 10px rgba(0,0,0,.08); }
 
-.rbc-table thead th { background: var(--rbc-light); font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--rbc-gray); border-color: var(--rbc-border); }
-.rbc-table td { vertical-align: middle; }
+.paceline-table thead th { background: var(--paceline-light); font-size: .8rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--paceline-gray); border-color: var(--paceline-border); }
+.paceline-table td { vertical-align: middle; }
 
 /* ── Auth pages ──────────────────────────────────────────────────────────── */
-.auth-wrapper { min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; background: var(--rbc-light); }
-.auth-card { background: #fff; border: 1px solid var(--rbc-border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 420px; box-shadow: 0 4px 24px rgba(0,0,0,.07); }
+.auth-wrapper { min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 2rem 1rem; background: var(--paceline-light); }
+.auth-card { background: #fff; border: 1px solid var(--paceline-border); border-radius: 12px; padding: 2.5rem; width: 100%; max-width: 420px; box-shadow: 0 4px 24px rgba(0,0,0,.07); }
 .auth-logo { margin-bottom: 1.5rem; text-align: center; line-height: 1; }
 .auth-title { font-family: 'Barlow Condensed', sans-serif; font-size: 1.8rem; font-weight: 700; margin-bottom: 1.5rem; text-align: center; }
-.auth-switch { text-align: center; margin-top: 1.25rem; font-size: .9rem; color: var(--rbc-gray); margin-bottom: 0; }
-.auth-switch a { color: var(--rbc-green); }
+.auth-switch { text-align: center; margin-top: 1.25rem; font-size: .9rem; color: var(--paceline-gray); margin-bottom: 0; }
+.auth-switch a { color: var(--paceline-green); }
 
 /* ── About sidebar ───────────────────────────────────────────────────────── */
-.about-sidebar { background: var(--rbc-light); border-radius: 10px; padding: 1.5rem; }
-.about-sidebar h5 { font-weight: 700; color: var(--rbc-dark); }
+.about-sidebar { background: var(--paceline-light); border-radius: 10px; padding: 1.5rem; }
+.about-sidebar h5 { font-weight: 700; color: var(--paceline-dark); }
 .pace-list { list-style: none; padding: 0; margin: 0; }
 .pace-list li { padding: .4rem 0; display: flex; align-items: center; gap: .5rem; border-bottom: 1px solid rgba(0,0,0,.08); font-size: .9rem; }
 .pace-list li:last-child { border-bottom: none; }
 
 /* ── Footer ──────────────────────────────────────────────────────────────── */
-.rbc-footer {
-  background: var(--rbc-navy);
+.paceline-footer {
+  background: var(--paceline-navy);
   color: rgba(255,255,255,.75);
   padding: 3rem 0 1.5rem;
   margin-top: auto;
@@ -722,7 +722,7 @@ body.club-page {
 }
 .view-switcher {
   display: flex;
-  border: 1px solid var(--rbc-border);
+  border: 1px solid var(--paceline-border);
   border-radius: 8px;
   overflow: hidden;
 }
@@ -732,36 +732,36 @@ body.club-page {
   font-weight: 600;
   color: #495057;
   text-decoration: none;
-  border-right: 1px solid var(--rbc-border);
+  border-right: 1px solid var(--paceline-border);
   background: #fff;
   transition: background .12s;
 }
 .view-btn:last-child { border-right: none; }
-.view-btn:hover { background: var(--rbc-light); color: var(--rbc-dark); }
-.view-btn.active { background: var(--rbc-green); color: #fff; }
+.view-btn:hover { background: var(--paceline-light); color: var(--paceline-dark); }
+.view-btn.active { background: var(--paceline-green); color: #fff; }
 
 .cal-nav { display: flex; align-items: center; gap: .75rem; }
 .cal-nav-btn {
   font-size: .85rem;
   font-weight: 600;
-  color: var(--rbc-green);
+  color: var(--paceline-green);
   text-decoration: none;
   padding: .35rem .75rem;
-  border: 1px solid var(--rbc-border);
+  border: 1px solid var(--paceline-border);
   border-radius: 6px;
   background: #fff;
   transition: background .12s;
 }
-.cal-nav-btn:hover { background: var(--rbc-light); }
-.cal-nav-title { font-weight: 700; font-size: .95rem; color: var(--rbc-dark); min-width: 180px; text-align: center; }
+.cal-nav-btn:hover { background: var(--paceline-light); }
+.cal-nav-title { font-weight: 700; font-size: .95rem; color: var(--paceline-dark); min-width: 180px; text-align: center; }
 
 /* ── Month grid ──────────────────────────────────────────────────────────── */
 .month-grid-wrap { overflow-x: auto; }
 .month-grid {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
-  border-top: 2px solid var(--rbc-green);
-  border-left: 1px solid var(--rbc-border);
+  border-top: 2px solid var(--paceline-green);
+  border-left: 1px solid var(--paceline-border);
   min-width: 700px;
 }
 .month-hdr {
@@ -771,16 +771,16 @@ body.club-page {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .08em;
-  color: var(--rbc-gray);
-  background: var(--rbc-light);
-  border-right: 1px solid var(--rbc-border);
-  border-bottom: 1px solid var(--rbc-border);
+  color: var(--paceline-gray);
+  background: var(--paceline-light);
+  border-right: 1px solid var(--paceline-border);
+  border-bottom: 1px solid var(--paceline-border);
 }
 .month-cell {
   min-height: 110px;
   padding: .4rem;
-  border-right: 1px solid var(--rbc-border);
-  border-bottom: 1px solid var(--rbc-border);
+  border-right: 1px solid var(--paceline-border);
+  border-bottom: 1px solid var(--paceline-border);
   background: #fff;
   vertical-align: top;
 }
@@ -789,12 +789,12 @@ body.club-page {
 .cell-date-num {
   font-size: .8rem;
   font-weight: 700;
-  color: var(--rbc-gray);
+  color: var(--paceline-gray);
   margin-bottom: .25rem;
   line-height: 1;
 }
 .is-today .cell-date-num {
-  background: var(--rbc-green);
+  background: var(--paceline-green);
   color: #fff;
   width: 1.4rem;
   height: 1.4rem;
@@ -843,23 +843,23 @@ body.club-page {
   min-width: 700px;
 }
 .week-col {
-  border: 1px solid var(--rbc-border);
+  border: 1px solid var(--paceline-border);
   border-radius: 10px;
   overflow: hidden;
   background: #fff;
 }
-.week-col-today { border-color: var(--rbc-green); border-width: 2px; }
+.week-col-today { border-color: var(--paceline-green); border-width: 2px; }
 .week-col-hdr {
-  background: var(--rbc-light);
+  background: var(--paceline-light);
   padding: .5rem;
   text-align: center;
-  border-bottom: 1px solid var(--rbc-border);
+  border-bottom: 1px solid var(--paceline-border);
 }
-.week-col-today .week-col-hdr { background: var(--rbc-green); }
+.week-col-today .week-col-hdr { background: var(--paceline-green); }
 .week-col-today .wch-dow,
 .week-col-today .wch-day { color: #fff; }
-.wch-dow { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: var(--rbc-gray); }
-.wch-day { font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--rbc-dark); line-height: 1; }
+.wch-dow { font-size: .7rem; font-weight: 700; text-transform: uppercase; color: var(--paceline-gray); }
+.wch-day { font-family: 'Barlow Condensed', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--paceline-dark); line-height: 1; }
 .week-col-body { padding: .4rem; }
 .week-col-empty-msg { font-size: .8rem; color: #ccc; text-align: center; padding: 1.5rem 0; }
 
@@ -871,8 +871,8 @@ body.club-page {
   border-left: 4px solid transparent;
   text-decoration: none;
   color: inherit;
-  background: var(--rbc-light);
-  border-color: var(--rbc-border);
+  background: var(--paceline-light);
+  border-color: var(--paceline-border);
   transition: box-shadow .12s;
 }
 .week-ride:hover { box-shadow: 0 2px 8px rgba(0,0,0,.1); color: inherit; }
@@ -883,15 +883,15 @@ body.club-page {
 .week-ride-warn { background: #fff7ed; border-left-color: #f97316 !important; }
 .week-ride-cancelled { opacity: .55; }
 
-.wr-time { font-size: .7rem; color: var(--rbc-gray); margin-bottom: .15rem; }
+.wr-time { font-size: .7rem; color: var(--paceline-gray); margin-bottom: .15rem; }
 .wr-title { font-size: .82rem; font-weight: 700; line-height: 1.2; margin-bottom: .15rem; }
-.wr-meta { font-size: .72rem; color: var(--rbc-gray); margin-bottom: .25rem; }
+.wr-meta { font-size: .72rem; color: var(--paceline-gray); margin-bottom: .25rem; }
 .wr-weather { font-size: .72rem; padding: .2rem .35rem; border-radius: 4px; margin-bottom: .2rem; }
 .wr-weather.sev-0 { background: #f0fdf4; color: #166534; }
 .wr-weather.sev-1 { background: #fefce8; color: #854d0e; }
 .wr-weather.sev-2 { background: #fff7ed; color: #9a3412; }
 .wr-warn-reasons { margin-top: .2rem; font-size: .68rem; }
-.wr-signups { font-size: .7rem; color: var(--rbc-green); font-weight: 600; }
+.wr-signups { font-size: .7rem; color: var(--paceline-green); font-weight: 600; }
 
 /* ── List view: weather + right column ──────────────────────────────────── */
 .ride-row-right {
@@ -909,14 +909,14 @@ body.club-page {
   line-height: 1.2;
   padding: .25rem .5rem;
   border-radius: 6px;
-  background: var(--rbc-light);
+  background: var(--paceline-light);
 }
 .list-weather.sev-0 { background: #f0fdf4; }
 .list-weather.sev-1 { background: #fefce8; }
 .list-weather.sev-2 { background: #fff7ed; }
 .lw-emoji { font-size: 1.2rem; }
-.lw-temp { font-weight: 700; color: var(--rbc-dark); }
-.lw-wind { font-size: .7rem; color: var(--rbc-gray); }
+.lw-temp { font-weight: 700; color: var(--paceline-dark); }
+.lw-wind { font-size: .7rem; color: var(--paceline-gray); }
 
 .ride-row-weather-warn { border-left-color: #f97316 !important; }
 .weather-warn-badge {
@@ -936,8 +936,8 @@ body.club-page {
 .sev-bg-2 { border-left: 4px solid #f97316; }
 .weather-detail-main { display: flex; align-items: center; gap: 1rem; }
 .wd-emoji { font-size: 2.5rem; line-height: 1; }
-.wd-desc { font-size: 1rem; font-weight: 600; color: var(--rbc-dark); }
-.wd-stats { font-size: .88rem; color: var(--rbc-gray); margin-top: .15rem; }
+.wd-desc { font-size: 1rem; font-weight: 600; color: var(--paceline-dark); }
+.wd-stats { font-size: .88rem; color: var(--paceline-gray); margin-top: .15rem; }
 .weather-warning-block {
   background: #fff7ed;
   border: 1px solid #fed7aa;
@@ -958,7 +958,7 @@ body.club-page {
 
 /* ── Weather legend ──────────────────────────────────────────────────────── */
 .weather-legend { display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap; }
-.wl-item { display: flex; align-items: center; gap: .35rem; font-size: .8rem; color: var(--rbc-gray); }
+.wl-item { display: flex; align-items: center; gap: .35rem; font-size: .8rem; color: var(--paceline-gray); }
 .wl-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .wl-dot.sev-0 { background: #22c55e; }
 .wl-dot.sev-1 { background: #eab308; }
@@ -979,7 +979,7 @@ body.club-page {
   margin-bottom: .75rem;
 }
 .wtw-title { font-weight: 600; font-size: 1rem; }
-.wtw-location { font-size: .75rem; color: var(--rbc-gray); }
+.wtw-location { font-size: .75rem; color: var(--paceline-gray); }
 .wtw-loading { display: flex; align-items: center; min-height: 48px; }
 .wtw-conditions {
   display: flex;
@@ -1016,12 +1016,12 @@ body.club-page {
 /* ── Ride card (club home + discover) ───────────────────────────────────── */
 .ride-card {
   background: #fff;
-  border: 1px solid var(--rbc-border);
+  border: 1px solid var(--paceline-border);
   border-radius: 10px;
   padding: 1rem 1.25rem;
   transition: box-shadow .12s, border-color .12s;
 }
-.ride-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08); border-color: var(--rbc-green-light); }
+.ride-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,.08); border-color: var(--paceline-green-light); }
 .ride-cancelled { opacity: .65; }
 
 .ride-date-block {
@@ -1034,30 +1034,30 @@ body.club-page {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .08em;
-  color: var(--rbc-green);
+  color: var(--paceline-green);
 }
 .rdb-day {
   font-family: 'Barlow Condensed', sans-serif;
   font-size: 2rem;
   font-weight: 700;
-  color: var(--rbc-dark);
+  color: var(--paceline-dark);
   line-height: 1;
 }
 
 .ride-title {
   font-weight: 600;
   font-size: 1rem;
-  color: var(--rbc-dark);
+  color: var(--paceline-dark);
   text-decoration: none;
   display: block;
   margin-bottom: .15rem;
 }
-.ride-title:hover { color: var(--rbc-green); }
+.ride-title:hover { color: var(--paceline-green); }
 
-.ride-meta { font-size: .82rem; color: var(--rbc-gray); }
+.ride-meta { font-size: .82rem; color: var(--paceline-gray); }
 
 /* ── Ride comment thread ─────────────────────────────────────────────────── */
-.comment-thread { border-top: 1px solid var(--rbc-border); padding-top: 1rem; margin-top: 1rem; }
+.comment-thread { border-top: 1px solid var(--paceline-border); padding-top: 1rem; margin-top: 1rem; }
 .comment-item {
   display: flex;
   gap: .75rem;
@@ -1069,7 +1069,7 @@ body.club-page {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: var(--rbc-green);
+  background: var(--paceline-green);
   color: #fff;
   display: flex;
   align-items: center;
@@ -1080,7 +1080,7 @@ body.club-page {
 }
 .comment-body { flex: 1; min-width: 0; }
 .comment-author { font-weight: 600; font-size: .85rem; }
-.comment-time { font-size: .75rem; color: var(--rbc-gray); margin-left: .4rem; }
+.comment-time { font-size: .75rem; color: var(--paceline-gray); margin-left: .4rem; }
 .comment-text { font-size: .9rem; margin-top: .15rem; word-break: break-word; white-space: pre-line; }
 
 /* ── Club banner / theming ───────────────────────────────────────────────── */
@@ -1092,12 +1092,12 @@ body.club-page {
 }
 
 /* ── Misc ────────────────────────────────────────────────────────────────── */
-.empty-state { text-align: center; padding: 4rem 1rem; color: var(--rbc-gray); }
+.empty-state { text-align: center; padding: 4rem 1rem; color: var(--paceline-gray); }
 .flash-container { margin-bottom: 0; }
 
-a { color: var(--rbc-green); }
-a:hover { color: var(--rbc-green-dark); }
-.btn-rbc, .btn-rbc:focus { color: #fff; }
+a { color: var(--paceline-green); }
+a:hover { color: var(--paceline-green-dark); }
+.btn-paceline, .btn-paceline:focus { color: #fff; }
 
 /* ── Mobile / responsive ─────────────────────────────────────────────────── */
 @media (max-width: 575px) {
@@ -1115,7 +1115,7 @@ a:hover { color: var(--rbc-green-dark); }
   .club-stat-item { padding: .9rem .5rem; }
   .club-stat-item:nth-child(2) { border-right: none; }
   .club-stat-item:nth-child(3),
-  .club-stat-item:nth-child(4) { border-top: 1px solid var(--rbc-border); }
+  .club-stat-item:nth-child(4) { border-top: 1px solid var(--paceline-border); }
   .csi-num { font-size: 1.6rem; }
 
   /* Next ride strip: stack on very small screens */
@@ -1143,7 +1143,7 @@ a:hover { color: var(--rbc-green-dark); }
   /* Next ride card: tighten gap */
   .next-ride-card { gap: 1rem; padding: 1rem; }
   .next-ride-actions { margin-left: 0; width: 100%; }
-  .next-ride-actions .btn-rbc { width: 100%; }
+  .next-ride-actions .btn-paceline { width: 100%; }
 
   /* Stats grid: stay 2-col but reduce padding */
   .stat-card { padding: 1rem; }
@@ -1156,7 +1156,7 @@ a:hover { color: var(--rbc-green-dark); }
   .signup-count-big { font-size: 2.2rem; }
 
   /* Admin tables: make them horizontally scrollable */
-  .rbc-table-wrap { overflow-x: auto; }
+  .paceline-table-wrap { overflow-x: auto; }
 
   /* Auth card: reduce padding on small screens */
   .auth-card { padding: 1.5rem 1.25rem; }

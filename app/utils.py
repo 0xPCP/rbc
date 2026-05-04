@@ -52,24 +52,24 @@ def _mix_black(hex_color, amount):
 def club_theme_vars(club):
     """
     Return a dict of CSS custom property overrides for a club's theme.
-    Keys are CSS variable names (e.g. '--rbc-green-dark'), values are hex strings.
+    Keys are CSS variable names (e.g. '--paceline-green-dark'), values are hex strings.
     Returns an empty dict when no theme is set.
     """
     result = {}
 
     if club.theme_primary and is_valid_hex(club.theme_primary):
         p = club.theme_primary.lower()
-        result['--rbc-primary']      = p
-        result['--rbc-primary-pale'] = _mix_white(p, 0.90)   # nav, strips, tab bar
-        result['--rbc-club-bg']      = _mix_white(p, 0.96)   # page background tint
-        result['--rbc-green-dark']   = _mix_black(p, 0.30)
-        result['--rbc-green']        = p
-        result['--rbc-green-light']  = _mix_white(p, 0.38)
-        result['--rbc-green-pale']   = _mix_white(p, 0.82)
+        result['--paceline-primary']      = p
+        result['--paceline-primary-pale'] = _mix_white(p, 0.90)   # nav, strips, tab bar
+        result['--paceline-club-bg']      = _mix_white(p, 0.96)   # page background tint
+        result['--paceline-green-dark']   = _mix_black(p, 0.30)
+        result['--paceline-green']        = p
+        result['--paceline-green-light']  = _mix_white(p, 0.38)
+        result['--paceline-green-pale']   = _mix_white(p, 0.82)
 
     if club.theme_accent and is_valid_hex(club.theme_accent):
         a = club.theme_accent.lower()
-        result['--rbc-orange']      = a
-        result['--rbc-orange-dark'] = _mix_black(a, 0.15)
+        result['--paceline-orange']      = a
+        result['--paceline-orange-dark'] = _mix_black(a, 0.15)
 
     return result

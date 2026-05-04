@@ -113,7 +113,7 @@ def test_club_home_renders_on_mobile(server_info, browser):
     page.wait_for_selector('h1')
 
     assert 'Browser Test Club' in page.locator('h1').inner_text()
-    assert page.locator('a.btn-rbc').filter(has_text='Sign In to Join').is_visible()
+    assert page.locator('a.btn-paceline').filter(has_text='Sign In to Join').is_visible()
     # Tab bar is present; "Rides" tab button is visible (Upcoming Rides now lives inside it)
     assert page.locator('.club-tab').filter(has_text='Rides').is_visible()
 

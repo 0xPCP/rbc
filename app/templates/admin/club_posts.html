@@ -13,15 +13,15 @@
     </nav>
     <div class="d-flex justify-content-between align-items-center">
       <h1>{{ club.name }} — News</h1>
-      <a href="{{ url_for('admin.post_new', slug=club.slug) }}" class="btn btn-rbc">+ New Post</a>
+      <a href="{{ url_for('admin.post_new', slug=club.slug) }}" class="btn btn-paceline">+ New Post</a>
     </div>
   </div>
 </div>
 
 <div class="container py-4">
   {% if posts %}
-  <div class="rbc-table-wrap">
-    <table class="table rbc-table">
+  <div class="paceline-table-wrap">
+    <table class="table paceline-table">
       <thead><tr><th>Title</th><th>Published</th><th>Author</th><th></th></tr></thead>
       <tbody>
         {% for post in posts %}

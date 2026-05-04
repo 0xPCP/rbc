@@ -129,9 +129,9 @@
         we'd love to help you get set up.
       </p>
       <div class="d-flex gap-3 justify-content-center flex-wrap">
-        <a href="{{ url_for('clubs.index') }}" class="btn btn-rbc btn-lg">Find a Club</a>
+        <a href="{{ url_for('clubs.index') }}" class="btn btn-paceline btn-lg">Find a Club</a>
         {% if not current_user.is_authenticated %}
-        <a href="{{ url_for('auth.register') }}" class="btn btn-rbc-outline btn-lg">Create Free Account</a>
+        <a href="{{ url_for('auth.register') }}" class="btn btn-paceline-outline btn-lg">Create Free Account</a>
         {% endif %}
       </div>
     </div>
