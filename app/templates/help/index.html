@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Help — Paceline{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <h1>Help</h1>
+    <p>Quick guides for setting up clubs, managing rides, and finding rides to join.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <p class="section-label mb-2">For club owners and managers</p>
+          <h2 class="section-heading h4 mb-3">Set up your club and manage rides</h2>
+          <p class="section-body">
+            Create your club page, add basic details, invite your team, publish rides,
+            manage signups, and keep members informed.
+          </p>
+          <a href="{{ url_for('main.help_club_managers') }}" class="btn btn-paceline">Club Manager Guide</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body p-4">
+          <p class="section-label mb-2">For riders</p>
+          <h2 class="section-heading h4 mb-3">Find clubs and join rides</h2>
+          <p class="section-body">
+            Learn how to create an account, discover nearby clubs, join rides,
+            manage your profile, and use the site safely.
+          </p>
+          <a href="{{ url_for('main.help_riders') }}" class="btn btn-paceline">Rider Guide</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Club Manager Guide — Paceline{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.help_index') }}">Help</a></li>
+        <li class="breadcrumb-item active">Club Manager Guide</li>
+      </ol>
+    </nav>
+    <h1>Club Manager Guide</h1>
+    <p>Set up your club page, publish rides, and manage your members.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <div class="mb-5">
+        <h2 class="section-heading h4">1. Create your club</h2>
+        <p class="section-body">
+          Sign in, choose <strong>Create a Club</strong>, and enter the club name,
+          city, state, and zip code. The zip code helps riders find your club on
+          the map and in nearby searches.
+        </p>
+        <p class="section-body">
+          Choose whether the club is public or private. Public clubs are easy for
+          anyone to join. Private clubs are better when you want to approve or
+          invite members before they participate.
+        </p>
+        <figure class="mb-0">
+          <img class="img-fluid rounded border shadow-sm"
+               src="{{ url_for('static', filename='img/help/club-create.png') }}"
+               alt="Create a Club form showing basic club details">
+          <figcaption class="small text-muted mt-2">
+            The club creation form starts with the basic details riders use to find you.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="section-heading h4">2. Complete club settings</h2>
+        <p class="section-body">
+          From your club page, open <strong>Admin</strong>, then <strong>Settings</strong>.
+          Add a tagline, description, contact email, logo, banner image, social links,
+          membership settings, safety guidelines, and club bylaws if you have them.
+        </p>
+        <p class="section-body">
+          Keep the description short and practical: who you are, where you ride,
+          what pace groups you offer, and how new riders should get started.
+        </p>
+        <figure class="mb-0">
+          <img class="img-fluid rounded border shadow-sm"
+               src="{{ url_for('static', filename='img/help/club-settings.png') }}"
+               alt="Club Settings page with description, location, contact, and membership fields">
+          <figcaption class="small text-muted mt-2">
+            Club settings control your public profile, contact details, membership rules, and safety notes.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="section-heading h4">3. Add your management team</h2>
+        <p class="section-body">
+          Open <strong>Admin</strong>, then <strong>Team</strong>. Add members by
+          username or email and choose the right role:
+        </p>
+        <ul class="section-body">
+          <li><strong>Admin:</strong> manages settings, members, rides, and content.</li>
+          <li><strong>Ride manager:</strong> creates and manages rides.</li>
+          <li><strong>Content editor:</strong> updates news posts and club content.</li>
+          <li><strong>Treasurer:</strong> views and exports member information.</li>
+        </ul>
+        <figure class="mb-0">
+          <img class="img-fluid rounded border shadow-sm"
+               src="{{ url_for('static', filename='img/help/club-team.png') }}"
+               alt="Club Team page listing manager roles and invite controls">
+          <figcaption class="small text-muted mt-2">
+            The Team page is where you assign manager roles for club operations.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="section-heading h4">4. Publish rides</h2>
+        <p class="section-body">
+          Go to <strong>Admin</strong>, then <strong>Rides</strong>, and choose
+          <strong>New Ride</strong>. Add the ride title, date, start time, meeting
+          location, distance, pace, ride type, leader, route link, and notes.
+        </p>
+        <p class="section-body">
+          Use clear titles and notes. Include regroup expectations, drop/no-drop
+          information, parking details, and anything riders should bring.
+        </p>
+        <figure class="mb-0">
+          <img class="img-fluid rounded border shadow-sm"
+               src="{{ url_for('static', filename='img/help/club-rides-admin.png') }}"
+               alt="Admin ride list showing upcoming rides and ride management actions">
+          <figcaption class="small text-muted mt-2">
+            The admin ride list shows upcoming rides and gives managers quick access to ride tools.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="section-heading h4">5. Manage signups and attendance</h2>
+        <p class="section-body">
+          Open a ride from the admin ride list to view the roster. You can see who
+          signed up, manage waitlists, and record attendance after the ride.
+        </p>
+        <p class="section-body">
+          If a ride needs to be canceled, edit the ride and mark it as canceled.
+          Riders will see the cancellation on the ride page.
+        </p>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="section-heading h4">6. Keep members informed</h2>
+        <p class="section-body">
+          Use <strong>News</strong> from the admin dashboard for club announcements,
+          schedule updates, event reminders, and other short updates.
+        </p>
+      </div>
+
+      <div class="alert alert-info">
+        Start simple: publish accurate club details and your next few rides first.
+        You can add polish, leaders, sponsors, bylaws, and advanced settings later.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

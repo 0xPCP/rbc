@@ -147,7 +147,7 @@ def club_map():
 
 _RESERVED_SLUGS = frozenset({
     'create', 'map', 'admin', 'auth', 'api', 'static', 'media',
-    'my-rides', 'discover', 'about', 'invites', 'set-language',
+    'my-rides', 'discover', 'about', 'help', 'invites', 'set-language',
 })
 
 

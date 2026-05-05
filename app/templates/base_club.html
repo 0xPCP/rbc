@@ -78,6 +78,7 @@
         <h6 class="footer-heading">Quick Links</h6>
         <ul class="footer-links">
           <li><a href="{{ url_for('clubs.index') }}">Find a Club</a></li>
+          <li><a href="{{ url_for('main.help_index') }}">Help</a></li>
           <li><a href="{{ url_for('main.about') }}">About</a></li>
           <li><a href="{{ url_for('main.donate') }}">Donate</a></li>
           {% if not current_user.is_authenticated %}

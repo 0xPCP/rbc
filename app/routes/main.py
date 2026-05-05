@@ -106,6 +106,21 @@ def donate():
     return render_template('donate.html')
 
 
+@main_bp.route('/help/')
+def help_index():
+    return render_template('help/index.html')
+
+
+@main_bp.route('/help/club-managers')
+def help_club_managers():
+    return render_template('help/club_managers.html')
+
+
+@main_bp.route('/help/riders')
+def help_riders():
+    return render_template('help/riders.html')
+
+
 @main_bp.route('/users/<username>')
 @login_required
 def public_profile(username):

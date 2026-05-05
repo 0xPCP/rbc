@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Rider Guide — Paceline{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('main.help_index') }}">Help</a></li>
+        <li class="breadcrumb-item active">Rider Guide</li>
+      </ol>
+    </nav>
+    <h1>Rider Guide</h1>
+    <p>Find clubs, discover rides, and manage your ride plans.</p>
+  </div>
+</div>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-9">
+      <div class="mb-5">
+        <h2 class="section-heading h4">1. Create an account</h2>
+        <p class="section-body">
+          Create a free account so you can join clubs, sign up for rides, manage
+          your profile, and see ride details that are limited to members.
+        </p>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="section-heading h4">2. Find clubs near you</h2>
+        <p class="section-body">
+          Use <strong>Find Clubs</strong> to search by name, city, state, or zip
+          code. Use <strong>Map</strong> to browse clubs visually.
+        </p>
+        <p class="section-body">
+          Open a club page to see its description, upcoming rides, leaders,
+          safety information, and links.
+        </p>
+        <figure class="mb-0">
+          <img class="img-fluid rounded border shadow-sm"
+               src="{{ url_for('static', filename='img/help/find-clubs.png') }}"
+               alt="Find Clubs page showing nearby club cards">
+          <figcaption class="small text-muted mt-2">
+            Find Clubs is the fastest way to discover active clubs by name or location.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="section-heading h4">3. Join a club</h2>
+        <p class="section-body">
+          On a club page, choose <strong>Join Club</strong>. Some clubs approve
+          members automatically. Others review requests manually before you become
+          an active member.
+        </p>
+        <p class="section-body">
+          Some clubs also require a waiver before you can sign up for rides.
+          If a waiver is required, Paceline will show you the next step.
+        </p>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="section-heading h4">4. Discover and sign up for rides</h2>
+        <p class="section-body">
+          Use <strong>Discover Rides</strong> to browse upcoming rides across
+          clubs and public user-created rides. Filter by date range, pace, ride
+          type, or zip code.
+        </p>
+        <p class="section-body">
+          Open a ride page to review the start time, distance, pace, meeting
+          location, route details, signup count, weather, and discussion.
+        </p>
+        <figure class="mb-0">
+          <img class="img-fluid rounded border shadow-sm"
+               src="{{ url_for('static', filename='img/help/discover-rides.png') }}"
+               alt="Discover Rides page with date, pace, type, and zip filters">
+          <figcaption class="small text-muted mt-2">
+            Discover Rides lets you narrow upcoming rides by date range, pace, type, and nearby zip code.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="section-heading h4">5. Manage your rides</h2>
+        <p class="section-body">
+          Your home page shows upcoming rides from your clubs and rides you have
+          joined. Use <strong>My Rides</strong> to create personal rides, manage
+          private invites, or review rides you own.
+        </p>
+        <figure class="mb-0">
+          <img class="img-fluid rounded border shadow-sm"
+               src="{{ url_for('static', filename='img/help/ride-detail.png') }}"
+               alt="Ride detail page showing time, distance, pace, meeting location, and signup controls">
+          <figcaption class="small text-muted mt-2">
+            Ride pages collect the details you need before deciding whether to sign up.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="mb-5">
+        <h2 class="section-heading h4">6. Keep your profile current</h2>
+        <p class="section-body">
+          Add your zip code for better recommendations. You can also add optional
+          profile details, emergency contact information, gear inventory, and a
+          Strava connection.
+        </p>
+      </div>
+
+      <div class="alert alert-info">
+        New to a ride or club? Read the ride notes, check the pace, arrive early,
+        and ask the ride leader if you are unsure whether the ride is a good fit.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
