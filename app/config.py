@@ -39,8 +39,12 @@ class Config:
     BABEL_DEFAULT_LOCALE = 'en'
     BABEL_DEFAULT_TIMEZONE = 'UTC'
 
-    # Hosted donation page. Leave blank to show the local coming-soon stub.
-    DONATE_URL = os.environ.get('DONATE_URL', '').strip()
+    # Hosted donation page. Set DONATE_URL='' in tests/local config to show the
+    # coming-soon stub instead.
+    DONATE_URL = (
+        os.environ.get('DONATE_URL')
+        or 'https://buy.stripe.com/dRm7sFgkK2yb8VwgrZ9AA00'
+    ).strip()
 
     # Comma-separated email allowlist for platform superadmins. These accounts
     # are promoted on startup and cannot have superadmin access revoked in-app.

@@ -32,6 +32,14 @@ def test_donate_page_links_to_configured_stripe_link(client, app):
     assert b'Send a note or suggestion' in resp.data
 
 
+def test_donate_page_uses_live_stripe_link(client, app):
+    app.config['DONATE_URL'] = 'https://buy.stripe.com/dRm7sFgkK2yb8VwgrZ9AA00'
+    resp = client.get('/donate')
+    assert resp.status_code == 200
+    assert b'href="https://buy.stripe.com/dRm7sFgkK2yb8VwgrZ9AA00"' in resp.data
+    assert b'Stripe-hosted donations' in resp.data
+
+
 def test_donate_rejects_non_http_configured_url(client, app):
     app.config['DONATE_URL'] = 'javascript:alert(1)'
     resp = client.get('/donate')
