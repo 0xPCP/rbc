@@ -88,6 +88,23 @@ class TestPostPublic:
         assert b'Upcoming Gran Fondo' in r.data
         assert b'Join us for the big ride.' in r.data
 
+    def test_post_body_escapes_malicious_html(self, client, db, sample_club, club_admin_user, mock_weather):
+        post = ClubPost(
+            club_id=sample_club.id,
+            author_id=club_admin_user.id,
+            title='<img src=x onerror=alert(1)>',
+            body='<script>alert(1)</script> https://evil.example/?q=<img src=x onerror=alert(2)>',
+        )
+        db.session.add(post)
+        db.session.commit()
+
+        r = client.get(f'/clubs/{sample_club.slug}/')
+        assert r.status_code == 200
+        assert b'<script>alert(1)</script>' not in r.data
+        assert b'<img src=x onerror=alert(1)>' not in r.data
+        assert b'&lt;script&gt;alert(1)&lt;/script&gt;' in r.data
+        assert b'&lt;img src=x onerror=alert(1)&gt;' in r.data
+
     def test_only_three_posts_shown(self, client, db, sample_club, club_admin_user, mock_weather):
         for i in range(5):
             db.session.add(ClubPost(club_id=sample_club.id, author_id=club_admin_user.id,

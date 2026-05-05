@@ -8,7 +8,9 @@
 {# ── Hero ─────────────────────────────────────────────────────────────────── #}
 <div class="club-hero">
   {% if club.banner_url %}
-  <div class="club-hero-bg" style="background-image:url('{{ club.banner_url }}')"></div>
+  <div class="club-hero-bg">
+    <img src="{{ club.banner_url }}" alt="" class="club-hero-bg-img" loading="lazy">
+  </div>
   <div class="club-hero-overlay"></div>
   {% endif %}
   <div class="container club-hero-content py-5">
@@ -487,7 +489,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ g.csp_nonce }}">
 function switchToTab(btnId) {
   const btn = document.getElementById(btnId);
   if (btn) {

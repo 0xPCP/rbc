@@ -8,7 +8,7 @@ from flask import (
     Blueprint, render_template, redirect, url_for, flash,
     abort, request, current_app,
 )
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, fresh_login_required
 from sqlalchemy.exc import IntegrityError
 
 from ..extensions import db
@@ -69,7 +69,7 @@ def list_rides():
 # ── Create ────────────────────────────────────────────────────────────────────
 
 @user_rides_bp.route('/create', methods=['GET', 'POST'])
-@login_required
+@fresh_login_required
 def create():
     if current_user.user_rides_this_week() >= MAX_RIDES_PER_WEEK:
         flash(f'You can only create {MAX_RIDES_PER_WEEK} rides per week.', 'warning')
@@ -150,7 +150,7 @@ def detail(ride_id):
 # ── Edit ──────────────────────────────────────────────────────────────────────
 
 @user_rides_bp.route('/<int:ride_id>/edit', methods=['GET', 'POST'])
-@login_required
+@fresh_login_required
 def edit(ride_id):
     ride = _get_own_ride_or_404(ride_id)
     form = UserRideForm(obj=ride)
@@ -171,7 +171,7 @@ def edit(ride_id):
 # ── Delete ────────────────────────────────────────────────────────────────────
 
 @user_rides_bp.route('/<int:ride_id>/delete', methods=['POST'])
-@login_required
+@fresh_login_required
 def delete(ride_id):
     ride = _get_own_ride_or_404(ride_id)
     db.session.delete(ride)
@@ -265,7 +265,7 @@ def request_access(ride_id):
 # ── Private ride: owner invites someone ──────────────────────────────────────
 
 @user_rides_bp.route('/<int:ride_id>/invite', methods=['POST'])
-@login_required
+@fresh_login_required
 def invite(ride_id):
     ride = _get_own_ride_or_404(ride_id)
     if not ride.is_private:
@@ -309,7 +309,7 @@ def invite(ride_id):
 # ── Owner: approve / decline access request ──────────────────────────────────
 
 @user_rides_bp.route('/<int:ride_id>/invites/<int:invite_id>/approve', methods=['POST'])
-@login_required
+@fresh_login_required
 def approve_invite(ride_id, invite_id):
     ride = _get_own_ride_or_404(ride_id)
     inv = UserRideInvite.query.filter_by(id=invite_id, ride_id=ride.id).first_or_404()
@@ -322,7 +322,7 @@ def approve_invite(ride_id, invite_id):
 
 
 @user_rides_bp.route('/<int:ride_id>/invites/<int:invite_id>/decline', methods=['POST'])
-@login_required
+@fresh_login_required
 def decline_invite(ride_id, invite_id):
     ride = _get_own_ride_or_404(ride_id)
     inv = UserRideInvite.query.filter_by(id=invite_id, ride_id=ride.id).first_or_404()

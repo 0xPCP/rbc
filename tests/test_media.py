@@ -237,6 +237,28 @@ class TestVideoLink:
             db.session.commit()
             assert item.embed_url is None
 
+    def test_video_link_rejects_host_prefix_trick(self, client, db, sample_club, regular_user):
+        ride = _make_past_ride(db, sample_club)
+        _login(client, regular_user)
+        resp = client.post(
+            f'/clubs/{sample_club.slug}/rides/{ride.id}/media/video',
+            data={'url': 'https://www.youtube.com.evil.example/watch?v=dQw4w9WgXcQ'},
+            follow_redirects=True,
+        )
+        assert b'Only YouTube, Vimeo, and Strava activity links are accepted.' in resp.data
+        assert RideMedia.query.filter_by(ride_id=ride.id, media_type='video_link').first() is None
+
+    def test_video_link_rejects_quoted_injection(self, client, db, sample_club, regular_user):
+        ride = _make_past_ride(db, sample_club)
+        _login(client, regular_user)
+        resp = client.post(
+            f'/clubs/{sample_club.slug}/rides/{ride.id}/media/video',
+            data={'url': 'https://www.youtube.com/watch?v=dQw4w9WgXcQ" onload="alert(1)'},
+            follow_redirects=True,
+        )
+        assert b'Only YouTube, Vimeo, and Strava activity links are accepted.' in resp.data
+        assert RideMedia.query.filter_by(ride_id=ride.id, media_type='video_link').first() is None
+
 
 # ── Delete ─────────────────────────────────────────────────────────────────────
 

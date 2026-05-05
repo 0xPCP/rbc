@@ -11,7 +11,6 @@ Strategy summary — see docs/media_strategy.md for full details.
               requires active membership to serve.
 """
 import os
-import re
 import uuid
 import logging
 from datetime import date
@@ -22,17 +21,13 @@ from flask_login import login_required, current_user
 
 from ..extensions import db
 from ..models import Club, Ride, RideMedia
+from ..security import is_allowed_video_link
 
 logger = logging.getLogger(__name__)
 
 media_bp = Blueprint('media', __name__)
 
 ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'webp'}
-
-_ALLOWED_VIDEO_RE = re.compile(
-    r'^https://(www\.)?(youtube\.com/watch|youtu\.be/|vimeo\.com/|strava\.com/activities/)'
-)
-
 
 def _get_club_or_404(slug):
     return Club.query.filter_by(slug=slug, is_active=True).first_or_404()
@@ -169,7 +164,7 @@ def add_video_link(slug, ride_id):
     if not url:
         flash('Please provide a video URL.', 'danger')
         return redirect(url_for('clubs.ride_detail', slug=slug, ride_id=ride_id) + '#media')
-    if not _ALLOWED_VIDEO_RE.match(url):
+    if not is_allowed_video_link(url):
         flash('Only YouTube, Vimeo, and Strava activity links are accepted.', 'danger')
         return redirect(url_for('clubs.ride_detail', slug=slug, ride_id=ride_id) + '#media')
 

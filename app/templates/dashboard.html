@@ -165,7 +165,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ g.csp_nonce }}">
 const WTW_API = '/api/weather/widget';
 const savedZip = {{ (current_user.zip_code | tojson) if current_user.zip_code else 'null' }};
 

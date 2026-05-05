@@ -299,7 +299,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ g.csp_nonce }}">
   const toggle = document.getElementById('auto_cancel_enabled');
   const panel  = document.getElementById('cancel-thresholds');
   toggle.addEventListener('change', () => {

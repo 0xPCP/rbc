@@ -1,6 +1,9 @@
 from datetime import date, datetime, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, request, session
-from flask_login import login_user, logout_user, login_required, current_user
+from flask_login import (
+    login_user, logout_user, login_required, current_user,
+    login_fresh, fresh_login_required,
+)
 from flask_babel import gettext as _
 from ..extensions import db, bcrypt
 from ..models import User, Ride, RideSignup, ClubInvite
@@ -61,7 +64,7 @@ def register():
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and login_fresh():
         return redirect(url_for('main.index'))
 
     form = LoginForm()
@@ -112,6 +115,7 @@ def setup_account(token):
         user.password_hash = bcrypt.generate_password_hash(
             form.password.data
         ).decode('utf-8')
+        user.revoke_sessions()
         invite.used_at = datetime.now(timezone.utc)
         invite.used_by_user_id = user.id
         db.session.commit()
@@ -123,7 +127,7 @@ def setup_account(token):
     return render_template('auth/setup_account.html', form=form, invite=invite)
 
 
-@auth_bp.route('/logout')
+@auth_bp.route('/logout', methods=['POST'])
 @login_required
 def logout():
     logout_user()
@@ -133,7 +137,7 @@ def logout():
 
 
 @auth_bp.route('/profile', methods=['GET', 'POST'])
-@login_required
+@fresh_login_required
 def profile():
     form = ProfileForm(obj=current_user)
     if form.validate_on_submit():

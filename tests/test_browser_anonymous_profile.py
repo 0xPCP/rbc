@@ -221,7 +221,8 @@ def _shot(page, name):
 
 
 def _logout(page, base):
-    page.goto(f'{base}/auth/logout')
+    page.goto(f'{base}/')
+    page.request.post(f'{base}/auth/logout')
     page.wait_for_load_state('networkidle')
 
 

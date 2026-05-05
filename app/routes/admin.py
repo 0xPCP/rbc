@@ -1,7 +1,7 @@
 from functools import wraps
 from datetime import date, datetime, timedelta, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, login_fresh
 import secrets
 import string
 from markupsafe import Markup, escape as html_escape
@@ -22,12 +22,22 @@ def _get_club_or_404(slug):
     return Club.query.filter_by(slug=slug, is_active=True).first_or_404()
 
 
+def _require_fresh_auth():
+    if login_fresh():
+        return None
+    flash('Please sign in again to continue.', 'info')
+    return redirect(url_for('auth.login', next=request.full_path.rstrip('?')))
+
+
 def club_admin_required(f):
     """Decorator: user must be club admin (or global superadmin) for the club in the URL."""
     @wraps(f)
     def decorated(*args, **kwargs):
         if not current_user.is_authenticated:
             abort(403)
+        fresh_response = _require_fresh_auth()
+        if fresh_response:
+            return fresh_response
         slug = kwargs.get('slug')
         if slug:
             club = _get_club_or_404(slug)
@@ -45,6 +55,9 @@ def club_ride_admin_required(f):
     def decorated(*args, **kwargs):
         if not current_user.is_authenticated:
             abort(403)
+        fresh_response = _require_fresh_auth()
+        if fresh_response:
+            return fresh_response
         slug = kwargs.get('slug')
         if slug:
             club = _get_club_or_404(slug)
@@ -61,6 +74,9 @@ def superadmin_required(f):
     def decorated(*args, **kwargs):
         if not current_user.is_authenticated or not current_user.is_admin:
             abort(403)
+        fresh_response = _require_fresh_auth()
+        if fresh_response:
+            return fresh_response
         return f(*args, **kwargs)
     return login_required(decorated)
 
@@ -71,6 +87,9 @@ def club_content_required(f):
     def decorated(*args, **kwargs):
         if not current_user.is_authenticated:
             abort(403)
+        fresh_response = _require_fresh_auth()
+        if fresh_response:
+            return fresh_response
         slug = kwargs.get('slug')
         if slug:
             club = _get_club_or_404(slug)
@@ -88,6 +107,9 @@ def club_member_view_required(f):
     def decorated(*args, **kwargs):
         if not current_user.is_authenticated:
             abort(403)
+        fresh_response = _require_fresh_auth()
+        if fresh_response:
+            return fresh_response
         slug = kwargs.get('slug')
         if slug:
             club = _get_club_or_404(slug)
@@ -192,6 +214,7 @@ def reset_user_password(user_id):
     alpha  = string.ascii_letters + string.digits
     tmp_pw = ''.join(secrets.choice(alpha) for _ in range(12))
     user.password_hash = bcrypt.generate_password_hash(tmp_pw).decode('utf-8')
+    user.revoke_sessions()
     db.session.commit()
     flash(Markup(
         f'Password reset for <strong>{html_escape(user.username)}</strong>. '
@@ -223,6 +246,7 @@ def toggle_active(user_id):
         flash('You cannot deactivate your own account.', 'danger')
         return redirect(url_for('admin.user_detail', user_id=user_id))
     user.is_active = not user.is_active
+    user.revoke_sessions()
     db.session.commit()
     action = 'reactivated' if user.is_active else 'deactivated'
     flash(f'Account {action} for {user.username}.', 'success')
@@ -981,4 +1005,3 @@ def club_import(slug):
         }
 
     return render_template('admin/club_import.html', club=club, form=form, results=results)
-

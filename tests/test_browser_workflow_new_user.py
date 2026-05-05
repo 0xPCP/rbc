@@ -204,7 +204,8 @@ def _register_user(page, base, username, email, password='TestPass1!'):
 
 def _logout_user(page, base):
     """Log out the current user."""
-    page.goto(f'{base}/auth/logout')
+    page.goto(f'{base}/')
+    page.request.post(f'{base}/auth/logout')
     page.wait_for_load_state('networkidle')
 
 

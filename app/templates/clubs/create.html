@@ -122,19 +122,19 @@
 
     <!-- Step indicator -->
     <div class="wizard-steps mb-4" id="wz-steps">
-      <div class="wz-step active" data-step="1" onclick="goStep(1)">
+      <div class="wz-step active" data-step="1">
         <div class="wz-dot">1</div><div class="wz-label">Basics</div>
       </div>
-      <div class="wz-step" data-step="2" onclick="goStep(2)">
+      <div class="wz-step" data-step="2">
         <div class="wz-dot">2</div><div class="wz-label">Privacy</div>
       </div>
-      <div class="wz-step" data-step="3" onclick="goStep(3)">
+      <div class="wz-step" data-step="3">
         <div class="wz-dot">3</div><div class="wz-label">Theme</div>
       </div>
-      <div class="wz-step" data-step="4" onclick="goStep(4)">
+      <div class="wz-step" data-step="4">
         <div class="wz-dot">4</div><div class="wz-label">Details</div>
       </div>
-      <div class="wz-step" data-step="5" onclick="goStep(5)">
+      <div class="wz-step" data-step="5">
         <div class="wz-dot">5</div><div class="wz-label">Review</div>
       </div>
     </div>
@@ -182,7 +182,7 @@
         </div>
 
         <div class="d-flex justify-content-end mt-3">
-          <button type="button" class="btn btn-paceline px-4" onclick="nextStep(1)">Next: Privacy →</button>
+          <button type="button" class="btn btn-paceline px-4" data-next-step="1">Next: Privacy →</button>
         </div>
       </div>
 
@@ -193,12 +193,12 @@
           <p class="text-muted small mb-4">Who can join your club?</p>
 
           <div class="privacy-cards">
-            <div class="privacy-card selected" id="card-public" onclick="setPrivacy(false)">
+            <div class="privacy-card selected" id="card-public" data-private="false">
               <div class="privacy-card-icon">🌐</div>
               <div class="privacy-card-title">Public</div>
               <div class="privacy-card-desc">Anyone can join with one click. Great for open community clubs.</div>
             </div>
-            <div class="privacy-card" id="card-private" onclick="setPrivacy(true)">
+            <div class="privacy-card" id="card-private" data-private="true">
               <div class="privacy-card-icon">🔒</div>
               <div class="privacy-card-title">Private</div>
               <div class="privacy-card-desc">Members must be invited by a club admin. Good for team or workplace clubs.</div>
@@ -207,8 +207,8 @@
         </div>
 
         <div class="d-flex justify-content-between mt-3">
-          <button type="button" class="btn btn-outline-secondary" onclick="goStep(1)">← Back</button>
-          <button type="button" class="btn btn-paceline px-4" onclick="goStep(3)">Next: Theme →</button>
+          <button type="button" class="btn btn-outline-secondary" data-go-step="1">← Back</button>
+          <button type="button" class="btn btn-paceline px-4" data-go-step="3">Next: Theme →</button>
         </div>
       </div>
 
@@ -227,7 +227,7 @@
             {% for p in presets %}
             <div class="theme-card {% if loop.first %}selected{% endif %}"
                  id="theme-{{ p.id }}"
-                 onclick="selectPreset('{{ p.id }}', '{{ p.primary }}', '{{ p.accent }}')"
+                 data-preset="{{ p.id }}"
                  data-primary="{{ p.primary }}" data-accent="{{ p.accent }}">
               <div class="theme-swatch">
                 <div class="theme-swatch-a" style="background:{{ p.primary }}"></div>
@@ -236,7 +236,7 @@
               <div class="theme-card-label">{{ p.label }}</div>
             </div>
             {% endfor %}
-            <div class="theme-card" id="theme-custom" onclick="selectPreset('custom', '', '')">
+            <div class="theme-card" id="theme-custom" data-preset="custom" data-primary="" data-accent="">
               <div class="theme-swatch" id="custom-swatch">
                 <div class="theme-swatch-a" style="background:#888888" id="custom-swatch-a"></div>
                 <div class="theme-swatch-b" style="background:#aaaaaa" id="custom-swatch-b"></div>
@@ -249,25 +249,25 @@
             <div>
               <label class="form-label small fw-semibold">Primary (header)</label>
               <div class="color-preview-row">
-                <input type="color" id="cp-primary" value="#888888" oninput="updateCustom()">
+                <input type="color" id="cp-primary" value="#888888">
                 <input type="text" id="ct-primary" class="form-control form-control-sm" style="width:90px"
-                       placeholder="#888888" oninput="syncColorText('primary')">
+                       placeholder="#888888">
               </div>
             </div>
             <div>
               <label class="form-label small fw-semibold">Accent (buttons)</label>
               <div class="color-preview-row">
-                <input type="color" id="cp-accent" value="#aaaaaa" oninput="updateCustom()">
+                <input type="color" id="cp-accent" value="#aaaaaa">
                 <input type="text" id="ct-accent" class="form-control form-control-sm" style="width:90px"
-                       placeholder="#aaaaaa" oninput="syncColorText('accent')">
+                       placeholder="#aaaaaa">
               </div>
             </div>
           </div>
         </div>
 
         <div class="d-flex justify-content-between mt-3">
-          <button type="button" class="btn btn-outline-secondary" onclick="goStep(2)">← Back</button>
-          <button type="button" class="btn btn-paceline px-4" onclick="goStep(4)">Next: Details →</button>
+          <button type="button" class="btn btn-outline-secondary" data-go-step="2">← Back</button>
+          <button type="button" class="btn btn-paceline px-4" data-go-step="4">Next: Details →</button>
         </div>
       </div>
 
@@ -306,8 +306,8 @@
         </div>
 
         <div class="d-flex justify-content-between mt-3">
-          <button type="button" class="btn btn-outline-secondary" onclick="goStep(3)">← Back</button>
-          <button type="button" class="btn btn-paceline px-4" onclick="buildReview()">Review →</button>
+          <button type="button" class="btn btn-outline-secondary" data-go-step="3">← Back</button>
+          <button type="button" class="btn btn-paceline px-4" data-build-review>Review →</button>
         </div>
       </div>
 
@@ -319,7 +319,7 @@
         </div>
 
         <div class="d-flex justify-content-between mt-3">
-          <button type="button" class="btn btn-outline-secondary" onclick="goStep(4)">← Back</button>
+          <button type="button" class="btn btn-outline-secondary" data-go-step="4">← Back</button>
           <button type="submit" class="btn btn-paceline btn-lg px-5">Create Club</button>
         </div>
       </div>
@@ -330,7 +330,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ g.csp_nonce }}">
 (function () {
   let currentStep = 1;
   const totalSteps = 5;
@@ -473,6 +473,34 @@
 
     goStep(5);
   };
+
+  document.querySelectorAll('.wz-step[data-step]').forEach(step => {
+    step.addEventListener('click', () => goStep(parseInt(step.dataset.step, 10)));
+  });
+
+  document.querySelectorAll('[data-go-step]').forEach(btn => {
+    btn.addEventListener('click', () => goStep(parseInt(btn.dataset.goStep, 10)));
+  });
+
+  document.querySelectorAll('[data-next-step]').forEach(btn => {
+    btn.addEventListener('click', () => nextStep(parseInt(btn.dataset.nextStep, 10)));
+  });
+
+  document.querySelectorAll('[data-private]').forEach(card => {
+    card.addEventListener('click', () => setPrivacy(card.dataset.private === 'true'));
+  });
+
+  document.querySelectorAll('.theme-card[data-preset]').forEach(card => {
+    card.addEventListener('click', () => {
+      selectPreset(card.dataset.preset, card.dataset.primary, card.dataset.accent);
+    });
+  });
+
+  document.getElementById('cp-primary').addEventListener('input', updateCustom);
+  document.getElementById('cp-accent').addEventListener('input', updateCustom);
+  document.getElementById('ct-primary').addEventListener('input', () => syncColorText('primary'));
+  document.getElementById('ct-accent').addEventListener('input', () => syncColorText('accent'));
+  document.querySelector('[data-build-review]').addEventListener('click', buildReview);
 
   // Initial state
   selectPreset('forest', '#2d6a4f', '#e76f51');

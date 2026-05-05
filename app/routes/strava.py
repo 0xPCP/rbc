@@ -1,7 +1,7 @@
 import time
 import requests
 from flask import Blueprint, redirect, url_for, flash, request, current_app
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, fresh_login_required
 from ..extensions import db
 
 strava_bp = Blueprint('strava', __name__)
@@ -83,7 +83,7 @@ def get_club_activities(strava_club_id, limit=6):
 # ── Member Strava OAuth ──────────────────────────────────────────────────────
 
 @strava_bp.route('/connect')
-@login_required
+@fresh_login_required
 def connect():
     client_id = current_app.config.get('STRAVA_CLIENT_ID')
     if not client_id:
@@ -102,7 +102,7 @@ def connect():
 
 
 @strava_bp.route('/callback')
-@login_required
+@fresh_login_required
 def callback():
     code = request.args.get('code')
     if not code:
@@ -141,7 +141,7 @@ def callback():
 
 
 @strava_bp.route('/disconnect', methods=['POST'])
-@login_required
+@fresh_login_required
 def disconnect():
     current_user.strava_id = None
     current_user.strava_access_token = None

@@ -227,7 +227,7 @@ class TestExistingUserImport:
         invite = ClubInvite.query.filter_by(email=existing_user.email, club_id=club.id).first()
 
         # Log in as the existing user and claim the invite
-        client.get('/auth/logout')
+        client.post('/auth/logout')
         _login(client, existing_user.email, 'password')
         resp = client.get(f'/clubs/invites/{invite.token}', follow_redirects=True)
         assert resp.status_code == 200

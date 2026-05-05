@@ -2,7 +2,7 @@ import re
 import calendar as cal_module
 from datetime import date, datetime, timedelta, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, request, abort, Response
-from flask_login import login_required, current_user
+from flask_login import login_required, current_user, fresh_login_required
 from sqlalchemy.exc import IntegrityError
 import requests as http_requests
 from ..extensions import db
@@ -163,7 +163,7 @@ def _generate_slug(name):
 
 
 @clubs_bp.route('/create', methods=['GET', 'POST'])
-@login_required
+@fresh_login_required
 def create():
     form = ClubCreateForm()
     if form.validate_on_submit():

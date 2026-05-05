@@ -4,8 +4,9 @@ services:
   web:
     build: .
     environment:
-      - DATABASE_URL=postgresql://paceline:${DB_PASSWORD}@db:5432/paceline
+      - DATABASE_URL=postgresql://paceline:${DB_PASSWORD}@paceline-db-1:5432/paceline
       - SECRET_KEY=${SECRET_KEY}
+      - COOKIE_SECURE=${COOKIE_SECURE:-true}
       - DONATE_URL=${DONATE_URL:-}
       - STRAVA_CLIENT_ID=${STRAVA_CLIENT_ID:-}
       - STRAVA_CLIENT_SECRET=${STRAVA_CLIENT_SECRET:-}

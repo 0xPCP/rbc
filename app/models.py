@@ -2,11 +2,22 @@ import re
 from datetime import datetime, date, timedelta, timezone
 from flask_login import UserMixin
 from .extensions import db, login_manager
+from .security import video_embed_url
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return db.session.get(User, int(user_id))
+    try:
+        raw_id, raw_version = str(user_id).split(':', 1)
+        user_id_int = int(raw_id)
+        token_version = int(raw_version)
+    except (TypeError, ValueError):
+        return None
+
+    user = db.session.get(User, user_id_int, populate_existing=True)
+    if user is None or user.session_token_version != token_version:
+        return None
+    return user
 
 
 class User(db.Model, UserMixin):
@@ -16,6 +27,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), unique=True, nullable=False)
     email = db.Column(db.String(255), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    session_token_version = db.Column(db.Integer, default=0, nullable=False)
     is_admin   = db.Column(db.Boolean, default=False, nullable=False)  # global superadmin
     is_active  = db.Column(db.Boolean, default=True,  nullable=False)  # False = account disabled
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc))
@@ -48,6 +60,12 @@ class User(db.Model, UserMixin):
     club_memberships = db.relationship('ClubMembership', backref='user', lazy=True, cascade='all, delete-orphan')
     club_admin_roles = db.relationship('ClubAdmin', backref='user', lazy=True, cascade='all, delete-orphan')
     waiver_signatures = db.relationship('WaiverSignature', backref='user', lazy=True, cascade='all, delete-orphan')
+
+    def get_id(self):
+        return f'{self.id}:{self.session_token_version or 0}'
+
+    def revoke_sessions(self):
+        self.session_token_version = (self.session_token_version or 0) + 1
 
     def is_club_admin(self, club):
         """Full club admin: can manage settings, members, and rides."""
@@ -296,14 +314,7 @@ class RideMedia(db.Model):
         """Return embeddable iframe URL for YouTube/Vimeo video links."""
         if self.media_type != 'video_link' or not self.url:
             return None
-        import re as _re
-        yt = _re.search(r'(?:youtube\.com/watch\?v=|youtu\.be/)([^&\n?#]+)', self.url)
-        if yt:
-            return f'https://www.youtube.com/embed/{yt.group(1)}'
-        vm = _re.search(r'vimeo\.com/(\d+)', self.url)
-        if vm:
-            return f'https://player.vimeo.com/video/{vm.group(1)}'
-        return None
+        return video_embed_url(self.url)
 
 
 class RideComment(db.Model):
@@ -444,13 +455,7 @@ class Ride(db.Model):
     def embed_url(self):
         if not self.video_url:
             return None
-        yt = re.search(r'(?:youtube\.com/watch\?v=|youtu\.be/)([^&\n?#]+)', self.video_url)
-        if yt:
-            return f'https://www.youtube.com/embed/{yt.group(1)}'
-        vm = re.search(r'vimeo\.com/(\d+)', self.video_url)
-        if vm:
-            return f'https://player.vimeo.com/video/{vm.group(1)}'
-        return self.video_url
+        return video_embed_url(self.video_url)
 
     @property
     def pace_label(self):

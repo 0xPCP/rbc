@@ -1,6 +1,7 @@
 import sys
+import secrets
 from datetime import datetime, timezone
-from flask import Flask, request, session, redirect, url_for, flash
+from flask import Flask, request, session, redirect, url_for, flash, g
 from flask_login import current_user, logout_user, login_fresh
 from .config import Config
 from .extensions import db, login_manager, bcrypt, csrf, mail, babel
@@ -92,7 +93,34 @@ def create_app(config_class=Config):
         }
 
     @app.before_request
+    def set_csp_nonce():
+        g.csp_nonce = secrets.token_urlsafe(16)
+
+    @app.before_request
     def enforce_auth_age():
+        if current_user.is_authenticated:
+            raw_user_id = session.get('_user_id', '')
+            try:
+                raw_id, raw_version = str(raw_user_id).split(':', 1)
+                user_id_int = int(raw_id)
+                token_version = int(raw_version)
+            except (TypeError, ValueError):
+                token_version = None
+                user_id_int = None
+
+            if user_id_int is None:
+                logout_user()
+                return redirect(url_for('auth.login', next=request.full_path.rstrip('?')))
+
+            from .models import User
+            user = db.session.get(User, user_id_int, populate_existing=True)
+            if user is None or user.session_token_version != token_version:
+                logout_user()
+                session.pop('_paceline_auth_started_at', None)
+                session.pop('_paceline_trusted_browser', None)
+                flash('Please sign in again to continue.', 'info')
+                return redirect(url_for('auth.login', next=request.full_path.rstrip('?')))
+
         if (
             not current_user.is_authenticated
             or _is_auth_timeout_exempt(request.endpoint)
@@ -131,7 +159,7 @@ def create_app(config_class=Config):
         # CSP: allow same-origin + Bootstrap/Google Fonts CDNs already in use
         response.headers['Content-Security-Policy'] = (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; "
+            f"script-src 'self' 'nonce-{g.get('csp_nonce', '')}' https://cdn.jsdelivr.net; "
             "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com; "
             "font-src 'self' https://fonts.gstatic.com; "
             "img-src 'self' data: https:; "

@@ -161,13 +161,13 @@ def test_no_logo_img_without_logo_url(client, sample_club, mock_weather):
 
 
 def test_banner_url_applied_to_club_home(client, sample_club, mock_weather):
-    """Banner URL is in the page-header style attribute when set."""
+    """Banner URL is rendered as an image, not inline CSS, when set."""
     sample_club.banner_url = 'https://example.com/banner.jpg'
     db.session.commit()
 
     resp = client.get(f'/clubs/{sample_club.slug}/')
     assert b'banner.jpg' in resp.data
-    assert b'background-image' in resp.data
+    assert b'background-image' not in resp.data
 
 
 # ── Admin settings form tests ─────────────────────────────────────────────────

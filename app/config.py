@@ -15,8 +15,10 @@ class Config:
     REMEMBER_COOKIE_DURATION = timedelta(days=int(os.environ.get('TRUSTED_BROWSER_DAYS', 30)))
     REMEMBER_COOKIE_HTTPONLY = True
     REMEMBER_COOKIE_SAMESITE = 'Lax'
+    REMEMBER_COOKIE_SECURE = os.environ.get('COOKIE_SECURE', 'true').lower() == 'true'
     SESSION_COOKIE_HTTPONLY = True
     SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = os.environ.get('COOKIE_SECURE', 'true').lower() == 'true'
 
     # Strava
     STRAVA_CLIENT_ID = os.environ.get('STRAVA_CLIENT_ID')

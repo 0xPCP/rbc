@@ -113,6 +113,23 @@ class TestLogin:
         })
         cookies = '\n'.join(resp.headers.getlist('Set-Cookie'))
         assert 'remember_token=' in cookies
+        assert 'HttpOnly' in cookies
+        assert 'SameSite=Lax' in cookies
+
+    def test_session_cookie_is_secure_http_only_and_lax(self, client, regular_user):
+        resp = client.post('/auth/login', data={
+            'email': 'rider@test.com',
+            'password': 'password123',
+        })
+        cookies = '\n'.join(resp.headers.getlist('Set-Cookie'))
+        assert 'session=' in cookies
+        assert 'HttpOnly' in cookies
+        assert 'SameSite=Lax' in cookies
+
+    def test_production_cookie_config_defaults_secure(self):
+        from app.config import Config
+        assert Config.SESSION_COOKIE_SECURE is True
+        assert Config.REMEMBER_COOKIE_SECURE is True
 
     def test_login_with_bad_password(self, client, regular_user):
         resp = client.post('/auth/login', data={
@@ -172,6 +189,31 @@ class TestLogin:
         resp = client.get('/auth/profile')
         assert resp.status_code == 200
         assert b'rider' in resp.data
+
+    def test_logout_requires_post(self, client, regular_user):
+        login(client, 'rider@test.com', 'password123')
+        resp = client.get('/auth/logout')
+        assert resp.status_code == 405
+
+    def test_revoking_session_version_invalidates_existing_session(self, client, db, regular_user):
+        login(client, 'rider@test.com', 'password123')
+        regular_user.revoke_sessions()
+        db.session.commit()
+        resp = client.get('/auth/profile', follow_redirects=True)
+        assert b'Sign In' in resp.data
+
+    def test_stale_trusted_session_must_reauth_for_admin(self, client, admin_user):
+        client.post('/auth/login', data={
+            'email': 'admin@test.com',
+            'password': 'password123',
+            'remember': 'y',
+        })
+        with client.session_transaction() as sess:
+            sess['_fresh'] = False
+
+        resp = client.get('/admin/', follow_redirects=False)
+        assert resp.status_code == 302
+        assert '/auth/login?next=/admin/' in resp.headers['Location']
 
 
 # ── Admin access ──────────────────────────────────────────────────────────────

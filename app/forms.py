@@ -1,4 +1,3 @@
-from urllib.parse import urlparse
 from flask_wtf import FlaskForm
 from flask_wtf.file import FileField, FileAllowed
 from wtforms import (
@@ -6,6 +5,7 @@ from wtforms import (
     TextAreaField, SelectField, FloatField, IntegerField, DateField, TimeField
 )
 from wtforms.validators import DataRequired, Email, EqualTo, Length, Optional, URL, NumberRange, Regexp, ValidationError
+from .security import is_safe_external_url
 
 
 class SafeURL(URL):
@@ -14,9 +14,8 @@ class SafeURL(URL):
     def __call__(self, form, field):
         if field.data:
             super().__call__(form, field)
-            scheme = urlparse(field.data).scheme.lower()
-            if scheme not in ('http', 'https'):
-                raise ValidationError('Only http:// and https:// URLs are accepted.')
+            if not is_safe_external_url(field.data):
+                raise ValidationError('Only plain http:// and https:// URLs are accepted.')
 
 
 class RegisterForm(FlaskForm):

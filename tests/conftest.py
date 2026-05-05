@@ -21,6 +21,13 @@ class TestConfig:
     SQLALCHEMY_DATABASE_URI = 'sqlite:///:memory:'
     WTF_CSRF_ENABLED = False
     SECRET_KEY = 'test-secret-key'
+    COOKIE_SECURE = False
+    SESSION_COOKIE_SECURE = False
+    REMEMBER_COOKIE_SECURE = False
+    SESSION_COOKIE_HTTPONLY = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    REMEMBER_COOKIE_HTTPONLY = True
+    REMEMBER_COOKIE_SAMESITE = 'Lax'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     STRAVA_CLIENT_ID = None
     STRAVA_CLIENT_SECRET = None
@@ -255,4 +262,4 @@ def login(client, email='rider@test.com', password='password123'):
 
 
 def logout(client):
-    return client.get('/auth/logout', follow_redirects=True)
+    return client.post('/auth/logout', follow_redirects=True)

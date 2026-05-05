@@ -134,7 +134,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script>
+<script nonce="{{ g.csp_nonce }}">
   (function () {
     const sel = document.getElementById('leader_select');
     const txt = document.getElementById('ride_leader_text');
