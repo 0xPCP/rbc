@@ -371,6 +371,25 @@ class AdminAuditLog(db.Model):
     target_user = db.relationship('User', foreign_keys=[target_user_id])
 
 
+class SiteFeedback(db.Model):
+    """Feedback submitted from public site pages for superadmin review."""
+    __tablename__ = 'site_feedback'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    name = db.Column(db.String(120), nullable=True)
+    email = db.Column(db.String(255), nullable=True)
+    message = db.Column(db.Text, nullable=False)
+    source = db.Column(db.String(80), nullable=True)
+    is_read = db.Column(db.Boolean, default=False, nullable=False)
+    read_at = db.Column(db.DateTime, nullable=True)
+    read_by_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    user = db.relationship('User', foreign_keys=[user_id])
+    read_by = db.relationship('User', foreign_keys=[read_by_id])
+
+
 class WaiverSignature(db.Model):
     """Records that a user accepted a club's waiver for a given year."""
     __tablename__ = 'waiver_signatures'

@@ -38,6 +38,11 @@ def ensure_runtime_schema():
         AdminAuditLog.__table__.create(db.engine, checkfirst=True)
         changed = True
 
+    if 'site_feedback' not in inspector.get_table_names():
+        from .models import SiteFeedback
+        SiteFeedback.__table__.create(db.engine, checkfirst=True)
+        changed = True
+
     superadmin_emails = _configured_superadmin_emails()
     if superadmin_emails:
         from .models import User

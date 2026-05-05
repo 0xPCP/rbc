@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}Feedback — Superadmin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Superadmin</a></li>
+        <li class="breadcrumb-item active">Feedback</li>
+      </ol>
+    </nav>
+    <h1>Feedback</h1>
+    <p class="mb-0">{{ unread_count }} unread item{{ 's' if unread_count != 1 }}</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="d-flex justify-content-end mb-3">
+    <div class="btn-group btn-group-sm">
+      <a href="{{ url_for('admin.feedback', filter='unread') }}"
+         class="btn btn-outline-secondary{{ ' active' if filter_type != 'all' }}">Unread</a>
+      <a href="{{ url_for('admin.feedback', filter='all') }}"
+         class="btn btn-outline-secondary{{ ' active' if filter_type == 'all' }}">All</a>
+    </div>
+  </div>
+
+  <div class="d-flex flex-column gap-3">
+    {% for item in items %}
+    <div class="detail-card">
+      <div class="d-flex justify-content-between gap-3 flex-wrap mb-2">
+        <div>
+          <h5 class="detail-card-title mb-1">
+            {{ item.name or 'Anonymous' }}
+            {% if item.is_read %}<span class="badge bg-secondary ms-1">Read</span>{% else %}<span class="badge bg-success ms-1">Unread</span>{% endif %}
+          </h5>
+          <div class="text-muted small">
+            {{ item.email or 'No email provided' }} &bull;
+            {{ item.created_at | strftime('%b %-d, %Y %-I:%M %p') }} &bull;
+            {{ item.source or 'site' }}
+          </div>
+        </div>
+        {% if not item.is_read %}
+        <form method="post" action="{{ url_for('admin.feedback_mark_read', feedback_id=item.id, filter=filter_type) }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <button class="btn btn-outline-secondary btn-sm">Mark Read</button>
+        </form>
+        {% endif %}
+      </div>
+      <p class="section-body mb-0" style="white-space:pre-line">{{ item.message }}</p>
+      {% if item.is_read and item.read_at %}
+      <div class="text-muted small mt-3">
+        Read {{ item.read_at | strftime('%b %-d, %Y %-I:%M %p') }}
+        {% if item.read_by %}by {{ item.read_by.username }}{% endif %}
+      </div>
+      {% endif %}
+    </div>
+    {% else %}
+    <div class="detail-card text-center text-muted py-5">
+      No feedback found.
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

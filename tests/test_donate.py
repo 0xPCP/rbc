@@ -23,11 +23,13 @@ def test_donate_stub_page_without_config(client, app):
     assert b'passion project' in resp.data
 
 
-def test_donate_redirects_to_configured_stripe_link(client, app):
+def test_donate_page_links_to_configured_stripe_link(client, app):
     app.config['DONATE_URL'] = 'https://buy.stripe.com/test_donation'
     resp = client.get('/donate')
-    assert resp.status_code == 302
-    assert resp.headers['Location'] == 'https://buy.stripe.com/test_donation'
+    assert resp.status_code == 200
+    assert b'href="https://buy.stripe.com/test_donation"' in resp.data
+    assert b'Support the project securely through Stripe' in resp.data
+    assert b'Send a note or suggestion' in resp.data
 
 
 def test_donate_rejects_non_http_configured_url(client, app):

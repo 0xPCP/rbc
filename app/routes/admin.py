@@ -8,8 +8,9 @@ import string
 from markupsafe import Markup, escape as html_escape
 from sqlalchemy import or_, func
 from ..extensions import db, bcrypt
-from ..models import (AdminAuditLog, Club, Ride, RideSignup, User, ClubMembership,
-                      ClubAdmin, ClubPost, ClubLeader, ClubSponsor, ClubInvite)
+from ..models import (AdminAuditLog, Club, Ride, RideSignup, SiteFeedback, User,
+                      ClubMembership, ClubAdmin, ClubPost, ClubLeader, ClubSponsor,
+                      ClubInvite)
 from ..forms import RideForm, ClubForm, ClubSettingsForm, ClubPostForm, ClubLeaderForm, ClubSponsorForm, ClubInviteForm, BulkImportForm
 from ..recurrence import generate_instances, delete_future_instances
 from ..geocoding import geocode_zip
@@ -166,10 +167,12 @@ def dashboard():
     recent_audit = (AdminAuditLog.query
                     .order_by(AdminAuditLog.created_at.desc())
                     .limit(8).all())
+    unread_feedback_count = SiteFeedback.query.filter_by(is_read=False).count()
     return render_template('admin/dashboard.html', stats=stats, clubs=clubs,
                            super_admins=super_admins, popular=popular,
                            ungeocodeable_count=ungeocodeable_count,
-                           report=report, recent_audit=recent_audit)
+                           report=report, recent_audit=recent_audit,
+                           unread_feedback_count=unread_feedback_count)
 
 
 # ── User management ───────────────────────────────────────────────────────────
@@ -195,6 +198,33 @@ def users():
                   .paginate(page=page, per_page=25, error_out=False))
     return render_template('admin/users.html', pagination=pagination,
                            q=q, filter_type=filter_type)
+
+
+@admin_bp.route('/feedback/')
+@superadmin_required
+def feedback():
+    filter_type = request.args.get('filter', 'unread')
+    query = SiteFeedback.query
+    if filter_type != 'all':
+        query = query.filter_by(is_read=False)
+    items = query.order_by(SiteFeedback.created_at.desc()).all()
+    unread_count = SiteFeedback.query.filter_by(is_read=False).count()
+    return render_template('admin/feedback.html', items=items,
+                           filter_type=filter_type, unread_count=unread_count)
+
+
+@admin_bp.route('/feedback/<int:feedback_id>/mark-read', methods=['POST'])
+@superadmin_required
+def feedback_mark_read(feedback_id):
+    item = SiteFeedback.query.get_or_404(feedback_id)
+    if not item.is_read:
+        item.is_read = True
+        item.read_at = datetime.now(timezone.utc)
+        item.read_by_id = current_user.id
+        _audit('mark_feedback_read', details=f'feedback_id={item.id}')
+        db.session.commit()
+        flash('Feedback marked as read.', 'success')
+    return redirect(url_for('admin.feedback', filter=request.args.get('filter', 'unread')))
 
 
 @admin_bp.route('/users/<int:user_id>')

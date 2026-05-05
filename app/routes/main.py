@@ -1,10 +1,12 @@
 from datetime import date, timedelta
 from urllib.parse import urlparse
-from flask import Blueprint, render_template, request, redirect, url_for, session, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, session, current_app, flash
 from flask_login import current_user, login_required
 from sqlalchemy import or_, and_
-from ..models import Club, Ride, RideSignup, ClubMembership, User
+from ..forms import FeedbackForm
+from ..models import Club, Ride, RideSignup, ClubMembership, SiteFeedback, User
 from ..extensions import db
+from ..email import send_feedback_notification
 from ..weather import get_weather_for_rides
 from ..geocoding import geocode_zip, haversine_miles
 from ..utils import is_safe_url
@@ -101,9 +103,33 @@ def about():
 def donate():
     donate_url = (current_app.config.get('DONATE_URL') or '').strip()
     parsed = urlparse(donate_url)
-    if donate_url and parsed.scheme in ('http', 'https') and parsed.netloc:
-        return redirect(donate_url)
-    return render_template('donate.html')
+    if not (donate_url and parsed.scheme in ('http', 'https') and parsed.netloc):
+        donate_url = ''
+    form = FeedbackForm()
+    if current_user.is_authenticated:
+        form.name.data = form.name.data or current_user.username
+        form.email.data = form.email.data or current_user.email
+    return render_template('donate.html', feedback_form=form, donate_url=donate_url)
+
+
+@main_bp.route('/feedback', methods=['POST'])
+def submit_feedback():
+    form = FeedbackForm()
+    if form.validate_on_submit():
+        feedback = SiteFeedback(
+            user_id=current_user.id if current_user.is_authenticated else None,
+            name=(form.name.data or '').strip() or None,
+            email=(form.email.data or '').strip().lower() or None,
+            message=form.message.data.strip(),
+            source=request.form.get('source', 'donate')[:80],
+        )
+        db.session.add(feedback)
+        db.session.commit()
+        send_feedback_notification(feedback)
+        flash('Thanks for the feedback. I will review it soon.', 'success')
+        return redirect(url_for('main.donate') + '#feedback')
+    flash('Please enter a valid message before sending feedback.', 'danger')
+    return redirect(url_for('main.donate') + '#feedback')
 
 
 @main_bp.route('/help/')

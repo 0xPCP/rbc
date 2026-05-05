@@ -15,14 +15,23 @@
   <div class="row justify-content-center g-4">
     <div class="col-lg-7">
       <div class="donate-panel">
-        <p class="section-label mb-2">Stripe donation link coming soon</p>
-        <h2 class="section-heading mb-3">The checkout page is being prepared.</h2>
+        <p class="section-label mb-2">{% if donate_url %}Stripe-hosted donations{% else %}Stripe donation link coming soon{% endif %}</p>
+        <h2 class="section-heading mb-3">{% if donate_url %}Support the project securely through Stripe.{% else %}The checkout page is being prepared.{% endif %}</h2>
         <p class="section-body mb-4">
+          {% if donate_url %}
+          Payments are handled by Stripe, not by this app. The button below opens
+          the hosted donation checkout.
+          {% else %}
           Paceline will use a Stripe-hosted donation page so payments are handled by Stripe,
           not by this app. Once the Stripe account is verified, this button will open the
           live donation checkout.
+          {% endif %}
         </p>
+        {% if donate_url %}
+        <a class="btn btn-paceline btn-lg" href="{{ donate_url }}" rel="noopener">Donate with Stripe</a>
+        {% else %}
         <button class="btn btn-paceline btn-lg" disabled>Donate with Stripe</button>
+        {% endif %}
         <p class="text-muted small mt-3 mb-0">
           No payment information is collected on Paceline.
         </p>
@@ -44,9 +53,37 @@
         </p>
         <p class="section-body mb-0">
           Donations help cover hosting infrastructure and the AI agents I use to develop,
-          test, and improve new features. Please message me directly with feedback.
+          test, and improve new features. Please send feedback below.
           <span class="d-block mt-2">- Phil</span>
         </p>
+      </div>
+    </div>
+    <div class="col-lg-7" id="feedback">
+      <div class="donate-panel">
+        <p class="section-label mb-2">Feedback</p>
+        <h2 class="section-heading mb-3">Send a note or suggestion.</h2>
+        <form method="post" action="{{ url_for('main.submit_feedback') }}" novalidate>
+          {{ feedback_form.hidden_tag() }}
+          <input type="hidden" name="source" value="donate">
+          <div class="row g-3">
+            <div class="col-md-6">
+              {{ feedback_form.name.label(class="form-label") }}
+              {{ feedback_form.name(class="form-control", placeholder="Optional") }}
+            </div>
+            <div class="col-md-6">
+              {{ feedback_form.email.label(class="form-label") }}
+              {{ feedback_form.email(class="form-control", placeholder="Optional") }}
+            </div>
+            <div class="col-12">
+              {{ feedback_form.message.label(class="form-label") }}
+              {{ feedback_form.message(class="form-control", rows="5", placeholder="What should Paceline improve?") }}
+              {% for e in feedback_form.message.errors %}
+              <div class="invalid-feedback d-block">{{ e }}</div>
+              {% endfor %}
+            </div>
+          </div>
+          <button class="btn btn-paceline mt-3">{{ feedback_form.submit.label.text }}</button>
+        </form>
       </div>
     </div>
   </div>

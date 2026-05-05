@@ -221,6 +221,13 @@ class SetPasswordForm(FlaskForm):
     submit = SubmitField('Set Password & Join Club')
 
 
+class FeedbackForm(FlaskForm):
+    name = StringField('Name', validators=[Optional(), Length(max=120)])
+    email = StringField('Email Address', validators=[Optional(), Email(), Length(max=255)])
+    message = TextAreaField('Feedback', validators=[DataRequired(), Length(min=5, max=2000)])
+    submit = SubmitField('Send Feedback')
+
+
 class RideForm(FlaskForm):
     title = StringField('Ride Title', validators=[DataRequired(), Length(max=200)])
     date = DateField('Date', validators=[DataRequired()])

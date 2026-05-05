@@ -1,0 +1,9 @@
+New Paceline feedback was submitted.
+
+From: {{ feedback.name or 'Anonymous' }}{% if feedback.email %} <{{ feedback.email }}>{% endif %}
+Source: {{ feedback.source or 'site' }}
+
+Message:
+{{ feedback.message }}
+
+Review it in the superadmin feedback inbox.

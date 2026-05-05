@@ -1,0 +1,14 @@
+<p>New Paceline feedback was submitted.</p>
+
+<p>
+  <strong>From:</strong>
+  {{ feedback.name or 'Anonymous' }}
+  {% if feedback.email %} &lt;{{ feedback.email }}&gt;{% endif %}
+</p>
+
+<p><strong>Source:</strong> {{ feedback.source or 'site' }}</p>
+
+<p><strong>Message:</strong></p>
+<p style="white-space:pre-line">{{ feedback.message }}</p>
+
+<p>Review it in the superadmin feedback inbox.</p>

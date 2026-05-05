@@ -80,6 +80,14 @@
         <div class="admin-stat-label">Inactive Accounts</div>
       </div>
     </div>
+    <div class="col-6 col-lg-3">
+      <a href="{{ url_for('admin.feedback') }}" class="text-decoration-none">
+        <div class="admin-stat-card admin-stat-card--link">
+          <div class="admin-stat-num">{{ unread_feedback_count }}</div>
+          <div class="admin-stat-label">Unread Feedback ↗</div>
+        </div>
+      </a>
+    </div>
   </div>
 
   {# Usage analytics #}

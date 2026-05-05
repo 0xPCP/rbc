@@ -165,3 +165,23 @@ def send_weekly_digest(club, rides):
     subject = f"This week's rides — {club.name}"
     _send(subject, recipients, html, text)
     logger.info('Weekly digest sent for club %d (%s) to %d recipient(s)', club.id, club.name, len(recipients))
+
+
+def send_feedback_notification(feedback):
+    """Notify superadmins that new site feedback was submitted."""
+    from .admin_stats import configured_superadmin_emails
+    from .models import User
+
+    configured = configured_superadmin_emails()
+    active_admins = User.query.filter_by(is_admin=True, is_active=True).all()
+    recipients = sorted({
+        email
+        for email in configured | {user.email for user in active_admins if user.email}
+        if email
+    })
+    if not recipients:
+        return
+    html = render_template('email/feedback_notification.html', feedback=feedback)
+    text = render_template('email/feedback_notification.txt', feedback=feedback)
+    _send('New Paceline feedback received', recipients, html, text)
+    logger.info('Feedback notification sent for feedback %d to %d recipient(s)', feedback.id, len(recipients))
