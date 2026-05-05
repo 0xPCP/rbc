@@ -18,6 +18,9 @@ def test_donate_stub_page_without_config(client, app):
     assert resp.status_code == 200
     assert b'Stripe donation link coming soon' in resp.data
     assert b'Donate with Stripe' in resp.data
+    assert b'Phil Porter' in resp.data
+    assert b'cyclist in Northern Virginia' in resp.data
+    assert b'passion project' in resp.data
 
 
 def test_donate_redirects_to_configured_stripe_link(client, app):
