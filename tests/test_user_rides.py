@@ -71,11 +71,12 @@ class TestCreate:
 
     def test_create_success(self, client, db, regular_user):
         login(client, 'rider@test.com')
-        rv = client.post('/my-rides/create', data=_form_data(), follow_redirects=True)
+        rv = client.post('/my-rides/create', data=_form_data(garmin_groupride_code='456789'), follow_redirects=True)
         assert rv.status_code == 200
         ride = Ride.query.filter_by(owner_id=regular_user.id).first()
         assert ride is not None
         assert ride.title == 'Saturday Spin'
+        assert ride.garmin_groupride_code == '456789'
         # Creator auto-signed up
         signup = RideSignup.query.filter_by(ride_id=ride.id, user_id=regular_user.id).first()
         assert signup is not None
@@ -133,11 +134,12 @@ class TestEditDelete:
     def test_owner_can_edit(self, client, db, regular_user):
         ride = _make_ride(db, regular_user)
         login(client, 'rider@test.com')
-        rv = client.post(f'/my-rides/{ride.id}/edit', data=_form_data(title='Updated Ride'),
+        rv = client.post(f'/my-rides/{ride.id}/edit', data=_form_data(title='Updated Ride', garmin_groupride_code='567890'),
                          follow_redirects=True)
         assert rv.status_code == 200
         db.session.refresh(ride)
         assert ride.title == 'Updated Ride'
+        assert ride.garmin_groupride_code == '567890'
 
     def test_owner_can_delete(self, client, db, regular_user):
         ride = _make_ride(db, regular_user)
@@ -210,6 +212,46 @@ class TestPublicSignup:
         rv = client.post(f'/my-rides/{ride.id}/signup', follow_redirects=True)
         assert rv.status_code == 200
         assert RideSignup.query.filter_by(ride_id=ride.id, user_id=second_user.id).first() is None
+
+    def test_signed_up_rider_can_add_blank_garmin_groupride_code(self, client, db, regular_user, second_user):
+        ride = _make_ride(db, regular_user, is_private=False)
+        db.session.add(RideSignup(ride_id=ride.id, user_id=second_user.id))
+        db.session.commit()
+        login(client, 'rider2@test.com')
+        rv = client.post(
+            f'/my-rides/{ride.id}/groupride-code',
+            data={'garmin_groupride_code': '654321'},
+            follow_redirects=True,
+        )
+        assert rv.status_code == 200
+        db.session.refresh(ride)
+        assert ride.garmin_groupride_code == '654321'
+
+    def test_signed_up_rider_cannot_overwrite_garmin_groupride_code(self, client, db, regular_user, second_user):
+        ride = _make_ride(db, regular_user, is_private=False, garmin_groupride_code='111222')
+        db.session.add(RideSignup(ride_id=ride.id, user_id=second_user.id))
+        db.session.commit()
+        login(client, 'rider2@test.com')
+        rv = client.post(
+            f'/my-rides/{ride.id}/groupride-code',
+            data={'garmin_groupride_code': '654321'},
+            follow_redirects=False,
+        )
+        assert rv.status_code == 403
+        db.session.refresh(ride)
+        assert ride.garmin_groupride_code == '111222'
+
+    def test_owner_can_clear_garmin_groupride_code(self, client, db, regular_user):
+        ride = _make_ride(db, regular_user, garmin_groupride_code='111222')
+        login(client, 'rider@test.com')
+        rv = client.post(
+            f'/my-rides/{ride.id}/groupride-code',
+            data={'garmin_groupride_code': ''},
+            follow_redirects=True,
+        )
+        assert rv.status_code == 200
+        db.session.refresh(ride)
+        assert ride.garmin_groupride_code is None
 
 
 # ── Private ride access control ───────────────────────────────────────────────

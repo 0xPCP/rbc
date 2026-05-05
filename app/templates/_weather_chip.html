@@ -3,6 +3,7 @@
 <span class="weather-chip sev-{{ w.severity }} {{ 'weather-chip-sm' if size == 'sm' else '' }}">
   {{ w.emoji }} {{ w.temp_f }}°F
   {% if size != 'sm' %}<span class="wc-wind">{{ w.wind_mph }}mph</span>{% endif %}
+  {% if size != 'sm' and w.aqi is defined and w.aqi is not none %}<span class="wc-wind">AQI {{ w.aqi }}</span>{% endif %}
   {% if w.warning %}<span class="wc-warn">⚠️</span>{% endif %}
 </span>
 {% endif %}

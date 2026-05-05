@@ -101,6 +101,16 @@
       </div>
 
       <div class="mb-3">
+        {{ form.garmin_groupride_code.label(class="form-label fw-semibold") }}
+        <span class="text-muted"
+              title="Garmin GroupRide lets compatible Edge users join a shared ride session for live rider locations, messaging, and shared course access. Create the GroupRide on a Garmin Edge/Garmin Connect, then paste the 6-digit code here.">ⓘ</span>
+        {{ form.garmin_groupride_code(class="form-control" + (" is-invalid" if form.garmin_groupride_code.errors else ""),
+                                      placeholder="123456", maxlength="6", inputmode="numeric", pattern="[0-9]{6}", style="max-width:160px") }}
+        <div class="form-text">Optional. Leave blank if this ride is not using Garmin GroupRide.</div>
+        {% for e in form.garmin_groupride_code.errors %}<div class="invalid-feedback">{{ e }}</div>{% endfor %}
+      </div>
+
+      <div class="mb-3">
         {{ form.description.label(class="form-label fw-semibold") }}
         {{ form.description(class="form-control", rows=4) }}
       </div>

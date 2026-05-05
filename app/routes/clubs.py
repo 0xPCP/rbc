@@ -6,7 +6,7 @@ from flask_login import login_required, current_user, fresh_login_required
 from sqlalchemy.exc import IntegrityError
 import requests as http_requests
 from ..extensions import db
-from ..models import Club, ClubAdmin, ClubMembership, Ride, RideComment, ClubInvite
+from ..models import Club, ClubAdmin, ClubMembership, Ride, RideComment, ClubInvite, RideSignup
 from ..weather import get_weather_for_rides
 from ..geocoding import clubs_near_zip
 from .strava import get_club_activities
@@ -389,11 +389,11 @@ def ride_detail(slug, ride_id):
 
     user_signed_up = False
     user_waitlisted = False
+    my_signup = None
     waiver_required = False
     membership_required = False
     show_route = True
     if current_user.is_authenticated:
-        from ..models import RideSignup
         my_signup = RideSignup.query.filter_by(
             ride_id=ride_id, user_id=current_user.id
         ).first()
@@ -416,6 +416,16 @@ def ride_detail(slug, ride_id):
 
     weather = get_weather_for_rides([ride])
     comment_form = RideCommentForm() if current_user.is_authenticated else None
+    can_manage_groupride_code = False
+    can_add_groupride_code = False
+    if current_user.is_authenticated:
+        can_manage_groupride_code = (
+            current_user.can_manage_rides(club)
+            or (ride.leader_id and ride.leader_id == current_user.id)
+        )
+        can_add_groupride_code = can_manage_groupride_code or (
+            not ride.garmin_groupride_code and my_signup is not None and not my_signup.is_waitlist
+        )
     from flask import current_app
     return render_template('clubs/ride_detail.html', club=club, ride=ride,
                            user_signed_up=user_signed_up,
@@ -425,8 +435,41 @@ def ride_detail(slug, ride_id):
                            show_route=show_route,
                            ride_weather=weather.get(ride.id),
                            comment_form=comment_form,
+                           can_manage_groupride_code=can_manage_groupride_code,
+                           can_add_groupride_code=can_add_groupride_code,
                            media_expiry_days=current_app.config.get('MEDIA_EXPIRY_DAYS', 90),
                            media_max_per_user=current_app.config.get('MEDIA_MAX_PHOTOS_PER_USER_RIDE', 5))
+
+
+@clubs_bp.route('/<slug>/rides/<int:ride_id>/groupride-code', methods=['POST'])
+@login_required
+def ride_groupride_code(slug, ride_id):
+    club = _get_club_or_404(slug)
+    ride = Ride.query.filter_by(id=ride_id, club_id=club.id).first_or_404()
+    signup = RideSignup.query.filter_by(ride_id=ride.id, user_id=current_user.id).first()
+    can_manage = (
+        current_user.can_manage_rides(club)
+        or (ride.leader_id and ride.leader_id == current_user.id)
+    )
+    can_add_when_blank = (
+        not ride.garmin_groupride_code
+        and signup is not None
+        and not signup.is_waitlist
+    )
+    if not can_manage and not can_add_when_blank:
+        abort(403)
+
+    code = (request.form.get('garmin_groupride_code') or '').strip()
+    if code and not re.fullmatch(r'\d{6}', code):
+        flash('Enter the 6-digit Garmin GroupRide code.', 'danger')
+        return redirect(url_for('clubs.ride_detail', slug=slug, ride_id=ride.id) + '#groupride')
+    if ride.garmin_groupride_code and not can_manage:
+        abort(403)
+
+    ride.garmin_groupride_code = code or None
+    db.session.commit()
+    flash('Garmin GroupRide code updated.', 'success')
+    return redirect(url_for('clubs.ride_detail', slug=slug, ride_id=ride.id) + '#groupride')
 
 
 @clubs_bp.route('/<slug>/rides/<int:ride_id>/ics')

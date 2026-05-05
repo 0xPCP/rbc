@@ -424,6 +424,7 @@ class Ride(db.Model):
     route_url = db.Column(db.String(500), nullable=True)
     description = db.Column(db.Text, nullable=True)
     video_url = db.Column(db.String(500), nullable=True)
+    garmin_groupride_code = db.Column(db.String(6), nullable=True)
     max_riders = db.Column(db.Integer, nullable=True)
     is_cancelled = db.Column(db.Boolean, default=False, nullable=False)
     cancel_reason = db.Column(db.String(500), nullable=True)

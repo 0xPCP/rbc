@@ -97,6 +97,32 @@
           <dd>{{ ride.ride_leader }}</dd>
           {% endif %}
 
+          <dt id="groupride">Garmin GroupRide</dt>
+          <dd>
+            {% if ride.garmin_groupride_code %}
+            <span class="badge bg-dark fs-6">{{ ride.garmin_groupride_code }}</span>
+            {% else %}
+            <span class="text-muted small">No code added</span>
+            {% endif %}
+            <span class="text-muted ms-1"
+                  title="Garmin GroupRide lets compatible Edge users join a shared ride session for live rider locations, messaging, and shared course access. Create the GroupRide on a Garmin Edge/Garmin Connect, then paste the 6-digit code here.">ⓘ</span>
+            {% set can_manage_groupride_code = access == 'owner' %}
+            {% set can_add_groupride_code = can_manage_groupride_code or (not ride.garmin_groupride_code and user_signup and access in ['public', 'accepted', 'invited']) %}
+            {% if can_manage_groupride_code or can_add_groupride_code %}
+            <form method="post" action="{{ url_for('user_rides.groupride_code', ride_id=ride.id) }}"
+                  class="d-flex gap-2 mt-2 flex-wrap">
+              <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+              <input class="form-control form-control-sm" name="garmin_groupride_code"
+                     value="{{ ride.garmin_groupride_code or '' }}" placeholder="123456"
+                     maxlength="6" inputmode="numeric" pattern="[0-9]{6}" style="max-width:120px">
+              <button class="btn btn-outline-secondary btn-sm">{{ 'Update' if ride.garmin_groupride_code else 'Add Code' }}</button>
+              {% if can_manage_groupride_code and ride.garmin_groupride_code %}
+              <button class="btn btn-link btn-sm text-danger" name="garmin_groupride_code" value="">Clear</button>
+              {% endif %}
+            </form>
+            {% endif %}
+          </dd>
+
           {% if ride.ride_type %}
           <dt>Type</dt>
           <dd>{{ ride.ride_type }}</dd>

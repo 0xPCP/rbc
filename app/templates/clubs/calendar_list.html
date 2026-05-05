@@ -84,6 +84,7 @@
               <span class="lw-emoji">{{ w.emoji }}</span>
               <span class="lw-temp">{{ w.temp_f }}°F</span>
               <span class="lw-wind">{{ w.wind_mph }} mph</span>
+              {% if w.aqi is defined and w.aqi is not none %}<span class="lw-wind">AQI {{ w.aqi }}</span>{% endif %}
             </div>
             {% endif %}
             <div class="ride-row-signups">
@@ -146,6 +147,7 @@
                     <span class="lw-emoji">{{ w.emoji }}</span>
                     <span class="lw-temp">{{ w.temp_f }}°F</span>
                     <span class="lw-wind">{{ w.wind_mph }} mph</span>
+                    {% if w.aqi is defined and w.aqi is not none %}<span class="lw-wind">AQI {{ w.aqi }}</span>{% endif %}
                   </div>
                   {% endif %}
                   <div class="ride-row-signups">

@@ -43,6 +43,7 @@ _WMO = {
 
 # Cache: key → {hourly: {...}, _ts: float}
 _cache = {}
+_aqi_cache = {}
 
 
 def _fetch_hourly(lat, lng, forecast_days):
@@ -81,6 +82,57 @@ def _fetch_hourly(lat, lng, forecast_days):
     return hourly
 
 
+def _fetch_hourly_aqi(lat, lng, forecast_days):
+    """Fetch and cache hourly U.S. AQI forecast data for a lat/lng."""
+    # Open-Meteo's air-quality forecast is shorter than weather forecast.
+    forecast_days = min(forecast_days, 7)
+    cache_key = (round(lat, 3), round(lng, 3), forecast_days)
+    now = time.time()
+    if cache_key in _aqi_cache and now - _aqi_cache[cache_key]['_ts'] < 1800:
+        return _aqi_cache[cache_key]['hourly']
+    try:
+        resp = requests.get(
+            'https://air-quality-api.open-meteo.com/v1/air-quality',
+            params={
+                'latitude':      lat,
+                'longitude':     lng,
+                'hourly':        'us_aqi',
+                'forecast_days': forecast_days,
+                'timezone':      'auto',
+            },
+            timeout=10,
+        )
+        hourly_data = resp.json().get('hourly', {})
+        times = hourly_data.get('time', [])
+        values = hourly_data.get('us_aqi', [])
+    except Exception:
+        return {}
+
+    hourly = {}
+    for i, t in enumerate(times):
+        if i >= len(values) or values[i] is None:
+            continue
+        hourly[t] = round(values[i])
+    _aqi_cache[cache_key] = {'hourly': hourly, '_ts': now}
+    return hourly
+
+
+def _aqi_category(aqi):
+    if aqi is None:
+        return None, 0
+    if aqi <= 50:
+        return 'Good', 0
+    if aqi <= 100:
+        return 'Moderate', 1
+    if aqi <= 150:
+        return 'Unhealthy for sensitive groups', 2
+    if aqi <= 200:
+        return 'Unhealthy', 2
+    if aqi <= 300:
+        return 'Very unhealthy', 2
+    return 'Hazardous', 2
+
+
 def get_weather_for_rides(rides, lat=None, lng=None):
     """
     Return {ride.id: weather_dict} for rides within the next 14 days.
@@ -100,6 +152,7 @@ def get_weather_for_rides(rides, lat=None, lng=None):
     hourly = _fetch_hourly(lat, lng, forecast_days)
     if not hourly:
         return {}
+    hourly_aqi = _fetch_hourly_aqi(lat, lng, forecast_days)
 
     result = {}
     for ride in in_window:
@@ -122,12 +175,17 @@ def get_weather_for_rides(rides, lat=None, lng=None):
         if h['code'] >= 95:
             warnings.append('thunderstorm possible')
 
+        aqi = hourly_aqi.get(key)
+        aqi_label, aqi_sev = _aqi_category(aqi)
+        if aqi is not None and aqi_sev >= 2:
+            warnings.append(f"AQI {aqi} ({aqi_label})")
+
         if warnings:
-            sev = max(code_sev, 2)
+            sev = max(code_sev, aqi_sev, 2)
         elif h['precip_prob'] >= 30 or h['wind_mph'] >= 15 or h['temp_f'] <= 45 or h['temp_f'] >= 88:
-            sev = max(code_sev, 1)
+            sev = max(code_sev, aqi_sev, 1)
         else:
-            sev = code_sev
+            sev = max(code_sev, aqi_sev)
 
         result[ride.id] = {
             'description':    desc,
@@ -136,6 +194,8 @@ def get_weather_for_rides(rides, lat=None, lng=None):
             'temp_f':         h['temp_f'],
             'wind_mph':       h['wind_mph'],
             'precip_prob':    h['precip_prob'],
+            'aqi':            aqi,
+            'aqi_label':      aqi_label,
             'warning':        bool(warnings),
             'warning_reasons': warnings,
         }

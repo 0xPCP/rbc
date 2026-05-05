@@ -3,6 +3,7 @@
 Users can create up to 7 personal rides per calendar week.
 Rides are either public (anyone can join) or private (invite-only with request-access flow).
 """
+import re
 from datetime import date
 from flask import (
     Blueprint, render_template, redirect, url_for, flash,
@@ -97,6 +98,7 @@ def create():
             ride_leader=form.ride_leader.data or current_user.username,
             route_url=form.route_url.data or None,
             video_url=form.video_url.data or None,
+            garmin_groupride_code=(form.garmin_groupride_code.data or '').strip() or None,
             description=form.description.data,
             max_riders=form.max_riders.data,
             created_by=current_user.id,
@@ -147,6 +149,36 @@ def detail(ride_id):
                            user_signup=user_signup)
 
 
+@user_rides_bp.route('/<int:ride_id>/groupride-code', methods=['POST'])
+@login_required
+def groupride_code(ride_id):
+    ride = Ride.query.filter(
+        Ride.id == ride_id, Ride.owner_id.isnot(None)
+    ).first_or_404()
+    access = _access_level(ride)
+    signup = RideSignup.query.filter_by(ride_id=ride.id, user_id=current_user.id).first()
+    can_manage = access == 'owner'
+    can_add_when_blank = (
+        not ride.garmin_groupride_code
+        and access in ('public', 'accepted', 'invited')
+        and signup is not None
+    )
+    if not can_manage and not can_add_when_blank:
+        abort(403)
+
+    code = (request.form.get('garmin_groupride_code') or '').strip()
+    if code and not re.fullmatch(r'\d{6}', code):
+        flash('Enter the 6-digit Garmin GroupRide code.', 'danger')
+        return redirect(url_for('user_rides.detail', ride_id=ride.id) + '#groupride')
+    if ride.garmin_groupride_code and not can_manage:
+        abort(403)
+
+    ride.garmin_groupride_code = code or None
+    db.session.commit()
+    flash('Garmin GroupRide code updated.', 'success')
+    return redirect(url_for('user_rides.detail', ride_id=ride.id) + '#groupride')
+
+
 # ── Edit ──────────────────────────────────────────────────────────────────────
 
 @user_rides_bp.route('/<int:ride_id>/edit', methods=['GET', 'POST'])
@@ -160,6 +192,7 @@ def edit(ride_id):
             ride.route_url = None
         if not form.video_url.data:
             ride.video_url = None
+        ride.garmin_groupride_code = (form.garmin_groupride_code.data or '').strip() or None
         db.session.commit()
         flash('Ride updated.', 'success')
         return redirect(url_for('user_rides.detail', ride_id=ride.id))

@@ -252,6 +252,9 @@ class RideForm(FlaskForm):
     ride_leader = StringField('Ride Leader', validators=[Optional(), Length(max=100)])
     route_url = StringField('Route URL (Strava, RideWithGPS, etc.)', validators=[Optional(), SafeURL(), Length(max=500)])
     video_url = StringField('Video URL (YouTube or Vimeo)', validators=[Optional(), SafeURL(), Length(max=500)])
+    garmin_groupride_code = StringField('Garmin GroupRide Code', validators=[
+        Optional(), Regexp(r'^\d{6}$', message='Enter the 6-digit Garmin GroupRide code.'),
+    ])
     description = TextAreaField('Description / Notes', validators=[Optional()])
     max_riders = IntegerField('Max Riders (leave blank for unlimited)', validators=[Optional(), NumberRange(min=1, max=9999)])
     is_cancelled = BooleanField('Mark as Cancelled')
@@ -284,6 +287,9 @@ class UserRideForm(FlaskForm):
     ride_leader      = StringField('Ride Leader', validators=[Optional(), Length(max=100)])
     route_url        = StringField('Route URL', validators=[Optional(), SafeURL(), Length(max=500)])
     video_url        = StringField('Video URL (YouTube or Vimeo)', validators=[Optional(), SafeURL(), Length(max=500)])
+    garmin_groupride_code = StringField('Garmin GroupRide Code', validators=[
+        Optional(), Regexp(r'^\d{6}$', message='Enter the 6-digit Garmin GroupRide code.'),
+    ])
     description      = TextAreaField('Description / Notes', validators=[Optional()])
     max_riders       = IntegerField('Max Riders (leave blank for unlimited)', validators=[Optional(), NumberRange(min=1, max=9999)])
     is_private       = BooleanField('Private ride — only invited riders can see details')

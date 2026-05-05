@@ -202,6 +202,7 @@ class TestRideDetail:
     def test_weather_card_shown(self, client, sample_club, one_ride, mock_weather):
         resp = client.get(f'/clubs/test-club/rides/{one_ride.id}')
         assert b'Forecast' in resp.data
+        assert b'AQI 42 Good' in resp.data
 
     def test_sign_in_prompt_for_anonymous(self, client, sample_club, one_ride, mock_weather):
         resp = client.get(f'/clubs/test-club/rides/{one_ride.id}')
@@ -224,6 +225,62 @@ class TestRideDetail:
     def test_add_to_calendar_button_present(self, client, sample_club, one_ride, mock_weather):
         resp = client.get(f'/clubs/test-club/rides/{one_ride.id}')
         assert b'Add to Calendar' in resp.data
+
+    def test_shows_garmin_groupride_code(self, client, db, sample_club, one_ride, mock_weather):
+        one_ride.garmin_groupride_code = '123456'
+        db.session.commit()
+        resp = client.get(f'/clubs/test-club/rides/{one_ride.id}')
+        assert b'Garmin GroupRide' in resp.data
+        assert b'123456' in resp.data
+
+    def test_signed_up_rider_can_add_blank_garmin_groupride_code(self, client, db, sample_club, one_ride, regular_user, mock_weather):
+        db.session.add(RideSignup(ride_id=one_ride.id, user_id=regular_user.id))
+        db.session.commit()
+        login(client)
+        resp = client.post(
+            f'/clubs/test-club/rides/{one_ride.id}/groupride-code',
+            data={'garmin_groupride_code': '234567'},
+            follow_redirects=True,
+        )
+        assert resp.status_code == 200
+        db.session.refresh(one_ride)
+        assert one_ride.garmin_groupride_code == '234567'
+
+    def test_signed_up_rider_cannot_overwrite_garmin_groupride_code(self, client, db, sample_club, one_ride, regular_user, mock_weather):
+        one_ride.garmin_groupride_code = '123456'
+        db.session.add(RideSignup(ride_id=one_ride.id, user_id=regular_user.id))
+        db.session.commit()
+        login(client)
+        resp = client.post(
+            f'/clubs/test-club/rides/{one_ride.id}/groupride-code',
+            data={'garmin_groupride_code': '234567'},
+            follow_redirects=False,
+        )
+        assert resp.status_code == 403
+        db.session.refresh(one_ride)
+        assert one_ride.garmin_groupride_code == '123456'
+
+    def test_club_ride_manager_can_update_garmin_groupride_code(self, client, db, sample_club, one_ride, club_admin_user, mock_weather):
+        login(client, 'clubadmin@test.com')
+        resp = client.post(
+            f'/clubs/test-club/rides/{one_ride.id}/groupride-code',
+            data={'garmin_groupride_code': '345678'},
+            follow_redirects=True,
+        )
+        assert resp.status_code == 200
+        db.session.refresh(one_ride)
+        assert one_ride.garmin_groupride_code == '345678'
+
+    def test_invalid_garmin_groupride_code_rejected(self, client, db, sample_club, one_ride, club_admin_user, mock_weather):
+        login(client, 'clubadmin@test.com')
+        resp = client.post(
+            f'/clubs/test-club/rides/{one_ride.id}/groupride-code',
+            data={'garmin_groupride_code': 'abc123'},
+            follow_redirects=True,
+        )
+        assert b'6-digit Garmin GroupRide code' in resp.data
+        db.session.refresh(one_ride)
+        assert one_ride.garmin_groupride_code is None
 
 
 # ── .ics download ─────────────────────────────────────────────────────────────

@@ -628,6 +628,7 @@ def ride_new(slug):
             ride_leader=ride_leader,
             route_url=form.route_url.data or None,
             video_url=form.video_url.data or None,
+            garmin_groupride_code=(form.garmin_groupride_code.data or '').strip() or None,
             description=form.description.data or None,
             is_cancelled=form.is_cancelled.data,
             is_recurring=form.is_recurring.data,
@@ -671,6 +672,7 @@ def ride_edit(slug, ride_id):
         ride.ride_leader    = ride_leader
         ride.route_url      = form.route_url.data or None
         ride.video_url      = form.video_url.data or None
+        ride.garmin_groupride_code = (form.garmin_groupride_code.data or '').strip() or None
         ride.description    = form.description.data or None
         ride.is_cancelled   = form.is_cancelled.data
         ride.is_recurring   = form.is_recurring.data

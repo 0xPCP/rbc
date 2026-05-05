@@ -228,6 +228,8 @@ FAKE_WEATHER = {
     'temp_f': 68,
     'wind_mph': 10,
     'precip_prob': 10,
+    'aqi': 42,
+    'aqi_label': 'Good',
     'warning': False,
     'warning_reasons': [],
 }

@@ -52,6 +52,7 @@ class TestListView:
         html = client.get(BASE).data.decode()
         assert 'list-weather' in html
         assert '68' in html
+        assert 'AQI 42' in html
 
     def test_empty_state_no_rides(self, client, sample_club, mock_weather):
         resp = client.get(BASE)

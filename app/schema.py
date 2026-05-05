@@ -33,6 +33,11 @@ def ensure_runtime_schema():
         db.session.execute(text(ddl))
         changed = True
 
+    ride_columns = {col['name'] for col in inspector.get_columns('rides')} if 'rides' in inspector.get_table_names() else set()
+    if ride_columns and 'garmin_groupride_code' not in ride_columns:
+        db.session.execute(text('ALTER TABLE rides ADD COLUMN garmin_groupride_code VARCHAR(6)'))
+        changed = True
+
     if 'admin_audit_logs' not in inspector.get_table_names():
         from .models import AdminAuditLog
         AdminAuditLog.__table__.create(db.engine, checkfirst=True)

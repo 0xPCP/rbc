@@ -15,8 +15,10 @@ def clear_weather_cache():
     """Clear the in-memory weather cache before each test so cached results
     from one test don't pollute the next."""
     weather_module._cache.clear()
+    weather_module._aqi_cache.clear()
     yield
     weather_module._cache.clear()
+    weather_module._aqi_cache.clear()
 
 
 def _fake_response(rides_dates, code=2, temp_f=68, wind_mph=10, precip_prob=10, precip_mm=0.0):
@@ -44,6 +46,28 @@ def _fake_response(rides_dates, code=2, temp_f=68, wind_mph=10, precip_prob=10, 
             'precipitation': precip_list,
             'wind_speed_10m': wind_list,
             'weather_code': code_list,
+        }
+    }
+    return mock_resp
+
+
+def _fake_aqi_response(rides_dates, aqi=42):
+    """Build a minimal Open-Meteo air-quality API response covering the given dates."""
+    times = []
+    aqi_list = []
+
+    base = min(rides_dates)
+    for day_offset in range(7):
+        d = base + timedelta(days=day_offset)
+        for hour in range(24):
+            times.append(f"{d.isoformat()}T{hour:02d}:00")
+            aqi_list.append(aqi)
+
+    mock_resp = MagicMock()
+    mock_resp.json.return_value = {
+        'hourly': {
+            'time': times,
+            'us_aqi': aqi_list,
         }
     }
     return mock_resp
@@ -169,7 +193,7 @@ class TestGetWeatherForRides:
             result = get_weather_for_rides([ride])
         w = result[1]
         for key in ('description', 'emoji', 'severity', 'temp_f', 'wind_mph',
-                    'precip_prob', 'warning', 'warning_reasons'):
+                    'precip_prob', 'aqi', 'aqi_label', 'warning', 'warning_reasons'):
             assert key in w, f"Missing key: {key}"
 
     def test_multiple_rides_all_returned(self, app):
@@ -179,6 +203,33 @@ class TestGetWeatherForRides:
         with patch('requests.get', return_value=mock_resp):
             result = get_weather_for_rides(rides)
         assert len(result) == 3
+
+    def test_aqi_added_when_air_quality_available(self, app):
+        from app.weather import get_weather_for_rides
+        ride = _make_ride(1, days_ahead=1)
+        mock_weather = _fake_response([ride.date], code=1, temp_f=68, wind_mph=8, precip_prob=5)
+        mock_aqi = _fake_aqi_response([ride.date], aqi=42)
+        with patch('requests.get', side_effect=[mock_weather, mock_aqi]):
+            result = get_weather_for_rides([ride])
+        w = result[1]
+        assert w['aqi'] == 42
+        assert w['aqi_label'] == 'Good'
+        assert w['severity'] == 0
+        assert w['warning'] is False
+
+    def test_unhealthy_aqi_triggers_warning(self, app):
+        from app.weather import get_weather_for_rides
+        ride = _make_ride(1, days_ahead=1)
+        mock_weather = _fake_response([ride.date], code=1, temp_f=68, wind_mph=8, precip_prob=5)
+        mock_aqi = _fake_aqi_response([ride.date], aqi=125)
+        with patch('requests.get', side_effect=[mock_weather, mock_aqi]):
+            result = get_weather_for_rides([ride])
+        w = result[1]
+        assert w['aqi'] == 125
+        assert w['aqi_label'] == 'Unhealthy for sensitive groups'
+        assert w['severity'] == 2
+        assert w['warning'] is True
+        assert any('AQI 125' in reason for reason in w['warning_reasons'])
 
 
 # ── WMO code mapping ──────────────────────────────────────────────────────────

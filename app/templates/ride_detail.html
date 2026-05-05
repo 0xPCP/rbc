@@ -86,6 +86,7 @@
               {{ ride_weather.temp_f }}°F &bull;
               {{ ride_weather.wind_mph }} mph winds &bull;
               {{ ride_weather.precip_prob }}% chance of rain
+              {% if ride_weather.aqi is defined and ride_weather.aqi is not none %}&bull; AQI {{ ride_weather.aqi }} {{ ride_weather.aqi_label }}{% endif %}
             </div>
           </div>
         </div>

@@ -48,6 +48,7 @@
               <div class="wr-weather sev-{{ w.severity }}">
                 {{ w.emoji }} {{ w.temp_f }}°F &bull; {{ w.wind_mph }} mph
                 {% if w.precip_prob > 20 %}&bull; {{ w.precip_prob }}% rain{% endif %}
+                {% if w.aqi is defined and w.aqi is not none %}&bull; AQI {{ w.aqi }}{% endif %}
                 {% if w.warning %}
                 <div class="wr-warn-reasons">
                   ⚠️ {{ w.warning_reasons | join(' · ') }}
