@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}{{ club.name }} — Superadmin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Superadmin</a></li>
+        <li class="breadcrumb-item active">{{ club.name }}</li>
+      </ol>
+    </nav>
+    <h1>{{ club.name }}</h1>
+    <p class="mb-0">Platform-level club maintenance.</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-lg-7">
+      <div class="detail-card mb-4">
+        <h5 class="detail-card-title">Club Status</h5>
+        <dl class="detail-dl mb-0">
+          <dt>Slug</dt>
+          <dd>{{ club.slug }}</dd>
+          <dt>Visibility</dt>
+          <dd>
+            {% if club.is_private %}
+            <span class="badge bg-dark">Private</span>
+            {% else %}
+            <span class="badge bg-success">Public</span>
+            {% endif %}
+          </dd>
+          <dt>Active</dt>
+          <dd>{{ 'Yes' if club.is_active else 'No' }}</dd>
+          <dt>Members</dt>
+          <dd>{{ stats.members }}</dd>
+          <dt>Rides</dt>
+          <dd>{{ stats.rides }}</dd>
+          <dt>Signups</dt>
+          <dd>{{ stats.signups }}</dd>
+          <dt>Posts</dt>
+          <dd>{{ stats.posts }}</dd>
+        </dl>
+      </div>
+
+      <div class="detail-card">
+        <h5 class="detail-card-title">Danger Zone</h5>
+        <p class="section-body">
+          Deleting a club permanently removes the club, its rides, memberships,
+          admin roles, waivers, posts, leaders, sponsors, and related ride records.
+        </p>
+        <form method="post" action="{{ url_for('admin.club_delete', slug=club.slug) }}"
+              onsubmit="return confirm('Permanently delete {{ club.name }}? This cannot be undone.')">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+          <label class="form-label">Type <strong>DELETE {{ club.slug }}</strong> to confirm.</label>
+          <div class="d-flex gap-2 flex-wrap">
+            <input class="form-control" style="max-width:260px" name="confirmation" autocomplete="off">
+            <button class="btn btn-outline-danger">Delete Club</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="detail-card mb-4">
+        <h5 class="detail-card-title">Actions</h5>
+        <div class="d-grid gap-2">
+          <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('clubs.home', slug=club.slug) }}">View Public Page</a>
+          <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('admin.club_dashboard', slug=club.slug) }}">Club Admin Dashboard</a>
+          <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('admin.club_settings', slug=club.slug) }}">Club Settings</a>
+          <form method="post" action="{{ url_for('admin.club_toggle_private', slug=club.slug) }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-sm w-100 {{ 'btn-outline-success' if club.is_private else 'btn-outline-dark' }}">
+              {{ 'Make Public' if club.is_private else 'Make Private' }}
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <div class="alert alert-warning">
+        These controls bypass normal club-admin ownership. Use them only for
+        platform support, moderation, or data cleanup.
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

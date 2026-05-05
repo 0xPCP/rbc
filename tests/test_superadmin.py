@@ -9,6 +9,7 @@ Tests for the super admin panel:
   - Deactivated user cannot log in
 """
 import pytest
+from datetime import date, time, timedelta
 from unittest.mock import patch
 from app.extensions import db, bcrypt
 from app.models import AdminAuditLog, Club, Ride, RideMedia, RideSignup, User
@@ -465,3 +466,100 @@ class TestPlatformStatistics:
         resp = client.get('/admin/')
         assert b'Recent Superadmin Activity' in resp.data
         assert b'revoke_sessions' in resp.data
+
+
+class TestSuperadminClubMaintenance:
+
+    def test_dashboard_links_to_club_superadmin_panel(self, client, db, admin_user, sample_club):
+        login_as(client, admin_user)
+        resp = client.get('/admin/')
+        assert resp.status_code == 200
+        assert f'/admin/clubs/{sample_club.slug}/superadmin'.encode() in resp.data
+
+    def test_regular_user_blocked_from_club_superadmin_panel(self, client, db, regular_user, sample_club):
+        login_as(client, regular_user)
+        resp = client.get(f'/admin/clubs/{sample_club.slug}/superadmin')
+        assert resp.status_code == 403
+
+    def test_superadmin_can_toggle_club_privacy(self, client, db, admin_user, sample_club):
+        assert sample_club.is_private is False
+        login_as(client, admin_user)
+        resp = client.post(
+            f'/admin/clubs/{sample_club.slug}/toggle-private',
+            follow_redirects=True,
+        )
+        assert resp.status_code == 200
+        db.session.refresh(sample_club)
+        assert sample_club.is_private is True
+        assert b'Make Public' in resp.data
+        assert AdminAuditLog.query.filter_by(action='toggle_club_private').first() is not None
+
+    def test_delete_club_requires_typed_confirmation(self, client, db, admin_user, sample_club):
+        login_as(client, admin_user)
+        resp = client.post(
+            f'/admin/clubs/{sample_club.slug}/delete',
+            data={'confirmation': 'DELETE WRONG'},
+            follow_redirects=True,
+        )
+        assert resp.status_code == 200
+        assert b'DELETE test-club' in resp.data
+        assert Club.query.filter_by(id=sample_club.id).first() is not None
+
+    def test_superadmin_can_delete_club_with_confirmation(self, client, db, admin_user, sample_club, sample_rides):
+        club_id = sample_club.id
+        login_as(client, admin_user)
+        resp = client.post(
+            f'/admin/clubs/{sample_club.slug}/delete',
+            data={'confirmation': f'DELETE {sample_club.slug}'},
+            follow_redirects=True,
+        )
+        assert resp.status_code == 200
+        assert b'deleted' in resp.data
+        assert Club.query.filter_by(id=club_id).first() is None
+        assert Ride.query.filter_by(club_id=club_id).count() == 0
+        assert AdminAuditLog.query.filter_by(action='delete_club').first() is not None
+
+
+class TestSuperadminUserHostedRides:
+
+    def _make_user_ride(self, db, owner, title='User Ride', is_private=False):
+        ride = Ride(
+            owner_id=owner.id,
+            club_id=None,
+            is_private=is_private,
+            title=title,
+            date=date.today() + timedelta(days=2),
+            time=time(9, 0),
+            meeting_location='Coffee Shop',
+            distance_miles=31.0,
+            pace_category='B',
+            ride_type='road',
+            ride_leader=owner.username,
+            created_by=owner.id,
+        )
+        db.session.add(ride)
+        db.session.commit()
+        return ride
+
+    def test_regular_user_blocked_from_user_rides_list(self, client, db, regular_user):
+        login_as(client, regular_user)
+        resp = client.get('/admin/user-rides/')
+        assert resp.status_code == 403
+
+    def test_superadmin_can_view_user_hosted_rides(self, client, db, admin_user, regular_user):
+        ride = self._make_user_ride(db, regular_user, title='Neighborhood Spin')
+        login_as(client, admin_user)
+        resp = client.get('/admin/user-rides/')
+        assert resp.status_code == 200
+        assert b'Neighborhood Spin' in resp.data
+        assert regular_user.email.encode() in resp.data
+        assert f'/my-rides/{ride.id}'.encode() in resp.data
+
+    def test_user_rides_list_filters_private(self, client, db, admin_user, regular_user):
+        self._make_user_ride(db, regular_user, title='Public Spin', is_private=False)
+        self._make_user_ride(db, regular_user, title='Private Spin', is_private=True)
+        login_as(client, admin_user)
+        resp = client.get('/admin/user-rides/?privacy=private')
+        assert resp.status_code == 200
+        assert b'Private Spin' in resp.data
+        assert b'Public Spin' not in resp.data

@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}User-Hosted Rides — Superadmin{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="container">
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb mb-1">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Superadmin</a></li>
+        <li class="breadcrumb-item active">User-Hosted Rides</li>
+      </ol>
+    </nav>
+    <h1>User-Hosted Rides</h1>
+    <p class="mb-0">{{ pagination.total }} ride{{ 's' if pagination.total != 1 }} created by users</p>
+  </div>
+</div>
+
+<div class="container py-4">
+  <div class="d-flex flex-wrap gap-2 mb-4 align-items-center">
+    <form class="d-flex gap-2" method="get">
+      <input class="form-control form-control-sm" style="min-width:240px"
+             name="q" value="{{ q }}" placeholder="Search title, username, or email">
+      <input type="hidden" name="privacy" value="{{ privacy }}">
+      <button class="btn btn-outline-secondary btn-sm">Search</button>
+    </form>
+
+    <div class="btn-group btn-group-sm ms-auto">
+      <a href="{{ url_for('admin.user_rides', privacy='all', q=q) }}"
+         class="btn btn-outline-secondary{{ ' active' if privacy == 'all' }}">All</a>
+      <a href="{{ url_for('admin.user_rides', privacy='public', q=q) }}"
+         class="btn btn-outline-secondary{{ ' active' if privacy == 'public' }}">Public</a>
+      <a href="{{ url_for('admin.user_rides', privacy='private', q=q) }}"
+         class="btn btn-outline-secondary{{ ' active' if privacy == 'private' }}">Private</a>
+    </div>
+  </div>
+
+  <div class="table-responsive">
+    <div class="paceline-table-wrap">
+      <table class="table paceline-table mb-0">
+        <thead>
+          <tr>
+            <th>Ride</th>
+            <th>Owner</th>
+            <th>Date</th>
+            <th>Privacy</th>
+            <th>Signups</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for ride in pagination.items %}
+          <tr>
+            <td>
+              <a href="{{ url_for('user_rides.detail', ride_id=ride.id) }}">{{ ride.title }}</a>
+              <div class="text-muted small">{{ ride.distance_miles }} mi &bull; {{ ride.pace_category }} &bull; {{ ride.meeting_location }}</div>
+            </td>
+            <td>
+              <a href="{{ url_for('admin.user_detail', user_id=ride.owner.id) }}">{{ ride.owner.username }}</a>
+              <div class="text-muted small">{{ ride.owner.email }}</div>
+            </td>
+            <td>{{ ride.date | strftime('%b %-d, %Y') }}<div class="text-muted small">{{ ride.time.strftime('%-I:%M %p') if ride.time else '' }}</div></td>
+            <td>
+              {% if ride.is_private %}
+              <span class="badge bg-dark">Private</span>
+              {% else %}
+              <span class="badge bg-success">Public</span>
+              {% endif %}
+            </td>
+            <td>{{ ride.signup_count }}</td>
+            <td><a class="btn btn-outline-secondary btn-xs" href="{{ url_for('user_rides.detail', ride_id=ride.id) }}">View</a></td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="6" class="text-muted text-center py-4">No user-hosted rides found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

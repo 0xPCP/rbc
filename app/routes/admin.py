@@ -200,6 +200,31 @@ def users():
                            q=q, filter_type=filter_type)
 
 
+@admin_bp.route('/user-rides/')
+@superadmin_required
+def user_rides():
+    q = request.args.get('q', '').strip()
+    privacy = request.args.get('privacy', 'all')
+    page = request.args.get('page', 1, type=int)
+
+    query = Ride.query.filter(Ride.owner_id.isnot(None)).join(User, Ride.owner_id == User.id)
+    if q:
+        query = query.filter(or_(
+            Ride.title.ilike(f'%{q}%'),
+            User.username.ilike(f'%{q}%'),
+            User.email.ilike(f'%{q}%'),
+        ))
+    if privacy == 'private':
+        query = query.filter(Ride.is_private == True)
+    elif privacy == 'public':
+        query = query.filter(Ride.is_private == False)
+
+    pagination = (query.order_by(Ride.date.desc(), Ride.time.desc())
+                  .paginate(page=page, per_page=25, error_out=False))
+    return render_template('admin/user_rides.html', pagination=pagination,
+                           q=q, privacy=privacy)
+
+
 @admin_bp.route('/feedback/')
 @superadmin_required
 def feedback():
@@ -370,6 +395,51 @@ def club_new():
         return redirect(url_for('admin.club_dashboard', slug=club.slug))
 
     return render_template('admin/club_form.html', form=form, title='New Club', club=None)
+
+
+@admin_bp.route('/clubs/<slug>/superadmin')
+@superadmin_required
+def club_superadmin(slug):
+    club = Club.query.filter_by(slug=slug).first_or_404()
+    stats = {
+        'members': ClubMembership.query.filter_by(club_id=club.id).count(),
+        'rides': Ride.query.filter_by(club_id=club.id).count(),
+        'signups': (RideSignup.query
+                    .join(Ride, RideSignup.ride_id == Ride.id)
+                    .filter(Ride.club_id == club.id).count()),
+        'posts': ClubPost.query.filter_by(club_id=club.id).count(),
+    }
+    return render_template('admin/club_superadmin.html', club=club, stats=stats)
+
+
+@admin_bp.route('/clubs/<slug>/toggle-private', methods=['POST'])
+@superadmin_required
+def club_toggle_private(slug):
+    club = Club.query.filter_by(slug=slug).first_or_404()
+    club.is_private = not club.is_private
+    _audit('toggle_club_private', details=f'club_id={club.id}; private={club.is_private}')
+    db.session.commit()
+    flash(f'{club.name} is now {"private" if club.is_private else "public"}.', 'success')
+    return redirect(url_for('admin.club_superadmin', slug=club.slug))
+
+
+@admin_bp.route('/clubs/<slug>/delete', methods=['POST'])
+@superadmin_required
+def club_delete(slug):
+    club = Club.query.filter_by(slug=slug).first_or_404()
+    confirmation = (request.form.get('confirmation') or '').strip()
+    expected = f'DELETE {club.slug}'
+    if confirmation != expected:
+        flash(f'Type "{expected}" to permanently delete this club.', 'danger')
+        return redirect(url_for('admin.club_superadmin', slug=club.slug))
+
+    name = club.name
+    club_id = club.id
+    db.session.delete(club)
+    _audit('delete_club', details=f'club_id={club_id}; slug={slug}; name={name}')
+    db.session.commit()
+    flash(f'Club "{name}" deleted.', 'success')
+    return redirect(url_for('admin.dashboard'))
 
 
 # ── Club admin ────────────────────────────────────────────────────────────────
