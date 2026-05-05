@@ -23,19 +23,24 @@ Transcoding for cross-browser compatibility requires CPU time or a paid service
 or Mux when clubs are large enough that video upload is a real friction point.
 Update `UPLOAD_FOLDER` handling in `app/routes/media.py` and add a transcoding step.
 
-### Photos: direct upload, resized on ingest, local storage
+### Photos: direct upload, resized on ingest, local storage for dev
 
 JPEG/PNG/WebP only. Input capped at 5 MB (Flask `MAX_CONTENT_LENGTH`).
 Pillow resizes to max 1200 px wide and re-saves as JPEG quality 85 before storing.
 Files land in `uploads/ride_media/<ride_id>/<uuid>.jpg` on the host filesystem.
 
-**Why:** Phone photos are the primary use case. After resize, a typical photo is 150–300 KB.
+**Why for current TrueNAS/dev:** Phone photos are the primary use case. After resize, a typical photo is 150–300 KB.
 At 30 photos/ride × 300 KB × 500 rides/year ≈ 4.5 GB/year — manageable on a NAS dataset.
 
-**To change storage backend to Cloudflare R2:**
-1. Add `boto3` (R2 is S3-compatible) and R2 credentials to `.env`.
+**Production direction:** The planned production deployment uses DigitalOcean App Platform,
+Managed PostgreSQL, and DigitalOcean Spaces. App Platform containers are disposable, so
+uploaded media must move to Spaces before production cutover. See
+`docs/digitalocean_deployment.md`.
+
+**To change storage backend to DigitalOcean Spaces:**
+1. Add `boto3` (Spaces is S3-compatible) and Spaces credentials to environment variables.
 2. Replace `_save_photo()` in `app/routes/media.py` with an S3 `put_object` call.
-3. Replace `serve_photo` route with a signed-URL redirect or a public R2 bucket URL.
+3. Replace `serve_photo` route with a signed-URL redirect or a public Spaces/CDN URL.
 4. Update `purge_expired_media` in `app/scheduler.py` to call `delete_object` instead of `os.remove`.
 5. The model and limits are unchanged.
 
