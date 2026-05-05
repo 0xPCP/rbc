@@ -18,21 +18,21 @@ _WMO = {
     0:  ('Clear',           '☀️',  0),
     1:  ('Mainly clear',    '🌤️', 0),
     2:  ('Partly cloudy',   '⛅',  0),
-    3:  ('Overcast',        '☁️',  1),
-    45: ('Fog',             '🌫️', 1),
+    3:  ('Overcast',        '☁️',  0),
+    45: ('Fog',             '🌫️', 0),
     48: ('Freezing fog',    '🌫️', 1),
-    51: ('Light drizzle',   '🌦️', 1),
-    53: ('Drizzle',         '🌦️', 1),
-    55: ('Heavy drizzle',   '🌧️', 2),
-    61: ('Light rain',      '🌧️', 2),
-    63: ('Rain',            '🌧️', 2),
+    51: ('Light drizzle',   '🌦️', 0),
+    53: ('Drizzle',         '🌦️', 0),
+    55: ('Heavy drizzle',   '🌧️', 1),
+    61: ('Light rain',      '🌧️', 1),
+    63: ('Rain',            '🌧️', 1),
     65: ('Heavy rain',      '🌧️', 2),
-    71: ('Light snow',      '❄️',  2),
+    71: ('Light snow',      '❄️',  1),
     73: ('Snow',            '❄️',  2),
     75: ('Heavy snow',      '❄️',  2),
     77: ('Snow grains',     '❄️',  2),
-    80: ('Rain showers',    '🌧️', 2),
-    81: ('Rain showers',    '🌧️', 2),
+    80: ('Rain showers',    '🌧️', 1),
+    81: ('Rain showers',    '🌧️', 1),
     82: ('Heavy showers',   '🌧️', 2),
     85: ('Snow showers',    '❄️',  2),
     86: ('Heavy snow',      '❄️',  2),
@@ -123,9 +123,9 @@ def _aqi_category(aqi):
     if aqi <= 50:
         return 'Good', 0
     if aqi <= 100:
-        return 'Moderate', 1
+        return 'Moderate', 0
     if aqi <= 150:
-        return 'Unhealthy for sensitive groups', 2
+        return 'Unhealthy for sensitive groups', 1
     if aqi <= 200:
         return 'Unhealthy', 2
     if aqi <= 300:
@@ -164,13 +164,13 @@ def get_weather_for_rides(rides, lat=None, lng=None):
         desc, emoji, code_sev = _WMO.get(h['code'], ('Unknown', '❓', 1))
 
         warnings = []
-        if h['precip_prob'] >= 60 and h['precip_mm'] >= 1:
+        if h['precip_prob'] >= 70 and h['precip_mm'] >= 1:
             warnings.append(f"{h['precip_prob']}% chance of rain")
-        if h['wind_mph'] >= 25:
+        if h['wind_mph'] >= 30:
             warnings.append(f"{h['wind_mph']} mph winds")
-        if h['temp_f'] <= 35:
+        if h['temp_f'] <= 32:
             warnings.append(f"{h['temp_f']}°F — dress in layers")
-        if h['temp_f'] >= 95:
+        if h['temp_f'] >= 98:
             warnings.append(f"{h['temp_f']}°F — extreme heat")
         if h['code'] >= 95:
             warnings.append('thunderstorm possible')
@@ -182,7 +182,7 @@ def get_weather_for_rides(rides, lat=None, lng=None):
 
         if warnings:
             sev = max(code_sev, aqi_sev, 2)
-        elif h['precip_prob'] >= 30 or h['wind_mph'] >= 15 or h['temp_f'] <= 45 or h['temp_f'] >= 88:
+        elif h['precip_prob'] >= 50 or h['wind_mph'] >= 20 or h['temp_f'] <= 38 or h['temp_f'] >= 92:
             sev = max(code_sev, aqi_sev, 1)
         else:
             sev = max(code_sev, aqi_sev)

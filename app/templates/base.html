@@ -51,23 +51,6 @@
             <a class="btn btn-paceline-sm" href="{{ url_for('auth.register') }}">{{ _('Join') }}</a>
           </li>
         {% endif %}
-
-        <!-- Language switcher -->
-        <li class="nav-item dropdown ms-lg-2">
-          <a class="nav-link dropdown-toggle px-1" href="#" data-bs-toggle="dropdown" aria-label="{{ _('Language') }}" title="{{ _('Language') }}">
-            🌐
-          </a>
-          <ul class="dropdown-menu dropdown-menu-end">
-            {% for code, name in languages.items() %}
-            <li>
-              <a class="dropdown-item{% if current_locale == code %} active{% endif %}"
-                 href="{{ url_for('main.set_language', lang=code) }}">
-                {{ name }}
-              </a>
-            </li>
-            {% endfor %}
-          </ul>
-        </li>
       </ul>
     </div>
   </div>

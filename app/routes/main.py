@@ -1,6 +1,6 @@
 from datetime import date, timedelta
 from urllib.parse import urlparse
-from flask import Blueprint, render_template, request, redirect, url_for, session, current_app, flash
+from flask import Blueprint, render_template, request, redirect, url_for, current_app, flash
 from flask_login import current_user, login_required
 from sqlalchemy import or_, and_
 from ..forms import FeedbackForm
@@ -9,7 +9,6 @@ from ..extensions import db
 from ..email import send_feedback_notification
 from ..weather import get_weather_for_rides
 from ..geocoding import geocode_zip, haversine_miles
-from ..utils import is_safe_url
 
 main_bp = Blueprint('main', __name__)
 
@@ -84,14 +83,9 @@ def _user_dashboard(today):
 
 @main_bp.route('/set-language/<lang>')
 def set_language(lang):
-    from app import SUPPORTED_LANGUAGES
-    if lang in SUPPORTED_LANGUAGES:
-        session['language'] = lang
-        if current_user.is_authenticated:
-            current_user.language = lang
-            db.session.commit()
-    referrer = request.referrer
-    return redirect(referrer if (referrer and is_safe_url(referrer)) else url_for('main.index'))
+    flash('Language can be changed from your profile. Signed-out visitors use their browser language preference.', 'info')
+    target = url_for('auth.profile') if current_user.is_authenticated else url_for('main.index')
+    return redirect(target)
 
 
 @main_bp.route('/about')

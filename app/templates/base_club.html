@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="{{ current_locale }}">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -21,7 +21,7 @@
       {% if current_user.is_authenticated %}
         {% if current_user.is_admin %}
         <li class="nav-item">
-          <a class="nav-link club-nav-link" href="{{ url_for('admin.dashboard') }}">Platform Admin</a>
+          <a class="nav-link club-nav-link" href="{{ url_for('admin.dashboard') }}">{{ _('Platform Admin') }}</a>
         </li>
         {% endif %}
         <li class="nav-item dropdown">
@@ -29,16 +29,16 @@
             {{ current_user.username }}
           </a>
           <ul class="dropdown-menu dropdown-menu-end">
-            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">Profile</a></li>
-            <li><a class="dropdown-item" href="{{ url_for('clubs.index') }}">Find Clubs</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('auth.profile') }}">{{ _('Profile') }}</a></li>
+            <li><a class="dropdown-item" href="{{ url_for('clubs.index') }}">{{ _('Find Clubs') }}</a></li>
             <li><hr class="dropdown-divider"></li>
-            <li><button class="dropdown-item" form="logout-form">Sign Out</button></li>
+            <li><button class="dropdown-item" form="logout-form">{{ _('Sign Out') }}</button></li>
           </ul>
         </li>
       {% else %}
-        <li class="nav-item"><a class="nav-link club-nav-link" href="{{ url_for('auth.login') }}">Sign In</a></li>
+        <li class="nav-item"><a class="nav-link club-nav-link" href="{{ url_for('auth.login') }}">{{ _('Sign In') }}</a></li>
         <li class="nav-item ms-lg-2">
-          <a class="btn btn-paceline-sm" href="{{ url_for('auth.register') }}">Join</a>
+          <a class="btn btn-paceline-sm" href="{{ url_for('auth.register') }}">{{ _('Join') }}</a>
         </li>
       {% endif %}
     </ul>
@@ -72,17 +72,17 @@
     <div class="row gy-3">
       <div class="col-md-4">
         <img src="{{ url_for('static', filename='img/logo-dark.svg') }}?v={{ version }}" alt="Paceline" height="28" style="width:auto;margin-bottom:.35rem;display:block">
-        <p class="footer-tagline">Find your pack.</p>
+        <p class="footer-tagline">{{ _('Find your pack.') }}</p>
       </div>
       <div class="col-md-4">
-        <h6 class="footer-heading">Quick Links</h6>
+        <h6 class="footer-heading">{{ _('Quick Links') }}</h6>
         <ul class="footer-links">
-          <li><a href="{{ url_for('clubs.index') }}">Find a Club</a></li>
-          <li><a href="{{ url_for('main.help_index') }}">Help</a></li>
-          <li><a href="{{ url_for('main.about') }}">About</a></li>
-          <li><a href="{{ url_for('main.donate') }}">Donate</a></li>
+          <li><a href="{{ url_for('clubs.index') }}">{{ _('Find a Club') }}</a></li>
+          <li><a href="{{ url_for('main.help_index') }}">{{ _('Help') }}</a></li>
+          <li><a href="{{ url_for('main.about') }}">{{ _('About') }}</a></li>
+          <li><a href="{{ url_for('main.donate') }}">{{ _('Donate') }}</a></li>
           {% if not current_user.is_authenticated %}
-          <li><a href="{{ url_for('auth.register') }}">Create Account</a></li>
+          <li><a href="{{ url_for('auth.register') }}">{{ _('Create Account') }}</a></li>
           {% endif %}
         </ul>
       </div>

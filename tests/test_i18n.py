@@ -27,9 +27,8 @@ from app.models import Club, Ride, User
 # ---- Language switching helpers ---------------------------------------------
 
 def set_lang(client, lang):
-    """Set session language directly -- reliable across auth and non-auth contexts."""
-    with client.session_transaction() as sess:
-        sess['language'] = lang
+    """Set the browser language preference used by auto-detection."""
+    client.environ_base['HTTP_ACCEPT_LANGUAGE'] = lang
 
 
 def get_decoded(client, url):
@@ -55,7 +54,7 @@ class TestLanguageSwitching:
         # English default preserved since 'xx' is not in SUPPORTED_LANGUAGES
         assert 'pack.' in body
 
-    def test_all_six_languages_accepted(self, client):
+    def test_legacy_set_language_route_redirects_for_supported_languages(self, client):
         for lang in ('fr', 'es', 'it', 'nl', 'de', 'pt'):
             resp = client.get(f'/set-language/{lang}')
             assert resp.status_code == 302, f'/set-language/{lang} returned {resp.status_code}'
@@ -288,9 +287,9 @@ class TestBaseTemplateI18n:
         body = get_decoded(client, '/')
         assert 'Encuentra tu grupo.' in body
 
-    def test_language_picker_present(self, client):
+    def test_language_picker_not_present_on_main_site(self, client):
         body = get_decoded(client, '/')
-        assert '\U0001f310' in body  # globe emoji
+        assert '\U0001f310' not in body  # language is controlled by browser/profile
 
 
 # ---- Dashboard (authenticated) ----------------------------------------------
@@ -347,6 +346,29 @@ class TestDashboardI18n:
         self._login(client)
         body = get_decoded(client, '/')
         assert 'lieu' in body  # "aucun lieu defini"
+
+
+class TestProfileLanguagePreference:
+
+    def test_profile_language_overrides_browser_detection(self, client, regular_user, db, mock_weather):
+        set_lang(client, 'en')
+        client.post('/auth/login', data={
+            'email': 'rider@test.com', 'password': 'password123',
+        }, follow_redirects=True)
+        resp = client.post('/auth/profile', data={
+            'username': 'rider',
+            'email': 'rider@test.com',
+            'zip_code': '',
+            'gender': '',
+            'bio': '',
+            'language': 'fr',
+            'emergency_contact_name': '',
+            'emergency_contact_phone': '',
+        }, follow_redirects=True)
+        assert resp.status_code == 200
+        db.session.refresh(regular_user)
+        assert regular_user.language == 'fr'
+        assert '<html lang="fr">' in resp.data.decode('utf-8')
 
 
 # ---- Browser / screenshot tests ---------------------------------------------
@@ -426,8 +448,8 @@ def _screenshot(page, name):
 
 
 def switch_lang_browser(page, base, lang):
-    """Navigate to set-language route to set the session cookie."""
-    page.goto(f'{base}/set-language/{lang}')
+    """Set the browser language preference for auto-detection."""
+    page.set_extra_http_headers({'Accept-Language': lang})
 
 
 # ---- Browser screenshot tests -----------------------------------------------
@@ -508,16 +530,11 @@ def test_browser_map_german(i18n_server, browser):
     page.close()
 
 
-def test_browser_language_picker_works(i18n_server, browser):
-    """Clicking the language picker and selecting Spanish updates the page."""
+def test_browser_language_picker_removed(i18n_server, browser):
+    """Language selection should not be exposed as a global navbar dropdown."""
     page = browser.new_page()
     page.goto(i18n_server)
-    page.wait_for_selector('text=\U0001f310')
-    page.locator('text=\U0001f310').click()
-    page.wait_for_selector('a.dropdown-item:has-text("Español")', timeout=3000)
-    page.locator('a.dropdown-item:has-text("Español")').click()
     page.wait_for_selector('.hero-title')
-    title = page.locator('.hero-title').inner_text()
-    assert 'grupo' in title or 'Encuentra' in title
-    _screenshot(page, 'language_picker_es')
+    assert '\U0001f310' not in page.content()
+    _screenshot(page, 'language_picker_removed')
     page.close()

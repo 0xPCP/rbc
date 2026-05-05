@@ -23,9 +23,15 @@ LANGUAGE_NAMES = {
 def get_locale():
     if current_user.is_authenticated and current_user.language:
         return current_user.language
-    lang = session.get('language')
-    if lang and lang in SUPPORTED_LANGUAGES:
-        return lang
+    if current_user.is_authenticated:
+        try:
+            raw_id, _ = str(session.get('_user_id', '')).split(':', 1)
+            from .models import User
+            user = db.session.get(User, int(raw_id), populate_existing=True)
+        except (TypeError, ValueError):
+            user = None
+        if user and user.language in SUPPORTED_LANGUAGES:
+            return user.language
     return request.accept_languages.best_match(SUPPORTED_LANGUAGES, default='en')
 
 

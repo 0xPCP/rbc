@@ -4,7 +4,7 @@ from flask_login import (
     login_user, logout_user, login_required, current_user,
     login_fresh, fresh_login_required,
 )
-from flask_babel import gettext as _
+from flask_babel import gettext as _, refresh as refresh_locale
 from ..extensions import db, bcrypt
 from ..models import User, Ride, RideSignup, ClubInvite
 from ..forms import RegisterForm, LoginForm, ProfileForm, SetPasswordForm
@@ -183,6 +183,7 @@ def profile():
                     flash(_('Zip code saved but could not be geocoded.'), 'warning')
 
         db.session.commit()
+        refresh_locale()
         flash(_('Profile updated.'), 'success')
         return redirect(url_for('auth.profile'))
 

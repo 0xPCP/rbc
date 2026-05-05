@@ -116,6 +116,27 @@ class TestGetWeatherForRides:
         assert w['temp_f'] == 68
         assert w['wind_mph'] == 8
 
+    def test_overcast_does_not_raise_caution(self, app):
+        from app.weather import get_weather_for_rides
+        ride = _make_ride(1, days_ahead=1)
+        mock_resp = _fake_response([ride.date], code=3, temp_f=68, wind_mph=8, precip_prob=5)
+        with patch('requests.get', return_value=mock_resp):
+            result = get_weather_for_rides([ride])
+        w = result[1]
+        assert w['severity'] == 0
+        assert w['warning'] is False
+
+    def test_light_rain_is_caution_not_warning(self, app):
+        from app.weather import get_weather_for_rides
+        ride = _make_ride(1, days_ahead=1)
+        mock_resp = _fake_response([ride.date], code=61, temp_f=68, wind_mph=8,
+                                   precip_prob=55, precip_mm=0.5)
+        with patch('requests.get', return_value=mock_resp):
+            result = get_weather_for_rides([ride])
+        w = result[1]
+        assert w['severity'] == 1
+        assert w['warning'] is False
+
     def test_high_precip_triggers_warning(self, app):
         from app.weather import get_weather_for_rides
         ride = _make_ride(1, days_ahead=1)
@@ -167,11 +188,21 @@ class TestGetWeatherForRides:
         assert w['warning'] is True
         assert 'thunderstorm' in ' '.join(w['warning_reasons'])
 
+    def test_ordinary_breeze_stays_good(self, app):
+        from app.weather import get_weather_for_rides
+        ride = _make_ride(1, days_ahead=1)
+        mock_resp = _fake_response([ride.date], code=2, temp_f=68, wind_mph=18, precip_prob=10)
+        with patch('requests.get', return_value=mock_resp):
+            result = get_weather_for_rides([ride])
+        w = result[1]
+        assert w['severity'] == 0
+        assert w['warning'] is False
+
     def test_moderate_conditions_severity_one(self, app):
         from app.weather import get_weather_for_rides
         ride = _make_ride(1, days_ahead=1)
-        # Moderate wind — caution but not warning
-        mock_resp = _fake_response([ride.date], code=2, temp_f=68, wind_mph=18, precip_prob=10)
+        # Noticeable wind — caution but not warning
+        mock_resp = _fake_response([ride.date], code=2, temp_f=68, wind_mph=20, precip_prob=10)
         with patch('requests.get', return_value=mock_resp):
             result = get_weather_for_rides([ride])
         w = result[1]
@@ -217,7 +248,7 @@ class TestGetWeatherForRides:
         assert w['severity'] == 0
         assert w['warning'] is False
 
-    def test_unhealthy_aqi_triggers_warning(self, app):
+    def test_sensitive_group_aqi_triggers_caution(self, app):
         from app.weather import get_weather_for_rides
         ride = _make_ride(1, days_ahead=1)
         mock_weather = _fake_response([ride.date], code=1, temp_f=68, wind_mph=8, precip_prob=5)
@@ -227,9 +258,23 @@ class TestGetWeatherForRides:
         w = result[1]
         assert w['aqi'] == 125
         assert w['aqi_label'] == 'Unhealthy for sensitive groups'
+        assert w['severity'] == 1
+        assert w['warning'] is False
+        assert not any('AQI 125' in reason for reason in w['warning_reasons'])
+
+    def test_unhealthy_aqi_triggers_warning(self, app):
+        from app.weather import get_weather_for_rides
+        ride = _make_ride(1, days_ahead=1)
+        mock_weather = _fake_response([ride.date], code=1, temp_f=68, wind_mph=8, precip_prob=5)
+        mock_aqi = _fake_aqi_response([ride.date], aqi=175)
+        with patch('requests.get', side_effect=[mock_weather, mock_aqi]):
+            result = get_weather_for_rides([ride])
+        w = result[1]
+        assert w['aqi'] == 175
+        assert w['aqi_label'] == 'Unhealthy'
         assert w['severity'] == 2
         assert w['warning'] is True
-        assert any('AQI 125' in reason for reason in w['warning_reasons'])
+        assert any('AQI 175' in reason for reason in w['warning_reasons'])
 
 
 # ── WMO code mapping ──────────────────────────────────────────────────────────
