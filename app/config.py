@@ -42,6 +42,10 @@ class Config:
     # Hosted donation page. Leave blank to show the local coming-soon stub.
     DONATE_URL = os.environ.get('DONATE_URL', '').strip()
 
+    # Comma-separated email allowlist for platform superadmins. These accounts
+    # are promoted on startup and cannot have superadmin access revoked in-app.
+    SUPERADMIN_EMAILS = os.environ.get('SUPERADMIN_EMAILS', 'phil@pcp.dev')
+
     # Media uploads — see docs/media_strategy.md for rationale and update guidance
     UPLOAD_FOLDER = os.environ.get(
         'UPLOAD_FOLDER',
@@ -52,3 +56,7 @@ class Config:
     MEDIA_MAX_PHOTOS_PER_USER_RIDE = int(os.environ.get('MEDIA_MAX_PHOTOS_PER_USER_RIDE', 5))
     MEDIA_MAX_PHOTOS_PER_RIDE = int(os.environ.get('MEDIA_MAX_PHOTOS_PER_RIDE', 30))
     MEDIA_MAX_WIDTH_PX = int(os.environ.get('MEDIA_MAX_WIDTH_PX', 1200))
+    STORAGE_WARNING_PERCENT = int(os.environ.get('STORAGE_WARNING_PERCENT', 80))
+    STORAGE_CRITICAL_PERCENT = int(os.environ.get('STORAGE_CRITICAL_PERCENT', 90))
+    MEDIA_STORAGE_WARNING_MB = int(os.environ.get('MEDIA_STORAGE_WARNING_MB', 1024))
+    ADMIN_DASHBOARD_SLOW_MS = int(os.environ.get('ADMIN_DASHBOARD_SLOW_MS', 1500))

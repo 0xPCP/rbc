@@ -110,6 +110,14 @@
             <button class="btn btn-outline-warning w-100 btn-sm">Reset Password</button>
           </form>
 
+          {% if profile_user.id != current_user.id %}
+          <form method="post" action="{{ url_for('admin.revoke_user_sessions', user_id=profile_user.id) }}"
+                onsubmit="return confirm('Revoke all active sessions for {{ profile_user.username }}? They will need to sign in again.')">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="btn btn-outline-secondary w-100 btn-sm">Revoke Sessions</button>
+          </form>
+          {% endif %}
+
           {# Toggle admin — disabled for self #}
           {% if profile_user.id != current_user.id %}
           <form method="post" action="{{ url_for('admin.toggle_admin', user_id=profile_user.id) }}"

@@ -40,6 +40,30 @@
     </div>
   </div>
 
+  {# Operational warnings #}
+  {% if report.dashboard_slow or report.storage.disk_warning or report.storage.media_warning %}
+  <div class="mb-4">
+    {% if report.dashboard_slow %}
+    <div class="alert alert-warning mb-2">
+      <strong>Dashboard query time is elevated.</strong>
+      This page took {{ report.dashboard_elapsed_ms }} ms to assemble. Review database size, query volume, and recent traffic if this persists.
+    </div>
+    {% endif %}
+    {% if report.storage.disk_warning %}
+    <div class="alert {{ 'alert-danger' if report.storage.disk_warning == 'critical' else 'alert-warning' }} mb-2">
+      <strong>Storage pressure is {{ report.storage.disk_warning }}.</strong>
+      Disk usage is {{ report.storage.disk.percent }}% with {{ report.storage.disk.free_label }} free.
+    </div>
+    {% endif %}
+    {% if report.storage.media_warning %}
+    <div class="alert alert-warning mb-2">
+      <strong>Media storage is growing.</strong>
+      Uploaded ride photos are using {{ report.storage.media_label }}.
+    </div>
+    {% endif %}
+  </div>
+  {% endif %}
+
   {# Management links #}
   <div class="row g-3 mb-5">
     <div class="col-6 col-lg-3">
@@ -54,6 +78,91 @@
       <div class="admin-stat-card">
         <div class="admin-stat-num">{{ stats.inactive_users }}</div>
         <div class="admin-stat-label">Inactive Accounts</div>
+      </div>
+    </div>
+  </div>
+
+  {# Usage analytics #}
+  <div class="row g-4 mb-5">
+    <div class="col-lg-7">
+      <div class="detail-card h-100">
+        <h5 class="detail-card-title">Growth Trends</h5>
+        <div class="row g-4">
+          <div class="col-md-4">
+            <h6 class="text-muted text-uppercase small fw-semibold">New Users</h6>
+            {% for point in report.user_growth %}
+            <div class="mb-2">
+              <div class="d-flex justify-content-between small">
+                <span>{{ point.label }}</span><span>{{ point.count }}</span>
+              </div>
+              <div class="progress" style="height:6px">
+                <div class="progress-bar bg-success" style="width: {{ point.width }}%"></div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="col-md-4">
+            <h6 class="text-muted text-uppercase small fw-semibold">New Clubs</h6>
+            {% for point in report.club_growth %}
+            <div class="mb-2">
+              <div class="d-flex justify-content-between small">
+                <span>{{ point.label }}</span><span>{{ point.count }}</span>
+              </div>
+              <div class="progress" style="height:6px">
+                <div class="progress-bar bg-info" style="width: {{ point.width }}%"></div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+          <div class="col-md-4">
+            <h6 class="text-muted text-uppercase small fw-semibold">Rides Hosted</h6>
+            {% for point in report.ride_growth %}
+            <div class="mb-2">
+              <div class="d-flex justify-content-between small">
+                <span>{{ point.label }}</span><span>{{ point.count }}</span>
+              </div>
+              <div class="progress" style="height:6px">
+                <div class="progress-bar bg-warning" style="width: {{ point.width }}%"></div>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="detail-card h-100">
+        <h5 class="detail-card-title">Usage and Storage</h5>
+        <dl class="detail-dl mb-3">
+          <dt>Active Riders</dt>
+          <dd>{{ stats.active_riders }}</dd>
+          <dt>Total Rides</dt>
+          <dd>{{ stats.total_rides }}</dd>
+          <dt>Rides Last 30 Days</dt>
+          <dd>{{ stats.rides_30d }}</dd>
+          <dt>New Clubs Last 30 Days</dt>
+          <dd>{{ stats.new_clubs_30d }}</dd>
+          <dt>Uploaded Photos</dt>
+          <dd>{{ report.storage.photo_count }}</dd>
+          <dt>Video Links</dt>
+          <dd>{{ report.storage.video_count }}</dd>
+          <dt>Media Storage</dt>
+          <dd>{{ report.storage.media_label }}</dd>
+          {% if report.storage.disk %}
+          <dt>Disk Used</dt>
+          <dd>{{ report.storage.disk.percent }}% of {{ report.storage.disk.total_label }}</dd>
+          <dt>Disk Free</dt>
+          <dd>{{ report.storage.disk.free_label }}</dd>
+          {% endif %}
+        </dl>
+        {% if report.storage.disk %}
+        <div class="progress" style="height:8px">
+          <div class="progress-bar {{ 'bg-danger' if report.storage.disk_warning == 'critical' else 'bg-warning' if report.storage.disk_warning == 'warning' else 'bg-success' }}"
+               style="width: {{ report.storage.disk.percent }}%"></div>
+        </div>
+        <div class="text-muted small mt-2">{{ report.storage.upload_folder }}</div>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -100,6 +209,38 @@
       </div>
     </div>
 
+  </div>
+
+  <div class="detail-card mb-5">
+    <h5 class="detail-card-title">Recent Superadmin Activity</h5>
+    {% if recent_audit %}
+    <div class="table-responsive">
+      <table class="table paceline-table mb-0">
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Actor</th>
+            <th>Action</th>
+            <th>Target</th>
+            <th>Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in recent_audit %}
+          <tr>
+            <td class="text-muted small">{{ item.created_at | strftime('%b %-d, %Y %-I:%M %p') }}</td>
+            <td>{{ item.actor.username if item.actor else 'system' }}</td>
+            <td><span class="badge bg-secondary">{{ item.action }}</span></td>
+            <td>{{ item.target_user.username if item.target_user else '—' }}</td>
+            <td class="text-muted small">{{ item.details or '—' }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% else %}
+    <p class="text-muted mb-0 small">No superadmin actions recorded yet.</p>
+    {% endif %}
   </div>
 
   {# Geocoding status #}

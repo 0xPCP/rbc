@@ -1,4 +1,5 @@
 from functools import wraps
+import time
 from datetime import date, datetime, timedelta, timezone
 from flask import Blueprint, render_template, redirect, url_for, flash, abort, request
 from flask_login import login_required, current_user, login_fresh
@@ -7,15 +8,27 @@ import string
 from markupsafe import Markup, escape as html_escape
 from sqlalchemy import or_, func
 from ..extensions import db, bcrypt
-from ..models import Club, Ride, RideSignup, User, ClubMembership, ClubAdmin, ClubPost, ClubLeader, ClubSponsor, ClubInvite
+from ..models import (AdminAuditLog, Club, Ride, RideSignup, User, ClubMembership,
+                      ClubAdmin, ClubPost, ClubLeader, ClubSponsor, ClubInvite)
 from ..forms import RideForm, ClubForm, ClubSettingsForm, ClubPostForm, ClubLeaderForm, ClubSponsorForm, ClubInviteForm, BulkImportForm
 from ..recurrence import generate_instances, delete_future_instances
 from ..geocoding import geocode_zip
+from ..admin_stats import (active_superadmin_count, configured_superadmin_emails,
+                           platform_report)
 from ..email import (send_cancellation_emails, send_new_ride_notification,
                      send_membership_approved, send_membership_rejected, send_invite_email,
                      send_import_welcome_email, send_import_invite_email)
 
 admin_bp = Blueprint('admin', __name__)
+
+
+def _audit(action, target_user=None, details=None):
+    db.session.add(AdminAuditLog(
+        actor_id=current_user.id if current_user.is_authenticated else None,
+        target_user_id=target_user.id if target_user else None,
+        action=action,
+        details=details,
+    ))
 
 
 def _get_club_or_404(slug):
@@ -126,24 +139,10 @@ def club_member_view_required(f):
 @admin_bp.route('/')
 @superadmin_required
 def dashboard():
-    from sqlalchemy import func
+    started_at = time.perf_counter()
     today = date.today()
-    total_miles = (db.session.query(func.sum(Ride.distance_miles))
-                   .filter(Ride.is_cancelled == False).scalar() or 0)
-    new_users_30d = User.query.filter(
-        User.created_at >= datetime.combine(today - timedelta(days=30), datetime.min.time())
-    ).count()
-    stats = {
-        'total_clubs':    Club.query.filter_by(is_active=True).count(),
-        'inactive_clubs': Club.query.filter_by(is_active=False).count(),
-        'total_members':  User.query.count(),
-        'new_users_30d':  new_users_30d,
-        'upcoming_rides': Ride.query.filter(Ride.date >= today, Ride.is_cancelled == False).count(),
-        'total_signups':  RideSignup.query.count(),
-        'total_miles':    round(total_miles),
-    }
-    stats['inactive_users'] = User.query.filter_by(is_active=False).count()
-    stats['total_signups']  = RideSignup.query.count()
+    report = platform_report(started_at)
+    stats = report['stats']
 
     # Popular clubs by active member count
     popular = (db.session.query(Club, func.count(ClubMembership.id).label('mc'))
@@ -164,9 +163,13 @@ def dashboard():
     ungeocodeable_count = Club.query.filter(
         Club.zip_code.isnot(None), Club.lat.is_(None)
     ).count()
+    recent_audit = (AdminAuditLog.query
+                    .order_by(AdminAuditLog.created_at.desc())
+                    .limit(8).all())
     return render_template('admin/dashboard.html', stats=stats, clubs=clubs,
                            super_admins=super_admins, popular=popular,
-                           ungeocodeable_count=ungeocodeable_count)
+                           ungeocodeable_count=ungeocodeable_count,
+                           report=report, recent_audit=recent_audit)
 
 
 # ── User management ───────────────────────────────────────────────────────────
@@ -215,6 +218,7 @@ def reset_user_password(user_id):
     tmp_pw = ''.join(secrets.choice(alpha) for _ in range(12))
     user.password_hash = bcrypt.generate_password_hash(tmp_pw).decode('utf-8')
     user.revoke_sessions()
+    _audit('reset_password', target_user=user)
     db.session.commit()
     flash(Markup(
         f'Password reset for <strong>{html_escape(user.username)}</strong>. '
@@ -231,7 +235,14 @@ def toggle_admin(user_id):
     if user.id == current_user.id:
         flash('You cannot change your own super admin status.', 'danger')
         return redirect(url_for('admin.user_detail', user_id=user_id))
+    if user.is_admin and user.email.lower() in configured_superadmin_emails():
+        flash('This account is configured as a bootstrap superadmin and cannot be revoked in the app.', 'danger')
+        return redirect(url_for('admin.user_detail', user_id=user_id))
+    if user.is_admin and active_superadmin_count(exclude_user_id=user.id) == 0:
+        flash('You must keep at least one active super admin account.', 'danger')
+        return redirect(url_for('admin.user_detail', user_id=user_id))
     user.is_admin = not user.is_admin
+    _audit('grant_superadmin' if user.is_admin else 'revoke_superadmin', target_user=user)
     db.session.commit()
     action = 'granted' if user.is_admin else 'revoked'
     flash(f'Super admin access {action} for {user.username}.', 'success')
@@ -245,11 +256,29 @@ def toggle_active(user_id):
     if user.id == current_user.id:
         flash('You cannot deactivate your own account.', 'danger')
         return redirect(url_for('admin.user_detail', user_id=user_id))
+    if user.is_active and user.is_admin and active_superadmin_count(exclude_user_id=user.id) == 0:
+        flash('You must keep at least one active super admin account.', 'danger')
+        return redirect(url_for('admin.user_detail', user_id=user_id))
     user.is_active = not user.is_active
     user.revoke_sessions()
+    _audit('reactivate_account' if user.is_active else 'deactivate_account', target_user=user)
     db.session.commit()
     action = 'reactivated' if user.is_active else 'deactivated'
     flash(f'Account {action} for {user.username}.', 'success')
+    return redirect(url_for('admin.user_detail', user_id=user_id))
+
+
+@admin_bp.route('/users/<int:user_id>/revoke-sessions', methods=['POST'])
+@superadmin_required
+def revoke_user_sessions(user_id):
+    user = User.query.get_or_404(user_id)
+    if user.id == current_user.id:
+        flash('You cannot revoke your own active session from this panel.', 'danger')
+        return redirect(url_for('admin.user_detail', user_id=user_id))
+    user.revoke_sessions()
+    _audit('revoke_sessions', target_user=user)
+    db.session.commit()
+    flash(f'All existing sessions revoked for {user.username}.', 'success')
     return redirect(url_for('admin.user_detail', user_id=user_id))
 
 
@@ -269,6 +298,7 @@ def geocode_clubs():
             succeeded += 1
         else:
             failed += 1
+    _audit('bulk_geocode_clubs', details=f'succeeded={succeeded}; failed={failed}')
     db.session.commit()
     msg = f'Geocoded {succeeded} club{"s" if succeeded != 1 else ""}.'
     if failed:

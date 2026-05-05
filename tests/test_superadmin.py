@@ -11,7 +11,7 @@ Tests for the super admin panel:
 import pytest
 from unittest.mock import patch
 from app.extensions import db, bcrypt
-from app.models import Club, User
+from app.models import AdminAuditLog, Club, Ride, RideMedia, RideSignup, User
 from tests.conftest import login, logout
 
 
@@ -78,6 +78,15 @@ class TestSuperadminAccessControl:
         login_as(client, admin_user)
         resp = client.get(f'/admin/users/{regular_user.id}')
         assert resp.status_code == 200
+
+    def test_configured_superadmin_email_promoted_by_schema_guard(self, app, db):
+        from app.schema import ensure_runtime_schema
+        app.config['SUPERADMIN_EMAILS'] = 'phil@pcp.dev'
+        user = make_user(db, 'phil', 'phil@pcp.dev', is_admin=False)
+        with app.app_context():
+            ensure_runtime_schema()
+        db.session.refresh(user)
+        assert user.is_admin is True
 
 
 # ── User list ─────────────────────────────────────────────────────────────────
@@ -225,6 +234,18 @@ class TestToggleAdmin:
         db.session.refresh(second_admin)
         assert not second_admin.is_admin
 
+    def test_cannot_revoke_configured_bootstrap_superadmin(self, client, db, admin_user):
+        client.application.config['SUPERADMIN_EMAILS'] = 'phil@pcp.dev'
+        phil = make_user(db, 'phil', 'phil@pcp.dev', is_admin=True)
+        login_as(client, admin_user)
+        resp = client.post(
+            f'/admin/users/{phil.id}/toggle-admin',
+            follow_redirects=True,
+        )
+        assert b'bootstrap superadmin' in resp.data
+        db.session.refresh(phil)
+        assert phil.is_admin is True
+
     def test_cannot_change_own_admin_status(self, client, db, admin_user):
         login_as(client, admin_user)
         resp = client.post(
@@ -243,6 +264,10 @@ class TestToggleAdmin:
             follow_redirects=True,
         )
         assert b'granted' in resp.data
+        assert AdminAuditLog.query.filter_by(
+            action='grant_superadmin',
+            target_user_id=regular_user.id,
+        ).first() is not None
 
 
 # ── Toggle active ─────────────────────────────────────────────────────────────
@@ -329,6 +354,36 @@ class TestDeactivatedLogin:
         assert resp.status_code == 302
 
 
+class TestSessionRevocation:
+
+    def test_superadmin_can_revoke_user_sessions(self, client, db, admin_user, regular_user):
+        old_version = regular_user.session_token_version
+        login_as(client, admin_user)
+        resp = client.post(
+            f'/admin/users/{regular_user.id}/revoke-sessions',
+            follow_redirects=True,
+        )
+        assert resp.status_code == 200
+        assert b'existing sessions revoked' in resp.data.lower()
+        db.session.refresh(regular_user)
+        assert regular_user.session_token_version == old_version + 1
+        assert AdminAuditLog.query.filter_by(
+            action='revoke_sessions',
+            target_user_id=regular_user.id,
+        ).first() is not None
+
+    def test_superadmin_cannot_revoke_own_session(self, client, db, admin_user):
+        old_version = admin_user.session_token_version
+        login_as(client, admin_user)
+        resp = client.post(
+            f'/admin/users/{admin_user.id}/revoke-sessions',
+            follow_redirects=True,
+        )
+        assert b'cannot revoke your own' in resp.data
+        db.session.refresh(admin_user)
+        assert admin_user.session_token_version == old_version
+
+
 # ── Bulk geocoding ─────────────────────────────────────────────────────────────
 
 class TestBulkGeocoding:
@@ -382,3 +437,31 @@ class TestBulkGeocoding:
         login_as(client, admin_user)
         resp = client.get('/admin/')
         assert b'missing map coordinates' not in resp.data
+
+
+class TestPlatformStatistics:
+
+    def test_dashboard_shows_usage_and_storage_sections(self, client, db, admin_user, sample_club, regular_user, sample_rides):
+        db.session.add(RideSignup(ride_id=sample_rides[0].id, user_id=regular_user.id))
+        db.session.add(RideMedia(
+            ride_id=sample_rides[0].id,
+            user_id=regular_user.id,
+            media_type='video_link',
+            url='https://youtube.com/watch?v=test',
+        ))
+        db.session.commit()
+        login_as(client, admin_user)
+        resp = client.get('/admin/')
+        assert resp.status_code == 200
+        assert b'Growth Trends' in resp.data
+        assert b'Usage and Storage' in resp.data
+        assert b'Active Riders' in resp.data
+        assert b'Rides Last 30 Days' in resp.data
+        assert b'Video Links' in resp.data
+
+    def test_dashboard_shows_recent_audit_activity(self, client, db, admin_user, regular_user):
+        login_as(client, admin_user)
+        client.post(f'/admin/users/{regular_user.id}/revoke-sessions', follow_redirects=True)
+        resp = client.get('/admin/')
+        assert b'Recent Superadmin Activity' in resp.data
+        assert b'revoke_sessions' in resp.data

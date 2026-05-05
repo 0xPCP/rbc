@@ -1,5 +1,5 @@
 from datetime import date, datetime, timezone
-from flask import Blueprint, render_template, redirect, url_for, flash, request, session
+from flask import Blueprint, render_template, redirect, url_for, flash, request, session, current_app
 from flask_login import (
     login_user, logout_user, login_required, current_user,
     login_fresh, fresh_login_required,
@@ -38,12 +38,18 @@ def register():
 
         hashed = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         # First registered user becomes admin
+        superadmin_emails = {
+            email.strip().lower()
+            for email in current_app.config.get('SUPERADMIN_EMAILS', '').split(',')
+            if email.strip()
+        }
         is_first_user = User.query.count() == 0
+        is_configured_superadmin = form.email.data.lower() in superadmin_emails
         user = User(
             username=form.username.data,
             email=form.email.data.lower(),
             password_hash=hashed,
-            is_admin=is_first_user,
+            is_admin=is_first_user or is_configured_superadmin,
         )
         db.session.add(user)
         db.session.commit()

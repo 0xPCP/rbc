@@ -4,11 +4,13 @@ from pathlib import Path
 HELP_IMAGE_DIR = Path(__file__).resolve().parents[1] / 'app' / 'static' / 'img' / 'help'
 
 
-def test_help_nav_link_present(client):
+def test_help_footer_link_present(client):
     resp = client.get('/')
     assert resp.status_code == 200
-    assert b'href="/help/"' in resp.data
-    assert b'Help' in resp.data
+    html = resp.get_data(as_text=True)
+    assert '<a class="nav-link" href="/help/">' not in html
+    assert 'href="/help/"' in html
+    assert 'Help' in html
 
 
 def test_help_index_links_to_guides(client):

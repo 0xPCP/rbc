@@ -356,6 +356,21 @@ class ClubInvite(db.Model):
         return expires < datetime.now(timezone.utc).replace(tzinfo=None)
 
 
+class AdminAuditLog(db.Model):
+    """Records high-impact actions performed from the superadmin panel."""
+    __tablename__ = 'admin_audit_logs'
+
+    id = db.Column(db.Integer, primary_key=True)
+    actor_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    target_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    action = db.Column(db.String(80), nullable=False)
+    details = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), nullable=False)
+
+    actor = db.relationship('User', foreign_keys=[actor_id])
+    target_user = db.relationship('User', foreign_keys=[target_user_id])
+
+
 class WaiverSignature(db.Model):
     """Records that a user accepted a club's waiver for a given year."""
     __tablename__ = 'waiver_signatures'
